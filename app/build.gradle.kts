@@ -65,4 +65,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.navigation.compose)
 }

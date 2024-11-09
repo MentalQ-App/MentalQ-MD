@@ -19,16 +19,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.theme.Black
+import com.c242_ps246.mentalq.ui.theme.White
 
 @Composable
-fun OnboardingScreen() {
-    val darkTheme = isSystemInDarkTheme()
+fun OnboardingScreen(onNavigateToLogin: () -> Unit, onNavigateToRegister: () -> Unit) {
+    val noDarkTheme = !isSystemInDarkTheme()
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -43,15 +46,15 @@ fun OnboardingScreen() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .background(Black.copy(alpha = 0.5f))
         )
         Card(
             modifier = Modifier
                 .fillMaxWidth(),
-            colors = if(isSystemInDarkTheme()) CardDefaults.cardColors(
-                Color.White
+            colors = if(noDarkTheme) CardDefaults.cardColors(
+                White
             )else CardDefaults.cardColors(
-                Color.Black
+                Black
             ),
             shape = RoundedCornerShape(
                 topStart = 40.dp,
@@ -68,16 +71,16 @@ fun OnboardingScreen() {
                 verticalArrangement = Arrangement.Bottom
             ) {
                 Text(
-                    text = "Welcome",
+                    text = stringResource(id = R.string.welcome),
                     style = TextStyle(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isSystemInDarkTheme()) Color.Black else Color.White
+                        color = if (noDarkTheme) Black else White
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Let's get started!",
+                    text = stringResource(id = R.string.get_started),
                     style = TextStyle(
                         fontSize = 18.sp,
                         color = Color.Gray
@@ -86,39 +89,41 @@ fun OnboardingScreen() {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
+                        onNavigateToLogin()
                         ripple(
-                            color = if (darkTheme) Color.White else Color.LightGray,
+                            color = if (noDarkTheme) White else Color.LightGray,
                             radius = 24.dp
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSystemInDarkTheme()) Color.Black else Color.White,
-                        contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+                        containerColor = if (noDarkTheme) Black else White,
+                        contentColor = if (noDarkTheme) White else Black
                     ),
                 ) {
                     Text(
-                        text = "Login",
+                        text = stringResource(id = R.string.login),
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
+                        onNavigateToRegister()
                         ripple(
-                            color = if (darkTheme) Color.White else Color.LightGray,
+                            color = if (noDarkTheme) White else Color.LightGray,
                             radius = 24.dp
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSystemInDarkTheme()) Color.Black else Color.White,
-                        contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+                        containerColor = if (noDarkTheme) Black else White,
+                        contentColor = if (noDarkTheme) White else Black
                     ),
                     interactionSource = remember { MutableInteractionSource() },
                 ) {
                     Text(
-                        text = "Register",
-                        color = if (isSystemInDarkTheme()) Color.White else Color.Black)
+                        text = stringResource(id = R.string.register),
+                        color = if (noDarkTheme) White else Black)
                 }
             }
         }
@@ -128,5 +133,5 @@ fun OnboardingScreen() {
 @Preview
 @Composable
 fun OnboardingScreenPreview() {
-    OnboardingScreen()
+    OnboardingScreen({}, {})
 }
