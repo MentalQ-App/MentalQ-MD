@@ -3,7 +3,6 @@
 package com.c242_ps246.mentalq.ui.auth
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,46 +10,31 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.ripple
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import com.c242_ps246.mentalq.ui.theme.Black
-import com.c242_ps246.mentalq.ui.theme.White
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 
 @Composable
-fun RegisterScreen(onBackPress: () -> Unit) {
-    val noDarkTheme = !isSystemInDarkTheme()
+fun RegisterScreen(onBackPress: () -> Unit, onRegisterSuccess: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        colors = if(noDarkTheme) CardDefaults.cardColors(
-            White
-        )else CardDefaults.cardColors(
-            Black
-        ),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(
             topStart = 40.dp,
             topEnd = 40.dp,
             bottomStart = 0.dp,
             bottomEnd = 0.dp
         )
-    )
-    {
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -60,21 +44,17 @@ fun RegisterScreen(onBackPress: () -> Unit) {
             IconButton(onClick = onBackPress, modifier = Modifier.align(Alignment.TopStart)) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = if (noDarkTheme) Black else White
+                    contentDescription = "Back"
                 )
             }
+
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    stringResource(id = R.string.register),
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = if (noDarkTheme) Black else White
-                    )
+                    text = stringResource(id = R.string.register),
+                    style = MaterialTheme.typography.titleLarge
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -82,15 +62,7 @@ fun RegisterScreen(onBackPress: () -> Unit) {
                 TextField(
                     value = "",
                     onValueChange = {},
-                    label = { Text(stringResource(id = R.string.full_name), style = TextStyle(color = Color.Gray)) },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.LightGray,
-                        disabledContainerColor = Color.Gray,
-                        errorContainerColor = Color.Red,
-                    ),
+                    label = { Text(stringResource(id = R.string.full_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -98,15 +70,7 @@ fun RegisterScreen(onBackPress: () -> Unit) {
                 TextField(
                     value = "",
                     onValueChange = {},
-                    label = { Text(stringResource(id = R.string.username), style = TextStyle(color = Color.Gray)) },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.LightGray,
-                        disabledContainerColor = Color.Gray,
-                        errorContainerColor = Color.Red,
-                    ),
+                    label = { Text(stringResource(id = R.string.username)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -114,37 +78,18 @@ fun RegisterScreen(onBackPress: () -> Unit) {
                 TextField(
                     value = "",
                     onValueChange = {},
-                    label = { Text(stringResource(id = R.string.password), style = TextStyle(color = Color.Gray)) },
+                    label = { Text(stringResource(id = R.string.password)) },
                     visualTransformation = PasswordVisualTransformation(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.LightGray,
-                        disabledContainerColor = Color.Gray,
-                        errorContainerColor = Color.Red,
-                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = {
-                        ripple(
-                            color = if (noDarkTheme) White else Color.LightGray,
-                            radius = 24.dp
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(32.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (noDarkTheme) Black else White,
-                        contentColor = if (noDarkTheme) White else Black
-                    ),
+                    onClick = { onRegisterSuccess() },
+                    modifier = Modifier.fillMaxWidth().padding(32.dp)
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.register),
-                    )
+                    Text(text = stringResource(id = R.string.register))
                 }
             }
         }
@@ -154,5 +99,7 @@ fun RegisterScreen(onBackPress: () -> Unit) {
 @Preview
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen(onBackPress = {})
+    MentalQTheme {
+        RegisterScreen(onBackPress = {}, onRegisterSuccess = {})
+    }
 }

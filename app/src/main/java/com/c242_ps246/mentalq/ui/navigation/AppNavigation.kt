@@ -10,6 +10,7 @@ import com.c242_ps246.mentalq.ui.auth.RegisterScreen
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideInFromBottom
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideOutToBottom
+import com.c242_ps246.mentalq.ui.main.MainScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -17,7 +18,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = "onboarding",
+        startDestination = Routes.ONBOARDING,
         modifier = modifier
     ) {
         composable("onboarding") {
@@ -31,14 +32,32 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
-            LoginScreen(onBackPress = { navController.popBackStack() })
+            LoginScreen(
+                onBackPress = { navController.popBackStack() },
+                onAuthSuccess = {
+                    navController.navigate("main_screen") {
+                        popUpTo("onboarding") { inclusive = true }
+                    }
+                }
+            )
         }
         composable(
             "register",
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
-            RegisterScreen(onBackPress = { navController.popBackStack() })
+            RegisterScreen(
+                onBackPress = { navController.popBackStack() },
+                onRegisterSuccess = {
+                    navController.navigate("main_screen") {
+                        popUpTo("onboarding") { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable("main_screen") {
+            MainScreen()
         }
     }
 }
+

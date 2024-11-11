@@ -13,32 +13,31 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = White,
     onPrimary = Black,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    secondary = Grey80,
+    onSecondary = White,
+    tertiary = Grey40,
+    background = Black,
+    onBackground = White,
+    surface = Black,
+    onSurface = White
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Black,
     onPrimary = White,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = Grey20,
+    onSecondary = Black,
+    tertiary = Grey40,
+    background = White,
+    onBackground = Black,
+    surface = White,
+    onSurface = Black
 )
 
 @Composable
 fun MentalQTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -46,7 +45,6 @@ fun MentalQTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
