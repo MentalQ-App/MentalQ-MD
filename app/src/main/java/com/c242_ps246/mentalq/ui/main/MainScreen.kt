@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideInFromRight
+import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideOutToLeft
 import com.c242_ps246.mentalq.ui.main.dashboard.DashboardScreen
 import com.c242_ps246.mentalq.ui.main.note.NoteScreen
 import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
@@ -24,9 +26,27 @@ fun MainScreen() {
             startDestination = Routes.DASHBOARD,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Routes.DASHBOARD) { DashboardScreen() }
-            composable(Routes.NOTE) { NoteScreen() }
-            composable(Routes.PROFILE) { ProfileScreen() }
+            composable(
+                route = Routes.DASHBOARD,
+                enterTransition = { slideInFromRight },
+                exitTransition = { slideOutToLeft }
+            ) {
+                DashboardScreen()
+            }
+            composable(
+                route = Routes.NOTE,
+                enterTransition = { slideInFromRight },
+                exitTransition = { slideOutToLeft }
+            ) {
+                NoteScreen()
+            }
+            composable(
+                route = Routes.PROFILE,
+                enterTransition = { slideInFromRight },
+                exitTransition = { slideOutToLeft }
+            ) {
+                ProfileScreen()
+            }
         }
     }
 }
