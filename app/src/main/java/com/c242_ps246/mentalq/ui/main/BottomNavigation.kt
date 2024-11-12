@@ -29,7 +29,6 @@ fun CustomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem("Dashboard", R.drawable.ic_home, Routes.DASHBOARD),
         BottomNavItem("Note", R.drawable.ic_note, Routes.NOTE),
-        BottomNavItem("Result", R.drawable.ic_result, Routes.RESULT),
         BottomNavItem("Profile", R.drawable.ic_profile, Routes.PROFILE)
     )
 
@@ -43,7 +42,7 @@ fun CustomNavigationBar(navController: NavHostController) {
     ) {
         NavigationBar(
             modifier = Modifier
-                .fillMaxWidth(0.75f)
+                .fillMaxWidth(0.6f)
                 .background(colorScheme.primary, shape = RoundedCornerShape(50.dp))
                 .height(60.dp),
             containerColor = Color.Transparent,

@@ -21,41 +21,41 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         startDestination = Routes.ONBOARDING,
         modifier = modifier
     ) {
-        composable("onboarding") {
+        composable(Routes.ONBOARDING) {
             OnboardingScreen(
                 onNavigateToLogin = { navController.navigate("login") },
                 onNavigateToRegister = { navController.navigate("register") }
             )
         }
         composable(
-            "login",
+            Routes.LOGIN,
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
             LoginScreen(
                 onBackPress = { navController.popBackStack() },
                 onAuthSuccess = {
-                    navController.navigate("main_screen") {
-                        popUpTo("onboarding") { inclusive = true }
+                    navController.navigate(Routes.MAIN_SCREEN) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
                     }
                 }
             )
         }
         composable(
-            "register",
+            Routes.REGISTER,
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
             RegisterScreen(
                 onBackPress = { navController.popBackStack() },
                 onRegisterSuccess = {
-                    navController.navigate("main_screen") {
-                        popUpTo("onboarding") { inclusive = true }
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
                     }
                 }
             )
         }
-        composable("main_screen") {
+        composable(Routes.MAIN_SCREEN) {
             MainScreen()
         }
     }

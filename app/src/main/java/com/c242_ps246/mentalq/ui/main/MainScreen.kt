@@ -10,7 +10,6 @@ import androidx.navigation.compose.rememberNavController
 import com.c242_ps246.mentalq.ui.main.dashboard.DashboardScreen
 import com.c242_ps246.mentalq.ui.main.note.NoteScreen
 import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
-import com.c242_ps246.mentalq.ui.main.result.ResultScreen
 import com.c242_ps246.mentalq.ui.navigation.Routes
 
 @Composable
@@ -27,7 +26,6 @@ fun MainScreen() {
         ) {
             composable(Routes.DASHBOARD) { DashboardScreen() }
             composable(Routes.NOTE) { NoteScreen() }
-            composable(Routes.RESULT) { ResultScreen() }
             composable(Routes.PROFILE) { ProfileScreen() }
         }
     }

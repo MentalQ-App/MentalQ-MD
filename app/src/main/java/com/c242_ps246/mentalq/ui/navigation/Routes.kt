@@ -5,15 +5,11 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
 
-    // Main Features Routes
+    const val MAIN_SCREEN = "main_screen"
     const val DASHBOARD = "dashboard"
     const val NOTE = "note"
     const val RESULT = "result"
     const val PROFILE = "profile"
-    const val NOTIFICATIONS = "notifications"
-    const val SEARCH = "search"
     const val DETAILS = "details"
-    const val EDIT = "edit"
     const val CREATE = "create"
-    const val CHAT = "chat"
 }
