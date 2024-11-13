@@ -1,5 +1,14 @@
 <resources>
     <string name="app_name">MentalQ</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_page1_title">Track Your Mood</string>
+    <string name="onboarding_page1_description">Monitor your daily emotional well-being with our intuitive tracking system</string>
+    <string name="onboarding_page2_title">Get Insights</string>
+    <string name="onboarding_page2_description">Understand your patterns and receive personalized recommendations</string>
+    <string name="onboarding_page3_title">Join Community</string>
+    <string name="onboarding_page3_description">Connect with others and share your journey in a safe, supportive environment</string>
 <!--    <string name="welcome">Welcome</string>-->
 <!--    <string name="get_started">Let\'s get started!</string>-->
 <!--    <string name="login">Login</string>-->

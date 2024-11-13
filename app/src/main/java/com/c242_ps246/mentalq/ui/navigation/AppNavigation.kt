@@ -7,10 +7,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.c242_ps246.mentalq.ui.auth.LoginScreen
 import com.c242_ps246.mentalq.ui.auth.RegisterScreen
-import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideInFromBottom
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideOutToBottom
 import com.c242_ps246.mentalq.ui.main.MainScreen
+import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -18,14 +18,15 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.ONBOARDING,
+        startDestination = Routes.LOGIN,
         modifier = modifier
     ) {
-        composable(Routes.ONBOARDING) {
-            OnboardingScreen(
-                onNavigateToLogin = { navController.navigate("login") },
-                onNavigateToRegister = { navController.navigate("register") }
-            )
+        composable (
+            Routes.ONBOARDING,
+            enterTransition = { slideInFromBottom },
+            exitTransition = { slideOutToBottom }
+        ) {
+            OnboardingScreen { navController.navigate(Routes.LOGIN) }
         }
         composable(
             Routes.LOGIN,
@@ -36,7 +37,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onBackPress = { navController.popBackStack() },
                 onAuthSuccess = {
                     navController.navigate(Routes.MAIN_SCREEN) {
-                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                        popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }
             )
@@ -50,7 +51,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onBackPress = { navController.popBackStack() },
                 onRegisterSuccess = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                        popUpTo(Routes.REGISTER) { inclusive = true }
                     }
                 }
             )
