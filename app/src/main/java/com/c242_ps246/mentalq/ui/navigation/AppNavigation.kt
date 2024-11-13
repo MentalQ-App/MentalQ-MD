@@ -5,10 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.c242_ps246.mentalq.ui.auth.LoginScreen
-import com.c242_ps246.mentalq.ui.auth.RegisterScreen
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideInFromBottom
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideOutToBottom
+import com.c242_ps246.mentalq.ui.auth.AuthScreen
 import com.c242_ps246.mentalq.ui.main.MainScreen
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 
@@ -18,7 +17,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN,
+        startDestination = Routes.ONBOARDING,
         modifier = modifier
     ) {
         composable (
@@ -26,35 +25,20 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
-            OnboardingScreen { navController.navigate(Routes.LOGIN) }
+            OnboardingScreen {
+                navController.navigate(Routes.AUTH) {
+                    popUpTo(Routes.ONBOARDING) {
+                        inclusive = true
+                    }
+                }
+            }
         }
         composable(
-            Routes.LOGIN,
+            Routes.AUTH,
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
-            LoginScreen(
-                onBackPress = { navController.popBackStack() },
-                onAuthSuccess = {
-                    navController.navigate(Routes.MAIN_SCREEN) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable(
-            Routes.REGISTER,
-            enterTransition = { slideInFromBottom },
-            exitTransition = { slideOutToBottom }
-        ) {
-            RegisterScreen(
-                onBackPress = { navController.popBackStack() },
-                onRegisterSuccess = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.REGISTER) { inclusive = true }
-                    }
-                }
-            )
+            AuthScreen()
         }
         composable(Routes.MAIN_SCREEN) {
             MainScreen()
