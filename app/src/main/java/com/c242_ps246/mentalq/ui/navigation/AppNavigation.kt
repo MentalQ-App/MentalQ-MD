@@ -9,7 +9,6 @@ import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideInFromBottom
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideOutToBottom
 import com.c242_ps246.mentalq.ui.auth.AuthScreen
 import com.c242_ps246.mentalq.ui.main.MainScreen
-import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
