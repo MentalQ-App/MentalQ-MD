@@ -17,28 +17,21 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.ONBOARDING,
+        startDestination = Routes.AUTH,
         modifier = modifier
     ) {
-        composable (
-            Routes.ONBOARDING,
-            enterTransition = { slideInFromBottom },
-            exitTransition = { slideOutToBottom }
-        ) {
-            OnboardingScreen {
-                navController.navigate(Routes.AUTH) {
-                    popUpTo(Routes.ONBOARDING) {
-                        inclusive = true
-                    }
-                }
-            }
-        }
         composable(
             Routes.AUTH,
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
-            AuthScreen()
+            AuthScreen{
+                navController.navigate(Routes.MAIN_SCREEN) {
+                    popUpTo(Routes.AUTH) {
+                        inclusive = true
+                    }
+                }
+            }
         }
         composable(Routes.MAIN_SCREEN) {
             MainScreen()

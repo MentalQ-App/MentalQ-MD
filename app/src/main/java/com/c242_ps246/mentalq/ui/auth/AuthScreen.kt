@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AuthScreen() {
+fun AuthScreen(onSuccess: ( ) -> Unit) {
     var isLogin by remember { mutableStateOf(true) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -275,6 +275,7 @@ fun AuthScreen() {
                     onClick = {
                         if (validateForm()) {
                             isLoading = true
+                            onSuccess()
                             // Handle auth-nya di sini ya le
                         }
                     },
@@ -343,6 +344,6 @@ fun AuthScreen() {
 @Composable
 fun AuthScreenPreview() {
     MentalQTheme {
-        AuthScreen()
+        AuthScreen({})
     }
 }

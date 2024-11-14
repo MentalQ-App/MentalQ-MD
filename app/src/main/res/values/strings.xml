@@ -33,7 +33,22 @@
     <string name="text_have_account_action">Sign in</string>
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
-<!--    <string name="welcome">Welcome</string>-->
+
+    <string name="hello_user">Hello, Adikana !</string>
+    <string name="diary_streak">Diary streak</string>
+    <string name="day_wed">Wed</string>
+    <string name="current_state">Current State</string>
+    <string name="state_anxiety">Anxiety</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit…</string>
+    <string name="latest_diary">Latest diary</string>
+    <string name="feeling_tired">I\'m feeling tired</string>
+    <string name="date_format">17 February 2024 | 12:30</string>
+    <string name="cd_profile_picture">Profile picture</string>
+    <string name="cd_home">Home</string>
+    <string name="cd_diary">Diary</string>
+    <string name="cd_profile">Profile</string>
+    <string name="mental_health_matters">Mental health matters!</string>
+    <!--    <string name="welcome">Welcome</string>-->
 <!--    <string name="get_started">Let\'s get started!</string>-->
 <!--    <string name="login">Login</string>-->
 <!--    <string name="register">Register</string>-->

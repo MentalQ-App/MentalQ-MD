@@ -1,9 +1,15 @@
 package com.c242_ps246.mentalq.ui.main
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,13 +24,15 @@ import com.c242_ps246.mentalq.ui.navigation.Routes
 fun MainScreen() {
     val navController = rememberNavController()
 
-    Scaffold(
-        bottomBar = { CustomNavigationBar(navController = navController) }
-    ) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         NavHost(
             navController = navController,
             startDestination = Routes.DASHBOARD,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             composable(
                 route = Routes.DASHBOARD,
@@ -48,6 +56,9 @@ fun MainScreen() {
                 ProfileScreen()
             }
         }
+        CustomNavigationBar(
+            navController = navController,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
-

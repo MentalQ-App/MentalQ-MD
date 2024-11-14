@@ -24,7 +24,10 @@ import com.c242_ps246.mentalq.ui.navigation.Routes
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 
 @Composable
-fun CustomNavigationBar(navController: NavHostController) {
+fun CustomNavigationBar(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     var selectedItem by remember { mutableStateOf(0) }
     val items = listOf(
         BottomNavItem("Dashboard", R.drawable.ic_home, Routes.DASHBOARD),
@@ -35,21 +38,24 @@ fun CustomNavigationBar(navController: NavHostController) {
     val colorScheme = MaterialTheme.colorScheme
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .background(Color.Transparent)
+            .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         NavigationBar(
             modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .background(colorScheme.primary, shape = RoundedCornerShape(50.dp))
-                .height(60.dp),
+                .wrapContentWidth()
+                .wrapContentHeight()
+                .background(colorScheme.background, shape = RoundedCornerShape(50.dp)),
             containerColor = Color.Transparent,
-            contentColor = colorScheme.onPrimary
+            contentColor = colorScheme.onPrimary,
+            tonalElevation = 8.dp
         ) {
             items.forEachIndexed { index, item ->
                 NavigationBarItem(
+                    modifier = Modifier.wrapContentSize(),
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colorScheme.secondary,
                         unselectedIconColor = colorScheme.tertiary,
@@ -64,7 +70,7 @@ fun CustomNavigationBar(navController: NavHostController) {
                                 .background(
                                     if (selectedItem == index) colorScheme.secondary else Color.Transparent
                                 )
-                                .padding(12.dp)
+                                .padding(20.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = item.icon),
@@ -81,13 +87,13 @@ fun CustomNavigationBar(navController: NavHostController) {
                             launchSingleTop = true
                         }
                     },
-                    alwaysShowLabel = false,
-                    modifier = Modifier.padding(horizontal = 2.dp)
+                    alwaysShowLabel = false
                 )
             }
         }
     }
 }
+
 
 data class BottomNavItem(val label: String, val icon: Int, val route: String)
 

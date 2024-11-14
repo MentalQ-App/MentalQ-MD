@@ -34,9 +34,7 @@ data class OnboardingPage(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingScreen(
-    onFinished: () -> Unit
-) {
+fun OnboardingScreen(onFinished: () -> Unit) {
     val pages = listOf(
         OnboardingPage(
             image = R.drawable.tracking_mood,
@@ -61,10 +59,11 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
@@ -72,17 +71,17 @@ fun OnboardingScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                if (pagerState.currentPage < pages.size - 1) {
-                    TextButton(
-                        onClick = onFinished,
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.onboarding_skip),
-                            color = Color(0xFF7FCFCF),
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                TextButton(
+                    onClick = {
+                        onFinished()
+                    },
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Text(
+                        text = stringResource(R.string.onboarding_skip),
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
 
@@ -134,7 +133,7 @@ fun OnboardingScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF7FCFCF)
+                        containerColor = MaterialTheme.colorScheme.secondary
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -176,7 +175,7 @@ private fun OnboardingPage(
             text = page.title,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onPrimary,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -184,7 +183,7 @@ private fun OnboardingPage(
         Text(
             text = page.description,
             fontSize = 16.sp,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.tertiary,
             textAlign = TextAlign.Center
         )
     }

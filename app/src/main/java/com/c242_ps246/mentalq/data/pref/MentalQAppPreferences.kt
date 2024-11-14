@@ -19,7 +19,7 @@ class MentalQAppPreferences(private val context: Context) {
 
     val shouldShowOnboarding: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
-            !preferences[HAS_COMPLETED_ONBOARDING]!!
+            preferences[HAS_COMPLETED_ONBOARDING] != true
         }
 
     suspend fun completeOnboarding() {
