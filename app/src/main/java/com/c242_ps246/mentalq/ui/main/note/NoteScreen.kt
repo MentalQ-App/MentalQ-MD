@@ -89,7 +89,7 @@ fun NoteItem(data: NoteData, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(
             MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp,
             pressedElevation = 8.dp
