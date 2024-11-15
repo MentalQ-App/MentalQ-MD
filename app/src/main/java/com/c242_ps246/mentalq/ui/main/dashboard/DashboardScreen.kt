@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,10 +41,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
     val scrollState = rememberScrollState()
     val toolbarHeight = 150.dp
     val minShrinkHeight = 0.dp
@@ -66,7 +66,7 @@ fun DashboardScreen() {
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.primary
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
@@ -244,7 +244,7 @@ fun DashboardScreen() {
                                     .fillMaxHeight(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary
+                                    containerColor = MaterialTheme.colorScheme.primary
                                 ),
                                 elevation = CardDefaults.cardElevation(
                                     defaultElevation = 8.dp
@@ -263,13 +263,13 @@ fun DashboardScreen() {
                                     Text(
                                         text = stringResource(R.string.day_wed),
                                         fontSize = 14.sp,
-                                        color = MaterialTheme.colorScheme.onSecondary
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
                                         text = "19",
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSecondary
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                             }
@@ -278,11 +278,11 @@ fun DashboardScreen() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 16.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
                             ),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary)
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
@@ -322,40 +322,16 @@ fun DashboardScreen() {
                             modifier = Modifier.padding(bottom = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            repeat(3) {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surface
-                                    ),
-                                    elevation = CardDefaults.cardElevation(
-                                        defaultElevation = 8.dp
+                            repeat(7) {
+                                LatestDiaryCard(
+                                    ListNoteItem(
+                                        id = "id",
+                                        title = "Title",
+                                        content = "Content",
+                                        date = "Date",
+                                        emotion = "Emotion"
                                     )
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(16.dp)
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.feeling_tired),
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.lorem_ipsum),
-                                            fontSize = 14.sp,
-                                            color = MaterialTheme.colorScheme.tertiary,
-                                            modifier = Modifier.padding(top = 4.dp)
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.date_format),
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.tertiary,
-                                            modifier = Modifier.padding(top = 4.dp)
-                                        )
-                                    }
-                                }
+                                )
                             }
                         }
                     }
@@ -365,10 +341,49 @@ fun DashboardScreen() {
     }
 }
 
+@Composable
+fun LatestDiaryCard(note: ListNoteItem){
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = note.title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = note.content,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                maxLines = 2,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Text(
+                text = note.date,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 fun DashboardScreenPreview() {
     MentalQTheme {
-        DashboardScreen()
+        DashboardScreen {}
     }
 }

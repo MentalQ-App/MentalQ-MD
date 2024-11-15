@@ -39,23 +39,25 @@ fun CustomNavigationBar(
 
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .background(Color.Transparent)
+            .width(300.dp)
+            .height(110.dp)
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         NavigationBar(
-            modifier = Modifier
-                .wrapContentWidth()
-                .wrapContentHeight()
-                .background(colorScheme.background, shape = RoundedCornerShape(50.dp)),
+            modifier = modifier
+                .matchParentSize()
+                .background(colorScheme.background, shape = RoundedCornerShape(50.dp))
+                .align(Alignment.Center),
             containerColor = Color.Transparent,
             contentColor = colorScheme.onPrimary,
-            tonalElevation = 8.dp
+            tonalElevation = 8.dp,
         ) {
             items.forEachIndexed { index, item ->
                 NavigationBarItem(
-                    modifier = Modifier.wrapContentSize(),
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .align(Alignment.CenterVertically),
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colorScheme.secondary,
                         unselectedIconColor = colorScheme.tertiary,

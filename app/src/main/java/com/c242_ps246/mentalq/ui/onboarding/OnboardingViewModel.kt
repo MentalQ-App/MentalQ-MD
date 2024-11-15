@@ -3,7 +3,7 @@ package com.c242_ps246.mentalq.ui.onboarding
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.c242_ps246.mentalq.data.pref.MentalQAppPreferences
+import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

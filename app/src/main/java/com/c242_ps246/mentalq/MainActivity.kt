@@ -16,8 +16,10 @@ import com.c242_ps246.mentalq.ui.navigation.AppNavigation
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingViewModel
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlin.getValue
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val onboardingViewModel: OnboardingViewModel by viewModels()
 

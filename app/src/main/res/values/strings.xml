@@ -48,6 +48,8 @@
     <string name="cd_diary">Diary</string>
     <string name="cd_profile">Profile</string>
     <string name="mental_health_matters">Mental health matters!</string>
+    <string name="your_note">Your Note</string>
+    <string name="your_profile">Your Profile</string>
     <!--    <string name="welcome">Welcome</string>-->
 <!--    <string name="get_started">Let\'s get started!</string>-->
 <!--    <string name="login">Login</string>-->

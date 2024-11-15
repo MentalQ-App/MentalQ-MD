@@ -1,4 +1,4 @@
-package com.c242_ps246.mentalq.data.pref
+package com.c242_ps246.mentalq.data.manager
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "MentalQAppPreferences")
 
-class MentalQAppPreferences(private val context: Context) {
+class MentalQAppPreferences(
+    private val context: Context
+) {
 
     companion object {
         private val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
@@ -21,6 +23,7 @@ class MentalQAppPreferences(private val context: Context) {
         .map { preferences ->
             preferences[HAS_COMPLETED_ONBOARDING] != true
         }
+
 
     suspend fun completeOnboarding() {
         context.dataStore.edit { preferences ->
