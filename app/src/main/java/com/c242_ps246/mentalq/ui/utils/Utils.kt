@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.utils
 
-import java.text.SimpleDateFormat
 import java.util.Calendar
 
 object Utils {

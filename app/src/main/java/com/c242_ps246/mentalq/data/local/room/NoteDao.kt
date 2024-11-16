@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.data.local.room
 
-import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -30,7 +29,7 @@ interface NoteDao {
 
     @Query("DELETE FROM note")
     suspend fun clearAllNotes()
-    
+
     @Query("DELETE FROM note WHERE id = :id")
     suspend fun deleteNoteById(id: String)
 }

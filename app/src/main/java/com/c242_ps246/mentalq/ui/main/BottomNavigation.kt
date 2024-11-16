@@ -1,34 +1,35 @@
 package com.c242_ps246.mentalq.ui.main
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.navigation.NavHostController
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.navigation.Routes
-import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 
 @Composable
 fun CustomNavigationBar(
-    navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedItem: Int,
+    onItemSelected: (Int, String) -> Unit
 ) {
-    var selectedItem by remember { mutableStateOf(0) }
     val items = listOf(
         BottomNavItem("Dashboard", R.drawable.ic_home, Routes.DASHBOARD),
         BottomNavItem("Note", R.drawable.ic_note, Routes.NOTE),
@@ -84,11 +85,7 @@ fun CustomNavigationBar(
                     },
                     selected = selectedItem == index,
                     onClick = {
-                        selectedItem = index
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = false }
-                            launchSingleTop = true
-                        }
+                        onItemSelected(index, item.route)
                     },
                     alwaysShowLabel = false
                 )
@@ -100,10 +97,3 @@ fun CustomNavigationBar(
 
 data class BottomNavItem(val label: String, val icon: Int, val route: String)
 
-@Preview
-@Composable
-fun CustomNavigationBarPreview() {
-    MentalQTheme {
-        CustomNavigationBar(navController = rememberNavController())
-    }
-}
