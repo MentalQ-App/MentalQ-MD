@@ -28,23 +28,35 @@ class NoteRepository(
     fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData {
         emit(Result.Loading)
         try {
+            val localData = noteDao.getAllNotes()
             val response = apiService.getNotes(userId = "1")
             val notes = response.listNote
-            val noteList = notes!!.map { note ->
-                ListNoteItem(
-                    note.id,
-                    note.title,
-                    note.content,
-                    note.date,
-                    note.emotion
-                )
+
+            if (localData.isNotEmpty()) {
+                emit(Result.Success(localData))
+            } else {
+                try {
+
+                    val noteList = notes!!.map { note ->
+                        ListNoteItem(
+                            note.id,
+                            note.title,
+                            note.content,
+                            note.date,
+                            note.emotion
+                        )
+                    }
+                    noteDao.clearAllNotes()
+                    noteDao.insertAllNotes(noteList)
+                    emit(Result.Success(noteList))
+                } catch (e: Exception) {
+                    emit(Result.Error("An error occurred: ${e.message}"))
+                }
             }
-            noteDao.clearAllNotes()
-            noteDao.insertAllNotes(noteList)
-            emit(Result.Success(noteList))
         } catch (e: Exception) {
             emit(Result.Error("An error occurred: ${e.message}"))
         }
+
     }
     suspend fun getNoteById(noteId: String): ListNoteItem {
         return noteDao.getNoteById(noteId)

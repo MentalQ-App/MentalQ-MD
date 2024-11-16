@@ -1,8 +1,9 @@
 package com.c242_ps246.mentalq.ui.main.note.detail
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,7 +21,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.ui.utils.Utils.getTodayDate
+import com.c242_ps246.mentalq.R
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailNoteScreen(
@@ -35,7 +39,6 @@ fun DetailNoteScreen(
     val todayDate = getTodayDate()
     val defaultTitle = "Title"
     val defaultContent = "Content"
-    val defaultEmotion = "Happy"
 
     LaunchedEffect(noteId) {
         viewModel.loadNote(noteId)
@@ -44,7 +47,7 @@ fun DetailNoteScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         TopAppBar(
             navigationIcon = {
@@ -52,9 +55,14 @@ fun DetailNoteScreen(
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             },
-            title = { Text("← Back") },
+            title = {
+                Text(
+                    text = "Back",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                    },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.White
+                containerColor = MaterialTheme.colorScheme.background,
             )
         )
 
@@ -83,14 +91,15 @@ fun DetailNoteScreen(
                     onValueChange = { viewModel.updateTitle(it) },
                     textStyle = TextStyle(
                         fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Text(
                     text = date ?: todayDate,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
@@ -100,7 +109,7 @@ fun DetailNoteScreen(
                     onValueChange = { viewModel.updateContent(it) },
                     textStyle = TextStyle(
                         fontSize = 16.sp,
-                        color = Color.DarkGray
+                        color = MaterialTheme.colorScheme.onBackground
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -108,26 +117,26 @@ fun DetailNoteScreen(
                 )
 
                 Text(
-                    text = "How are you feeling in this moment?",
+                    text = stringResource(id = R.string.how_do_you_feel),
                     fontSize = 16.sp,
-                    modifier = Modifier.padding(vertical = 16.dp)
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Row(
+                val emotionList = listOf("Happy", "Anxious", "Angry", "Sad")
+                val emoji = listOf("😆", "😰", "😡", "😕")
+                LazyRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    EmotionButton("Anxious", "😰", selectedEmotion) {
-                        viewModel.updateEmotion("Anxious")
-                    }
-                    EmotionButton("Happy", "😆", selectedEmotion) {
-                        viewModel.updateEmotion("Happy")
-                    }
-                    EmotionButton("Angry", "😡", selectedEmotion) {
-                        viewModel.updateEmotion("Angry")
-                    }
-                    EmotionButton("Sad", "😕", selectedEmotion) {
-                        viewModel.updateEmotion("Sad")
+                    items(emotionList.size) { index ->
+                        Spacer(modifier = Modifier.width(8.dp))
+                        EmotionButton(
+                            emotion = emotionList[index],
+                            emoji = emoji[index],
+                            selectedEmotion = selectedEmotion
+                        ) {
+                            viewModel.updateEmotion(emotionList[index])
+                        }
                     }
                 }
             }
@@ -142,27 +151,39 @@ private fun EmotionButton(
     selectedEmotion: String?,
     onClick: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = if (selectedEmotion == emotion) MaterialTheme.colorScheme.primary else Color.LightGray
+        ),
+        shape = RoundedCornerShape(10.dp),
         modifier = Modifier
-            .background(
-                if (selectedEmotion == emotion) Color.LightGray else Color(0xFFF5F5F5),
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(8.dp)
+            .wrapContentSize(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        ),
+        onClick = { onClick() }
     ) {
-        Text(
-            text = emoji,
-            fontSize = 24.sp,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .padding(bottom = 4.dp)
-                .clickable { onClick() }
-        )
-        Text(
-            text = emotion,
-            fontSize = 12.sp,
-            color = Color.DarkGray
-        )
+                .width(82.dp)
+                .height(82.dp)
+        ) {
+            Text(
+                text = emoji,
+                fontSize = 24.sp,
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+            )
+            Text(
+                text = emotion,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
 

@@ -19,8 +19,11 @@ interface NoteDao {
     @Update
     suspend fun updateNote(note: ListNoteItem)
 
+//    @Query("SELECT * FROM note")
+//    fun getAllNotes(): PagingSource<Int, ListNoteItem>
+
     @Query("SELECT * FROM note")
-    fun getAllNotes(): PagingSource<Int, ListNoteItem>
+    suspend fun getAllNotes(): List<ListNoteItem>
 
     @Query("SELECT * FROM note WHERE id = :id")
     suspend fun getNoteById(id: String): ListNoteItem

@@ -1,6 +1,7 @@
 package com.c242_ps246.mentalq.ui.main.note
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -101,6 +102,8 @@ fun NoteItem(data: ListNoteItem, onItemClick: (ListNoteItem) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable{onItemClick(data)}
             .padding(4.dp),
         colors = CardDefaults.cardColors(
             MaterialTheme.colorScheme.surface
