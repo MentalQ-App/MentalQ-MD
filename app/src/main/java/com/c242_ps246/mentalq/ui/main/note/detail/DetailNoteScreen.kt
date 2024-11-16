@@ -13,21 +13,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.c242_ps246.mentalq.ui.utils.Utils.getTodayDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailNoteScreen(
-    viewModel: NoteDetailViewModel,
     noteId: String,
     onBackClick: () -> Unit
 ) {
+    val viewModel: NoteDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val title by viewModel.title.collectAsStateWithLifecycle()
-    val content by viewModel.content.collectAsStateWithLifecycle()
-    val selectedEmotion by viewModel.emotion.collectAsStateWithLifecycle()
+    val title: String? by viewModel.title.collectAsStateWithLifecycle()
+    val content: String? by viewModel.content.collectAsStateWithLifecycle()
+    val date: String? by viewModel.date.collectAsStateWithLifecycle()
+    val selectedEmotion: String? by viewModel.emotion.collectAsStateWithLifecycle()
+    val todayDate = getTodayDate()
+    val defaultTitle = "Title"
+    val defaultContent = "Content"
+    val defaultEmotion = "Happy"
 
     LaunchedEffect(noteId) {
         viewModel.loadNote(noteId)
@@ -71,7 +79,7 @@ fun DetailNoteScreen(
                     .padding(16.dp)
             ) {
                 BasicTextField(
-                    value = title,
+                    value = title ?: defaultTitle,
                     onValueChange = { viewModel.updateTitle(it) },
                     textStyle = TextStyle(
                         fontSize = 24.sp,
@@ -81,14 +89,14 @@ fun DetailNoteScreen(
                 )
 
                 Text(
-                    text = uiState.note?.date ?: "",
+                    text = date ?: todayDate,
                     color = Color.Gray,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
 
                 BasicTextField(
-                    value = content,
+                    value = content ?: defaultContent,
                     onValueChange = { viewModel.updateContent(it) },
                     textStyle = TextStyle(
                         fontSize = 16.sp,
@@ -157,3 +165,13 @@ private fun EmotionButton(
         )
     }
 }
+
+@Preview
+@Composable
+fun PreviewDetailNoteScreen() {
+    DetailNoteScreen(
+        noteId = "1",
+        onBackClick = {}
+    )
+}
+

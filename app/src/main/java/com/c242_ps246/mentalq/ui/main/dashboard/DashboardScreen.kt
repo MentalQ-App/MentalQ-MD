@@ -357,21 +357,21 @@ fun LatestDiaryCard(note: ListNoteItem){
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = note.title,
+                text = note.title ?: "",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = note.content,
+                text = note.content ?: "",
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.tertiary,
                 maxLines = 2,
                 modifier = Modifier.padding(top = 4.dp)
             )
             Text(
-                text = note.date,
+                text = note.date ?: "",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.padding(top = 4.dp)

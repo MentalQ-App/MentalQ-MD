@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.data.repository.NoteRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -15,6 +16,7 @@ data class NoteDetailUiState(
     val error: String? = null
 )
 
+@HiltViewModel
 class NoteDetailViewModel @Inject constructor(
     private val noteRepository: NoteRepository
 ) : ViewModel() {
@@ -28,6 +30,9 @@ class NoteDetailViewModel @Inject constructor(
     private val _content = MutableStateFlow("")
     val content = _content.asStateFlow()
 
+    private  val _date = MutableStateFlow("")
+    val date = _date.asStateFlow()
+
     private val _emotion = MutableStateFlow<String?>(null)
     val emotion = _emotion.asStateFlow()
 
@@ -40,8 +45,9 @@ class NoteDetailViewModel @Inject constructor(
                     isLoading = false,
                     note = note
                 )
-                _title.value = note.title
-                _content.value = note.content
+                _title.value = note.title.toString()
+                _content.value = note.content.toString()
+                _date.value = note.date.toString()
                 _emotion.value = note.emotion
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -75,6 +81,7 @@ class NoteDetailViewModel @Inject constructor(
                         note.copy(
                             title = _title.value,
                             content = _content.value,
+                            date = _date.value,
                             emotion = _emotion.value
                         )
                     )

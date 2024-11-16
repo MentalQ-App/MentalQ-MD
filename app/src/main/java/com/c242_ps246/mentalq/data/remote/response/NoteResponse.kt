@@ -15,6 +15,17 @@ data class NoteResponse (
     val message: String? = null
 )
 
+data class DetailNoteResponse (
+    @field:SerializedName("note")
+    val note: ListNoteItem? = null,
+
+    @field:SerializedName("error")
+    val error: Boolean? = null,
+
+    @field:SerializedName("message")
+    val message: String? = null
+)
+
 @Entity(tableName = "note")
 data class ListNoteItem (
     @PrimaryKey
@@ -22,15 +33,15 @@ data class ListNoteItem (
     val id: String,
 
     @field:SerializedName("title")
-    val title: String,
+    val title: String? = null,
 
     @field:SerializedName("content")
-    val content: String,
+    val content: String? = null,
 
     @field:SerializedName("date")
-    val date: String,
+    val date: String? = null,
 
     @field:SerializedName("emotion")
-    val emotion: String?
+    val emotion: String? = null
 )
 

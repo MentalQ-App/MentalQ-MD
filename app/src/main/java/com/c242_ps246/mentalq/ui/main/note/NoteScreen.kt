@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -15,11 +16,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 
 @Composable
-fun NoteScreen(onNavigateToNoteDetail: (String) -> Unit) {
+fun NoteScreen(
+    viewModel: NoteViewModel = hiltViewModel(),
+    onNavigateToNoteDetail: (String) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val listNote by viewModel.listNote.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadAllNotes()
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -43,28 +56,38 @@ fun NoteScreen(onNavigateToNoteDetail: (String) -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    val items = List(100) { index ->
-                        NoteData(
-                            index+1,
-                            "Title ${index + 1}",
-                            "Content ${index + 1}",
-                            "Date ${index + 1}"
+                    if (uiState.isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ){
+                            CircularProgressIndicator()
+                        }
+                    } else if (!uiState.error.isNullOrEmpty()) {
+                        Text(
+                            text = uiState.error!!,
+                            color = MaterialTheme.colorScheme.error
                         )
-                    }
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                    ) {
-                        itemsIndexed(items) { index, item ->
-                            NoteItem(
-                                data = item,
-                                onClick = {
-                                    onNavigateToNoteDetail(item.id.toString())
-                                }
-                            )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            itemsIndexed(listNote) { index, item ->
+                                NoteItem(
+                                    data = ListNoteItem(
+                                        id = item.id.toString(),
+                                        title = item.title,
+                                        content = item.content,
+                                        date = item.date
+                                    ),
+                                    onItemClick = { note ->
+                                        onNavigateToNoteDetail(note.id)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -73,15 +96,8 @@ fun NoteScreen(onNavigateToNoteDetail: (String) -> Unit) {
     }
 }
 
-data class NoteData(
-    val id: Int,
-    val title: String,
-    val content: String,
-    val date: String
-)
-
 @Composable
-fun NoteItem(data: NoteData, onClick: () -> Unit) {
+fun NoteItem(data: ListNoteItem, onItemClick: (ListNoteItem) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,7 +115,7 @@ fun NoteItem(data: NoteData, onClick: () -> Unit) {
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = data.title,
+                text = data.title ?: "",
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
@@ -108,7 +124,7 @@ fun NoteItem(data: NoteData, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = data.content,
+                text = data.content ?: "",
                 style = TextStyle(
                     fontSize = 16.sp
                 ),
@@ -116,7 +132,7 @@ fun NoteItem(data: NoteData, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = data.date,
+                text = data.date ?: "",
                 style = TextStyle(
                     fontSize = 12.sp
                 )

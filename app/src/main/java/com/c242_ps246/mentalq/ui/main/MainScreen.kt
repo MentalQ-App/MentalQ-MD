@@ -37,8 +37,6 @@ fun MainScreen(
         else -> false
     }
 
-    val noteDetailViewModel: NoteDetailViewModel = hiltViewModel()
-
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -80,7 +78,6 @@ fun MainScreen(
             ) { backStackEntry ->
                 val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
                 DetailNoteScreen(
-                    viewModel = noteDetailViewModel,
                     noteId = noteId,
                     onBackClick = {
                         navController.navigateUp()

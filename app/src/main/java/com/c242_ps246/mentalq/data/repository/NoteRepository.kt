@@ -1,12 +1,7 @@
 package com.c242_ps246.mentalq.data.repository
 
 import androidx.lifecycle.LiveData
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.liveData
-import com.c242_ps246.mentalq.data.local.remotemediator.NoteRemoteMediator
+import androidx.lifecycle.liveData
 import com.c242_ps246.mentalq.data.local.room.MentalQDatabase
 import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
@@ -18,18 +13,39 @@ class NoteRepository(
     private val apiService: ApiService
 ) {
 
-    fun getAllNotes(): LiveData<PagingData<ListNoteItem>>{
-        @OptIn(ExperimentalPagingApi::class)
-        return Pager(
-            config = PagingConfig(
-                pageSize = 10,
-                enablePlaceholders = false
-            ),
-            remoteMediator = NoteRemoteMediator(mentalQDatabase, apiService),
-            pagingSourceFactory = { noteDao.getAllNotes() }
-        ).liveData
-    }
+//    fun getAllNotes(): LiveData<PagingData<ListNoteItem>>{
+//        @OptIn(ExperimentalPagingApi::class)
+//        return Pager(
+//            config = PagingConfig(
+//                pageSize = 10,
+//                enablePlaceholders = false
+//            ),
+//            remoteMediator = NoteRemoteMediator(mentalQDatabase, apiService),
+//            pagingSourceFactory = { noteDao.getAllNotes() }
+//        ).liveData
+//    }
 
+    fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData {
+        emit(Result.Loading)
+        try {
+            val response = apiService.getNotes(userId = "1")
+            val notes = response.listNote
+            val noteList = notes!!.map { note ->
+                ListNoteItem(
+                    note.id,
+                    note.title,
+                    note.content,
+                    note.date,
+                    note.emotion
+                )
+            }
+            noteDao.clearAllNotes()
+            noteDao.insertAllNotes(noteList)
+            emit(Result.Success(noteList))
+        } catch (e: Exception) {
+            emit(Result.Error("An error occurred: ${e.message}"))
+        }
+    }
     suspend fun getNoteById(noteId: String): ListNoteItem {
         return noteDao.getNoteById(noteId)
     }
