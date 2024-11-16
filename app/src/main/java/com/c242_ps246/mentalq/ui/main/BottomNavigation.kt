@@ -50,6 +50,7 @@ fun CustomNavigationBar(
                 .background(colorScheme.background, shape = RoundedCornerShape(50.dp))
                 .align(Alignment.Center),
             containerColor = Color.Transparent,
+            windowInsets = WindowInsets(0, 0, 0, 0),
             contentColor = colorScheme.onPrimary,
             tonalElevation = 8.dp,
         ) {

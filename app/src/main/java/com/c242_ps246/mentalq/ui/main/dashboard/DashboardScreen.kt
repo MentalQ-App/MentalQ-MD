@@ -170,7 +170,7 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                     .width(100.dp)
                                     .fillMaxHeight()
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White)
+                                    .background(MaterialTheme.colorScheme.surface)
                             ) {
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
