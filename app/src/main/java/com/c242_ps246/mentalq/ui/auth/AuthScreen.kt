@@ -1,5 +1,7 @@
 package com.c242_ps246.mentalq.ui.auth
 
+import android.app.DatePickerDialog
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -26,6 +28,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
@@ -44,36 +48,51 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
+import java.util.Calendar
 
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AuthScreen(onSuccess: () -> Unit) {
+    val viewModel: AuthViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val token by viewModel.token.collectAsStateWithLifecycle()
+
+    LaunchedEffect(token) {
+        if (!token.isNullOrEmpty()) {
+            onSuccess()
+        }
+    }
+
     var isLogin by remember { mutableStateOf(true) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var birthday by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
 
     var emailError by remember { mutableStateOf<Int?>(null) }
     var passwordError by remember { mutableStateOf<Int?>(null) }
     var nameError by remember { mutableStateOf<Int?>(null) }
-
-    var isLoading by remember { mutableStateOf(false) }
+    var birthdayError by remember { mutableStateOf<Int?>(null) }
 
     fun validateName(name: String): Boolean {
         return if (name.isEmpty()) {
@@ -81,6 +100,16 @@ fun AuthScreen(onSuccess: () -> Unit) {
             false
         } else {
             nameError = null
+            true
+        }
+    }
+
+    fun validateBirthday(birthday: String): Boolean {
+        return if (birthday.isEmpty()) {
+            birthdayError = R.string.error_birthday_empty
+            false
+        } else {
+            birthdayError = null
             true
         }
     }
@@ -115,8 +144,8 @@ fun AuthScreen(onSuccess: () -> Unit) {
         val isEmailValid = validateEmail(email)
         val isPasswordValid = validatePassword(password)
         val isNameValid = if (!isLogin) validateName(name) else true
-//        return isEmailValid && isPasswordValid && isNameValid
-        return true
+        val isBirthdayValid = if (!isLogin) validateBirthday(birthday) else true
+        return isEmailValid && isPasswordValid && isNameValid && isBirthdayValid
     }
 
     Box(
@@ -195,14 +224,14 @@ fun AuthScreen(onSuccess: () -> Unit) {
                                 if (nameError != null) validateName(it)
                             },
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
                                 errorBorderColor = MaterialTheme.colorScheme.error
                             ),
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             },
                             label = { Text(stringResource(R.string.label_name)) },
@@ -210,6 +239,29 @@ fun AuthScreen(onSuccess: () -> Unit) {
                             modifier = Modifier.fillMaxWidth()
                         )
                         nameError?.let {
+                            Text(
+                                text = stringResource(it),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = !isLogin,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Column {
+                        DateInputField(
+                            birthdayDate = birthday,
+                            onDateChange = { newDate ->
+                                birthday = newDate
+                            }
+                        )
+                        birthdayError?.let {
                             Text(
                                 text = stringResource(it),
                                 color = MaterialTheme.colorScheme.error,
@@ -228,14 +280,14 @@ fun AuthScreen(onSuccess: () -> Unit) {
                             if (emailError != null) validateEmail(it)
                         },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             errorBorderColor = MaterialTheme.colorScheme.error
                         ),
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.MailOutline,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         },
                         label = { Text(stringResource(R.string.label_email)) },
@@ -261,14 +313,14 @@ fun AuthScreen(onSuccess: () -> Unit) {
                             if (passwordError != null) validatePassword(it)
                         },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             errorBorderColor = MaterialTheme.colorScheme.error
                         ),
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         },
                         trailingIcon = {
@@ -308,20 +360,28 @@ fun AuthScreen(onSuccess: () -> Unit) {
                 Button(
                     onClick = {
                         if (validateForm()) {
-                            isLoading = true
-                            onSuccess()
-                            // Handle auth-nya di sini ya le
+                            if (isLogin) {
+                                viewModel.login(email, password)
+                                if (uiState.error != null) {
+                                    Log.e("AuthScreen", uiState.error!!)
+                                }
+                            } else {
+                                viewModel.register(name, email, password, birthday)
+                                if (uiState.error != null) {
+                                    Log.e("AuthScreen", uiState.error!!)
+                                }
+                            }
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
+                        containerColor = MaterialTheme.colorScheme.primary
                     ),
-                    enabled = !isLoading
+                    enabled = !uiState.isLoading
                 ) {
-                    if (isLoading) {
+                    if (uiState.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = MaterialTheme.colorScheme.onPrimary
@@ -365,13 +425,64 @@ fun AuthScreen(onSuccess: () -> Unit) {
                                 if (isLogin) R.string.text_no_account_action
                                 else R.string.text_have_account_action
                             ),
-                            color = MaterialTheme.colorScheme.secondary
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun DateInputField(birthdayDate: String, onDateChange: (String) -> Unit) {
+    val context = LocalContext.current
+    val datePickerDialog = remember { mutableStateOf<DatePickerDialog?>(null) }
+
+    val openDatePicker = {
+        val calendar = Calendar.getInstance()
+        val datePicker = DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val selectedDate = "$dayOfMonth/${month + 1}/$year"
+                onDateChange(selectedDate)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.value = datePicker
+        datePicker.show()
+    }
+
+    OutlinedTextField(
+        value = birthdayDate,
+        onValueChange = {
+
+        },
+        label = {
+            Text(
+                text = stringResource(R.string.label_birthday),
+            )
+        },
+        readOnly = true,
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.CalendarMonth,
+                contentDescription = "Pick a date",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        trailingIcon = {
+            IconButton(onClick = openDatePicker) {
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = "Pick a date"
+                )
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Preview(showBackground = true)

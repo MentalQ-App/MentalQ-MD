@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
-data class NoteResponse (
+data class NoteResponse(
     @field:SerializedName("listNote")
     val listNote: List<ListNoteItem>? = null,
 
@@ -15,7 +15,7 @@ data class NoteResponse (
     val message: String? = null
 )
 
-data class DetailNoteResponse (
+data class DetailNoteResponse(
     @field:SerializedName("note")
     val note: ListNoteItem? = null,
 
@@ -27,9 +27,9 @@ data class DetailNoteResponse (
 )
 
 @Entity(tableName = "note")
-data class ListNoteItem (
+data class ListNoteItem(
     @PrimaryKey
-    @field:SerializedName("id")
+    @field:SerializedName("note_id")
     val id: String,
 
     @field:SerializedName("title")
@@ -38,10 +38,13 @@ data class ListNoteItem (
     @field:SerializedName("content")
     val content: String? = null,
 
-    @field:SerializedName("date")
-    val date: String? = null,
-
     @field:SerializedName("emotion")
-    val emotion: String? = null
+    val emotion: String? = null,
+
+    @field:SerializedName("updatedAt")
+    val updatedAt: String? = null,
+
+    @field:SerializedName("createdAt")
+    val createdAt: String? = null
 )
 

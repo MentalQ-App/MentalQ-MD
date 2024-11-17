@@ -52,11 +52,13 @@
     <string name="your_profile">Your Profile</string>
     <string name="preferences">Preferences</string>
     <string name="how_do_you_feel">How are you feeling in this moment?</string>
+    <string name="label_birthday">Birthday</string>
+    <string name="error_birthday_empty">Birthday cannot be empty</string>
     <!--    <string name="welcome">Welcome</string>-->
-<!--    <string name="get_started">Let\'s get started!</string>-->
-<!--    <string name="login">Login</string>-->
-<!--    <string name="register">Register</string>-->
-<!--    <string name="full_name">Full Name</string>-->
-<!--    <string name="username">Username</string>-->
-<!--    <string name="password">Password</string>-->
+    <!--    <string name="get_started">Let\'s get started!</string>-->
+    <!--    <string name="login">Login</string>-->
+    <!--    <string name="register">Register</string>-->
+    <!--    <string name="full_name">Full Name</string>-->
+    <!--    <string name="username">Username</string>-->
+    <!--    <string name="password">Password</string>-->
 </resources>

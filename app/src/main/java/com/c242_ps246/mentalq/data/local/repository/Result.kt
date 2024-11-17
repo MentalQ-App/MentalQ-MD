@@ -1,4 +1,4 @@
-package com.c242_ps246.mentalq.data.repository
+package com.c242_ps246.mentalq.data.local.repository
 
 sealed class Result<out R> private constructor() {
     data class Success<out T>(val data: T) : Result<T>()

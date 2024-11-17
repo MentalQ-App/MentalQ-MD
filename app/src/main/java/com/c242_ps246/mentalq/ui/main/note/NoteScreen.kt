@@ -61,7 +61,7 @@ fun NoteScreen(
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
-                        ){
+                        ) {
                             CircularProgressIndicator()
                         }
                     } else if (!uiState.error.isNullOrEmpty()) {
@@ -82,7 +82,8 @@ fun NoteScreen(
                                         id = item.id.toString(),
                                         title = item.title,
                                         content = item.content,
-                                        date = item.date
+                                        updatedAt = item.updatedAt,
+                                        createdAt = item.createdAt
                                     ),
                                     onItemClick = { note ->
                                         onNavigateToNoteDetail(note.id)
@@ -103,7 +104,7 @@ fun NoteItem(data: ListNoteItem, onItemClick: (ListNoteItem) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .clickable{onItemClick(data)}
+            .clickable { onItemClick(data) }
             .padding(4.dp),
         colors = CardDefaults.cardColors(
             MaterialTheme.colorScheme.surface
@@ -135,7 +136,7 @@ fun NoteItem(data: ListNoteItem, onItemClick: (ListNoteItem) -> Unit) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = data.date ?: "",
+                text = data.createdAt ?: "",
                 style = TextStyle(
                     fontSize = 12.sp
                 )
