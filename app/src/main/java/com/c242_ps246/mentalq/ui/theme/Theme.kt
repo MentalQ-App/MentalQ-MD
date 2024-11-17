@@ -11,27 +11,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Tosca,
+    primary = Tosca_600,
     onPrimary = Black,
-    secondary = Tosca,
+    secondary = Tosca_600,
     onSecondary = Black,
     tertiary = Grey40,
     background = Black,
     onBackground = White,
     surface = LightBlack,
-    onSurface = White
+    onSurface = White,
+    outline = LighterBlack,
+    outlineVariant = LighterBlack
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Tosca,
+    primary = Tosca_200,
     onPrimary = White,
-    secondary = Tosca,
+    secondary = Tosca_200,
     onSecondary = White,
     tertiary = Grey40,
     background = White,
     onBackground = Black,
     surface = White,
-    onSurface = Black
+    onSurface = Black,
+    outlineVariant = Tosca_100,
+    outline = LighterGrey
 )
 
 @Composable
@@ -45,6 +49,7 @@ fun MentalQTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

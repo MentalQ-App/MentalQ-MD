@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -60,6 +61,8 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
 
     val currentHeight = lerp(toolbarHeight, minShrinkHeight, scrollProgress)
     val currentCornerRadius = lerp(maxCornerRadius, minCornerRadius, scrollProgress)
+
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -118,7 +121,7 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                         bottomEnd = 0.dp
                     ),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 ) {
                     Column(
@@ -165,78 +168,93 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                 }
                             }
                             Spacer(modifier = Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .fillMaxHeight()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surface)
+                            Card(
+                                modifier = Modifier.wrapContentSize(),
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outlineVariant
+                                ),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 4.dp
+                                ),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.Transparent
+                                )
                             ) {
-                                Column(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.diary_streak),
-                                        modifier = Modifier.padding(top = 16.dp),
-                                        style = TextStyle(
-                                            fontSize = 14.sp,
-                                            color = Color.Gray,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    )
-                                    Text(
-                                        text = "7",
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        style = TextStyle(
-                                            fontSize = 32.sp,
-                                            color = Color(0xFF2C2C2C),
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    )
-                                }
-                                Canvas(
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(70.dp)
-                                        .align(Alignment.BottomCenter)
+                                        .width(100.dp)
+                                        .fillMaxHeight()
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(MaterialTheme.colorScheme.surface)
                                 ) {
-                                    val path = Path()
-                                    val width = size.width
-                                    val height = size.height
+                                    Column(
+                                        modifier = Modifier.fillMaxSize(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.diary_streak),
+                                            modifier = Modifier.padding(top = 16.dp),
+                                            style = TextStyle(
+                                                fontSize = 14.sp,
+                                                color = MaterialTheme.colorScheme.onBackground,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        )
+                                        Text(
+                                            text = "7",
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            style = TextStyle(
+                                                fontSize = 32.sp,
+                                                color = MaterialTheme.colorScheme.onBackground,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        )
+                                    }
+                                    Canvas(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(50.dp)
+                                            .align(Alignment.BottomCenter)
+                                    ) {
+                                        val path = Path()
+                                        val width = size.width
+                                        val height = size.height
 
-                                    path.moveTo(0f, height * 0.5f)
-                                    path.cubicTo(
-                                        width * 0.3f, height * 0.3f,
-                                        width * 0.7f, height * 0.7f,
-                                        width, height * 0.5f
-                                    )
-                                    path.lineTo(width, height)
-                                    path.lineTo(0f, height)
-                                    path.close()
+                                        path.moveTo(0f, height * 0.5f)
+                                        path.cubicTo(
+                                            width * 0.7f, height * 0.7f,
+                                            width * 0.3f, height * 0.2f,
+                                            width, height * 0.6f
+                                        )
+                                        path.lineTo(width, height)
+                                        path.lineTo(0f, height)
+                                        path.close()
 
-                                    drawPath(
-                                        path = path,
-                                        color = Color(0xFFE5F6F6)
-                                    )
+                                        drawPath(
+                                            path = path,
+                                            color = primaryColor.copy(alpha = 0.5f)
+                                        )
 
-                                    val path2 = Path()
-                                    path2.moveTo(0f, height * 0.6f)
-                                    path2.cubicTo(
-                                        width * 0.3f, height * 0.4f,
-                                        width * 0.7f, height * 0.8f,
-                                        width, height * 0.6f
-                                    )
-                                    path2.lineTo(width, height)
-                                    path2.lineTo(0f, height)
-                                    path2.close()
+                                        val path2 = Path()
+                                        path2.moveTo(0f, height * 0.6f)
+                                        path2.cubicTo(
+                                            width * 0.1f, height * 0.1f,
+                                            width * 0.7f, height * 1.2f,
+                                            width, height * 0.8f
+                                        )
+                                        path2.lineTo(width, height)
+                                        path2.lineTo(0f, height)
+                                        path2.close()
 
-                                    drawPath(
-                                        path = path2,
-                                        color = Color(0xFFD5F0F0)
-                                    )
+                                        drawPath(
+                                            path = path2,
+                                            color = primaryColor.copy(alpha = 1f)
+                                        )
+                                    }
                                 }
                             }
+
                             Spacer(modifier = Modifier.width(8.dp))
                             Card(
                                 modifier = Modifier
@@ -247,7 +265,7 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                     containerColor = MaterialTheme.colorScheme.primary
                                 ),
                                 elevation = CardDefaults.cardElevation(
-                                    defaultElevation = 8.dp
+                                    defaultElevation = 4.dp
                                 )
                             ) {
                                 Column(
@@ -263,11 +281,12 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                     Text(
                                         text = stringResource(R.string.day_wed),
                                         fontSize = 14.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = FontWeight.Medium
                                     )
                                     Text(
                                         text = "19",
-                                        fontSize = 20.sp,
+                                        fontSize = 32.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -342,7 +361,7 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
 }
 
 @Composable
-fun LatestDiaryCard(note: ListNoteItem){
+fun LatestDiaryCard(note: ListNoteItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
