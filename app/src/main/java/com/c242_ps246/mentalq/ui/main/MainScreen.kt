@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,15 @@ fun MainScreen(
 
     var selectedItem by remember { mutableIntStateOf(0) }
 
+    LaunchedEffect(currentRoute) {
+        selectedItem = when (currentRoute) {
+            Routes.DASHBOARD -> 0
+            Routes.NOTE -> 1
+            Routes.PROFILE -> 2
+            else -> selectedItem
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -48,11 +58,13 @@ fun MainScreen(
         NavHost(
             navController = navController,
             startDestination = Routes.DASHBOARD,
-            enterTransition = { ->
+            enterTransition = {
                 EnterTransition.None
+//                slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth })
             },
-            exitTransition = { ->
+            exitTransition = {
                 ExitTransition.None
+//                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
             }
         ) {
             composable(
