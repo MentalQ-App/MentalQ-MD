@@ -24,7 +24,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             enterTransition = { slideInFromBottom },
             exitTransition = { slideOutToBottom }
         ) {
-            AuthScreen{
+            AuthScreen {
                 navController.navigate(Routes.MAIN_SCREEN) {
                     popUpTo(Routes.AUTH) {
                         inclusive = true
@@ -33,7 +33,15 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             }
         }
         composable(Routes.MAIN_SCREEN) {
-            MainScreen()
+            MainScreen(
+                onLogout = {
+                    navController.navigate(Routes.AUTH) {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }

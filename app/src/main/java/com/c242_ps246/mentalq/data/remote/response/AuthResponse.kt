@@ -20,9 +20,9 @@ data class AuthResponse(
 
 @Entity(tableName = "user_data")
 data class UserData(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @field:SerializedName("id")
-    val id: String,
+    val id: Int,
 
     @field:SerializedName("name")
     val name: String,

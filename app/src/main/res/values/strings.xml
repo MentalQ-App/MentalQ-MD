@@ -54,6 +54,12 @@
     <string name="how_do_you_feel">How are you feeling in this moment?</string>
     <string name="label_birthday">Birthday</string>
     <string name="error_birthday_empty">Birthday cannot be empty</string>
+    <string name="notifications">Notifications</string>
+    <string name="language">Language</string>
+    <string name="privacy_and_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="logout">Logout</string>
+    <string name="logout_message">Are you sure you want to logout? You\'ll need to login again to access your account.</string>
     <!--    <string name="welcome">Welcome</string>-->
     <!--    <string name="get_started">Let\'s get started!</string>-->
     <!--    <string name="login">Login</string>-->

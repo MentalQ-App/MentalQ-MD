@@ -14,9 +14,7 @@ import retrofit2.http.Query
 
 interface NoteApiService {
     @GET("notes")
-    suspend fun getNotes(
-        @Query("user_id") userId: String
-    ): NoteResponse
+    suspend fun getNotes(): NoteResponse
 
     @FormUrlEncoded
     @POST("notes")

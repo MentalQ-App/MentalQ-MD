@@ -1,23 +1,16 @@
 package com.c242_ps246.mentalq.ui.auth
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.local.repository.AuthRepository
-import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import com.c242_ps246.mentalq.data.local.repository.Result
-import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
-    private val preferencesManager: MentalQAppPreferences
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthScreenUIState())
     val uiState = _uiState.asStateFlow()
@@ -37,15 +30,16 @@ class AuthViewModel @Inject constructor(
                 }
 
                 is Result.Success -> {
-                    result.data.token?.let { token ->
-                        saveToken(token)
-                        _token.value = token
-                    }
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = null)
+                    _uiState.value =
+                        _uiState.value.copy(isLoading = false, error = null, success = true)
                 }
 
                 is Result.Error -> {
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = result.error)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = result.error,
+                        success = false
+                    )
                 }
             }
         }
@@ -59,39 +53,35 @@ class AuthViewModel @Inject constructor(
                 }
 
                 is Result.Success -> {
-                    result.data.token?.let { token ->
-                        saveToken(token)
-                        _token.value = token
-                    }
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = null)
+                    _uiState.value =
+                        _uiState.value.copy(isLoading = false, error = null, success = true)
                 }
 
                 is Result.Error -> {
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = result.error)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = result.error,
+                        success = false
+                    )
                 }
             }
-        }
-    }
-
-    fun saveToken(token: String) {
-        viewModelScope.launch {
-            preferencesManager.saveToken(token)
         }
     }
 
     private fun getToken() {
-        viewModelScope.launch {
-            preferencesManager.token.first()?.let { savedToken ->
-                if (savedToken.isNotEmpty()) {
-                    _token.value = savedToken
-                }
-            }
+        authRepository.getToken().observeForever {
+            _token.value = it
         }
     }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
+
 }
 
 data class AuthScreenUIState(
     val isLoading: Boolean = false,
-    val note: ListNoteItem? = null,
+    val success: Boolean = false,
     val error: String? = null
 )

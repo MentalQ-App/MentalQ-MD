@@ -27,7 +27,8 @@ import com.c242_ps246.mentalq.ui.navigation.Routes
 
 @Composable
 fun MainScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLogout: () -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -90,7 +91,9 @@ fun MainScreen(
             composable(
                 route = Routes.PROFILE
             ) {
-                ProfileScreen()
+                ProfileScreen(
+                    onLogout = onLogout
+                )
             }
         }
 

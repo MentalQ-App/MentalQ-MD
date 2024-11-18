@@ -8,14 +8,15 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "MentalQAppPreferences")
 
-class MentalQAppPreferences(
+class MentalQAppPreferences @Inject constructor(
     private val context: Context
 ) {
-
     companion object {
         private val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
         private val TOKEN = stringPreferencesKey("token")
@@ -33,10 +34,12 @@ class MentalQAppPreferences(
         }
     }
 
-    val token: Flow<String?> = context.dataStore.data
-        .map { preferences ->
-            preferences[TOKEN]
+    fun getToken(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            val token = preferences[TOKEN] ?: ""
+            token
         }
+    }
 
     suspend fun saveToken(token: String) {
         context.dataStore.edit { preferences ->

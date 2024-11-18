@@ -14,7 +14,7 @@ class NoteRepository(
         emit(Result.Loading)
         try {
             val localData = noteDao.getAllNotes()
-            val response = noteApiService.getNotes(userId = "1")
+            val response = noteApiService.getNotes()
             val notes = response.listNote
 
             if (localData.isNotEmpty() && localData == notes) {

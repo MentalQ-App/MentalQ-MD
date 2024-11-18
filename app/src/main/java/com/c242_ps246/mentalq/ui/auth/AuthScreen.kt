@@ -1,7 +1,6 @@
 package com.c242_ps246.mentalq.ui.auth
 
 import android.app.DatePickerDialog
-import android.util.Log
 import android.util.Patterns
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -65,6 +64,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.component.CustomToast
+import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import java.util.Calendar
 
@@ -75,6 +76,10 @@ fun AuthScreen(onSuccess: () -> Unit) {
     val viewModel: AuthViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val token by viewModel.token.collectAsStateWithLifecycle()
+
+    var showToast by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf("") }
+    var toastType by remember { mutableStateOf(ToastType.INFO) }
 
     LaunchedEffect(token) {
         if (!token.isNullOrEmpty()) {
@@ -88,6 +93,25 @@ fun AuthScreen(onSuccess: () -> Unit) {
     var name by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState) {
+        when {
+            uiState.error != null -> {
+                showToast = true
+                toastMessage = uiState.error ?: "Login failed"
+                toastType = ToastType.ERROR
+                viewModel.clearError()
+            }
+
+            uiState.success -> {
+                showToast = true
+                toastMessage = if (isLogin) "Login successful!" else "Registration successful!"
+                toastType = ToastType.SUCCESS
+                viewModel.clearError()
+                onSuccess()
+            }
+        }
+    }
 
     var emailError by remember { mutableStateOf<Int?>(null) }
     var passwordError by remember { mutableStateOf<Int?>(null) }
@@ -362,14 +386,8 @@ fun AuthScreen(onSuccess: () -> Unit) {
                         if (validateForm()) {
                             if (isLogin) {
                                 viewModel.login(email, password)
-                                if (uiState.error != null) {
-                                    Log.e("AuthScreen", uiState.error!!)
-                                }
                             } else {
                                 viewModel.register(name, email, password, birthday)
-                                if (uiState.error != null) {
-                                    Log.e("AuthScreen", uiState.error!!)
-                                }
                             }
                         }
                     },
@@ -396,7 +414,14 @@ fun AuthScreen(onSuccess: () -> Unit) {
                         )
                     }
                 }
-
+                if (showToast) {
+                    CustomToast(
+                        message = toastMessage,
+                        type = toastType,
+                        duration = 2000L,
+                        onDismiss = { showToast = false }
+                    )
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,

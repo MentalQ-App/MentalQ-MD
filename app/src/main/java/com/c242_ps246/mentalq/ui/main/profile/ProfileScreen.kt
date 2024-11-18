@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,17 +19,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.c242_ps246.mentalq.R
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.data.remote.response.UserData
+import com.c242_ps246.mentalq.ui.component.CustomDialog
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(onLogout: () -> Unit) {
+    val viewModel: ProfileViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -37,12 +49,13 @@ fun ProfileScreen() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            Box(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(32.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp) // Add spacing between items
             ) {
-                Column {
+                item {
                     Text(
                         text = stringResource(id = R.string.your_profile),
                         style = TextStyle(
@@ -50,14 +63,14 @@ fun ProfileScreen() {
                             fontSize = 24.sp
                         )
                     )
-                    Spacer(modifier = Modifier.height(32.dp))
-
+                }
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(),
                         contentAlignment = Alignment.TopCenter
-                    ){
-                        Column (
+                    ) {
+                        Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Image(
@@ -70,7 +83,7 @@ fun ProfileScreen() {
                             Spacer(modifier = Modifier.height(8.dp))
                             UserDetailInfo(
                                 UserData(
-                                    id = "1",
+                                    id = 1,
                                     name = "John Doe",
                                     email = "johndoe@gmail.com",
                                     birthday = "01/01/1990"
@@ -78,25 +91,70 @@ fun ProfileScreen() {
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Box(
+                }
+                item {
+                    Text(
+                        text = stringResource(id = R.string.preferences),
+                        style = TextStyle(
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    )
+                }
+                item {
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        contentAlignment = Alignment.TopCenter
-                    ){
-                        Column (
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 8.dp
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         ) {
-                            Text(
-                                text = stringResource(id = R.string.preferences),
-                                style = TextStyle(
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
+                            PreferenceItem(
+                                title = stringResource(id = R.string.notifications),
+                                isChecked = true,
+                                onCheckedChange = {}
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            PreferenceItemsCard()
+                            PreferenceItem(
+                                title = stringResource(id = R.string.language),
+                            )
+                            PreferenceItem(
+                                title = stringResource(id = R.string.privacy_and_policy)
+                            )
+                            PreferenceItem(
+                                title = stringResource(id = R.string.terms_of_service)
+                            )
+                            LogoutItem(
+                                onClick = {
+                                    showConfirmDialog = true
+                                }
+                            )
                         }
+                    }
+                }
+                if (showConfirmDialog) {
+                    item {
+                        CustomDialog(
+                            dialogTitle = stringResource(id = R.string.logout),
+                            dialogMessage = stringResource(id = R.string.logout_message),
+                            onConfirm = {
+                                viewModel.logout()
+                                onLogout()
+                                showConfirmDialog = false
+                            },
+                            onDismiss = { showConfirmDialog = false }
+                        )
                     }
                 }
             }
@@ -104,14 +162,15 @@ fun ProfileScreen() {
     }
 }
 
+
 @Composable
-fun UserDetailInfo(userData: UserData){
-    Column (
+fun UserDetailInfo(userData: UserData) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Text(
             text = userData.name,
             style = TextStyle(
@@ -143,49 +202,12 @@ fun UserDetailInfo(userData: UserData){
 }
 
 @Composable
-fun PreferenceItemsCard(){
-    Card (
-        modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
-        )
-    ){
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ){
-            PreferenceItem(
-                title = "Notification",
-                isChecked = true,
-                onCheckedChange = {}
-            )
-            PreferenceItem(
-                title = "Language",
-                isChecked = false
-            )
-            PreferenceItem(
-                title = "Privacy Policy"
-            )
-            PreferenceItem(
-                title = "Terms of Service"
-            )
-            LogoutItem(
-                onClick = {}
-            )
-        }
-    }
-}
-
-@Composable
-fun PreferenceItem(title: String, isChecked: Boolean = false, onClick: () -> Unit = {}, onCheckedChange: ((Boolean) -> Unit)? = null) {
+fun PreferenceItem(
+    title: String,
+    isChecked: Boolean = false,
+    onClick: () -> Unit = {},
+    onCheckedChange: ((Boolean) -> Unit)? = null
+) {
 
     Box(
         modifier = Modifier
@@ -237,6 +259,6 @@ fun LogoutItem(onClick: () -> Unit) {
 @Composable
 fun ProfileScreenPreview() {
     MentalQTheme {
-        ProfileScreen()
+        ProfileScreen({})
     }
 }

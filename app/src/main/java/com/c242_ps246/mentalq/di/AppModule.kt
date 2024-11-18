@@ -2,6 +2,7 @@ package com.c242_ps246.mentalq.di
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import com.c242_ps246.mentalq.data.local.repository.AuthRepository
 import com.c242_ps246.mentalq.data.local.room.MentalQDatabase
@@ -15,8 +16,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -29,6 +32,12 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
+    fun provideContext(application: Application): Context {
+        return application.applicationContext
+    }
+
+    @Provides
+    @Singleton
     fun provideMentalQAppPreferences(context: Context): MentalQAppPreferences {
         return MentalQAppPreferences(context)
     }
@@ -39,23 +48,33 @@ object AppModule {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-
         val authInterceptor = Interceptor { chain ->
-            val authToken = runBlocking { preferencesManager.token.first() }
-            val newRequest = chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $authToken")
-                .build()
+            val originalRequest = chain.request()
+            val newRequest = runBlocking {
+                withContext(Dispatchers.IO) {
+                    val token = preferencesManager.getToken().first()
+
+                    originalRequest.newBuilder()
+                        .apply {
+                            if (token.isNotEmpty()) {
+                                addHeader("Authorization", "Bearer $token")
+                            }
+                        }
+                        .build()
+                }
+            }
+
             chain.proceed(newRequest)
         }
 
-        val client = OkHttpClient.Builder()
-            .addInterceptor(logging)
-            .addInterceptor(authInterceptor)
-            .build()
-
         return Retrofit.Builder()
             .baseUrl("https://mentalq-backend.vercel.app/api/")
-            .client(client)
+            .client(
+                OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .addInterceptor(authInterceptor)
+                    .build()
+            )
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(NoteApiService::class.java)
@@ -78,12 +97,6 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AuthApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideContext(application: Application): Context {
-        return application.applicationContext
     }
 
     @Provides
@@ -121,9 +134,10 @@ object AppModule {
     @Singleton
     fun provideAuthRepository(
         userDao: UserDao,
-        authApiService: AuthApiService
+        authApiService: AuthApiService,
+        preferencesManager: MentalQAppPreferences
     ): AuthRepository {
-        return AuthRepository(authApiService, userDao)
+        return AuthRepository(authApiService, userDao, preferencesManager)
     }
 
 }
