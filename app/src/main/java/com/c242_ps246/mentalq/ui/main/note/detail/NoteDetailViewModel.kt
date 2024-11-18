@@ -3,7 +3,7 @@ package com.c242_ps246.mentalq.ui.main.note.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
-import com.c242_ps246.mentalq.data.repository.NoteRepository
+import com.c242_ps246.mentalq.data.local.repository.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +30,7 @@ class NoteDetailViewModel @Inject constructor(
     private val _content = MutableStateFlow("")
     val content = _content.asStateFlow()
 
-    private  val _date = MutableStateFlow("")
+    private val _date = MutableStateFlow("")
     val date = _date.asStateFlow()
 
     private val _emotion = MutableStateFlow<String?>(null)
@@ -47,7 +47,7 @@ class NoteDetailViewModel @Inject constructor(
                 )
                 _title.value = note.title.toString()
                 _content.value = note.content.toString()
-                _date.value = note.date.toString()
+                _date.value = note.createdAt.toString()
                 _emotion.value = note.emotion
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -77,11 +77,17 @@ class NoteDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value.note?.let { note ->
-                    noteRepository.updateNote(
+                    noteRepository.updateLocalNote(
                         note.copy(
                             title = _title.value,
                             content = _content.value,
-                            date = _date.value,
+                            emotion = _emotion.value
+                        )
+                    )
+                    noteRepository.updateRemoteNote(
+                        note.copy(
+                            title = _title.value,
+                            content = _content.value,
                             emotion = _emotion.value
                         )
                     )

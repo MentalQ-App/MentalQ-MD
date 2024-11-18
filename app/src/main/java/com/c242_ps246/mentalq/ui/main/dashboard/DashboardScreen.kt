@@ -347,8 +347,9 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                         id = "id",
                                         title = "Title",
                                         content = "Content",
-                                        date = "Date",
-                                        emotion = "Emotion"
+                                        emotion = "Emotion",
+                                        updatedAt = "Updated At",
+                                        createdAt = "Created At"
                                     )
                                 )
                             }
@@ -390,7 +391,7 @@ fun LatestDiaryCard(note: ListNoteItem) {
                 modifier = Modifier.padding(top = 4.dp)
             )
             Text(
-                text = note.date ?: "",
+                text = note.createdAt ?: "",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.padding(top = 4.dp)
