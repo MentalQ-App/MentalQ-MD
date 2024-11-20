@@ -17,8 +17,9 @@ class NoteRepository(
             val response = noteApiService.getNotes()
             val notes = response.listNote
 
-            if (localData.isNotEmpty() && localData == notes) {
-                emit(Result.Success(localData))
+            if (localData.isNotEmpty() && localData == notes && localData.size == notes.size) {
+                val sortedLocalData = localData.sortedByDescending { it.createdAt }
+                emit(Result.Success(sortedLocalData))
             } else {
                 try {
                     val noteList = notes!!.map { note ->
@@ -33,7 +34,8 @@ class NoteRepository(
                     }
                     noteDao.clearAllNotes()
                     noteDao.insertAllNotes(noteList)
-                    emit(Result.Success(noteList))
+                    val sortedNoteList = noteList.sortedByDescending { it.createdAt }
+                    emit(Result.Success(sortedNoteList))
                 } catch (e: Exception) {
                     emit(Result.Error("An error occurred: ${e.message}"))
                 }
@@ -88,7 +90,20 @@ class NoteRepository(
         noteDao.updateNote(note)
     }
 
-    suspend fun deleteNoteById(noteId: String) {
-        noteDao.deleteNoteById(noteId)
+    fun deleteNoteById(noteId: String): LiveData<Result<String>> = liveData {
+        emit(Result.Loading)
+        try {
+            val response = noteApiService.deleteNote(
+                id = noteId
+            )
+            if (response.error == false) {
+                noteDao.deleteNoteById(noteId)
+                emit(Result.Success(response.message ?: ""))
+            } else {
+                emit(Result.Error("An error occurred: ${response.message}"))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("An error occurred: ${e.message}"))
+        }
     }
 }

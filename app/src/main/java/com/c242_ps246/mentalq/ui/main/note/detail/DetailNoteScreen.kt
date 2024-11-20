@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.ui.utils.Utils.getTodayDate
@@ -37,8 +38,8 @@ fun DetailNoteScreen(
     val date: String? by viewModel.date.collectAsStateWithLifecycle()
     val selectedEmotion: String? by viewModel.emotion.collectAsStateWithLifecycle()
     val todayDate = getTodayDate()
-    val defaultTitle = "Title"
-    val defaultContent = "Content"
+    val defaultTitle = stringResource(id = R.string.note_title)
+    val defaultContent = stringResource(id = R.string.note_content)
 
     LaunchedEffect(noteId) {
         viewModel.loadNote(noteId)
@@ -51,7 +52,11 @@ fun DetailNoteScreen(
     ) {
         TopAppBar(
             navigationIcon = {
-                IconButton(onClick = onBackClick) {
+                IconButton(onClick = {
+                    viewModel.updateRemoteNote()
+                    onBackClick()
+                })
+                {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             },
@@ -60,7 +65,7 @@ fun DetailNoteScreen(
                     text = "Back",
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                    },
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
             )
@@ -123,7 +128,12 @@ fun DetailNoteScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                val emotionList = listOf("Happy", "Anxious", "Angry", "Sad")
+                val emotionList = listOf(
+                    stringResource(id = R.string.happy),
+                    stringResource(id = R.string.anxious),
+                    stringResource(id = R.string.angry),
+                    stringResource(id = R.string.sad)
+                )
                 val emoji = listOf("😆", "😰", "😡", "😕")
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),

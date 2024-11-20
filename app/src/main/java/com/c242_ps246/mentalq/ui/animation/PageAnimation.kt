@@ -11,12 +11,17 @@ import androidx.compose.animation.slideOutVertically
 object PageAnimation {
     val slideInFromBottom = slideInVertically(
         initialOffsetY = { 1000 },
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
     ) + fadeIn(animationSpec = tween(500))
 
     val slideOutToBottom = slideOutVertically(
         targetOffsetY = { 1000 },
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
     ) + fadeOut(animationSpec = tween(500))
-
 }

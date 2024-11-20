@@ -15,6 +15,14 @@ data class NoteResponse(
     val message: String? = null
 )
 
+data class DeleteNoteResponse(
+    @field:SerializedName("error")
+    val error: Boolean? = null,
+
+    @field:SerializedName("message")
+    val message: String? = null
+)
+
 data class DetailNoteResponse(
     @field:SerializedName("note")
     val note: ListNoteItem? = null,
@@ -47,4 +55,3 @@ data class ListNoteItem(
     @field:SerializedName("createdAt")
     val createdAt: String? = null
 )
-

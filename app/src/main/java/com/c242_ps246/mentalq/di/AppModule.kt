@@ -139,5 +139,4 @@ object AppModule {
     ): AuthRepository {
         return AuthRepository(authApiService, userDao, preferencesManager)
     }
-
 }

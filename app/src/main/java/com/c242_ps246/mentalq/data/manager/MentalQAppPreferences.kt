@@ -20,6 +20,9 @@ class MentalQAppPreferences @Inject constructor(
     companion object {
         private val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
         private val TOKEN = stringPreferencesKey("token")
+        private val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        private val LAST_ENTRY_DATE = stringPreferencesKey("last_entry_date")
+        private val STREAK_COUNT = stringPreferencesKey("streak_count")
     }
 
     val shouldShowOnboarding: Flow<Boolean> = context.dataStore.data
@@ -46,4 +49,32 @@ class MentalQAppPreferences @Inject constructor(
             preferences[TOKEN] = token
         }
     }
+
+    suspend fun saveStreakInfo(lastEntryDate: String, streakCount: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[LAST_ENTRY_DATE] = lastEntryDate
+            preferences[STREAK_COUNT] = streakCount.toString()
+        }
+    }
+
+    fun getStreakInfo(): Flow<Pair<String, Int>> {
+        return context.dataStore.data.map { preferences ->
+            val lastEntryDate = preferences[LAST_ENTRY_DATE] ?: ""
+            val streakCount = preferences[STREAK_COUNT]?.toInt() ?: 0
+            Pair(lastEntryDate, streakCount)
+        }
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    fun getNotificationsState(): Flow<Boolean> {
+        return context.dataStore.data.map { preferences ->
+            preferences[NOTIFICATIONS_ENABLED] ?: false
+        }
+    }
+    
 }

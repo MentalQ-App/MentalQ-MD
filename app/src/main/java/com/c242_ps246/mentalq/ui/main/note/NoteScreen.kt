@@ -1,9 +1,11 @@
 package com.c242_ps246.mentalq.ui.main.note
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,21 +35,49 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
+import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import com.c242_ps246.mentalq.ui.component.CustomToast
+import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteScreen(
-    uiState: NoteScreenUiState,
-    listNote: List<ListNoteItem>,
-//    viewModel: NoteViewModel = hiltViewModel(),
+//    uiState: NoteScreenUiState,
+//    listNote: List<ListNoteItem>,
+    viewModel: NoteViewModel = hiltViewModel(),
     onNavigateToNoteDetail: (String) -> Unit
 ) {
-//    val uiState by viewModel.uiState.collectAsState()
-//    val listNote by viewModel.listNote.collectAsState()
-//
-//    LaunchedEffect(Unit) {
-//        viewModel.loadAllNotes()
-//    }
+    val uiState by viewModel.uiState.collectAsState()
+    val listNote by viewModel.listNote.collectAsState()
+    var noteAdded by remember { mutableStateOf(false) }
+
+    var showToast by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf("") }
+    var toastType by remember { mutableStateOf(ToastType.INFO) }
+
+    LaunchedEffect(uiState) {
+        when {
+            uiState.error != null -> {
+                showToast = true
+                toastMessage = uiState.error ?: "An Error Occurred"
+                toastType = ToastType.ERROR
+                viewModel.clearError()
+            }
+
+            uiState.success -> {
+                showToast = true
+                toastMessage = "Success"
+                toastType = ToastType.SUCCESS
+                viewModel.clearError()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -81,8 +112,17 @@ fun NoteScreen(
                             shape = RoundedCornerShape(12.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp),
                             onClick = {
-                                // TODO: Add Notes Logic Here
-                            }
+                                viewModel.addNote(
+                                    ListNoteItem(
+                                        id = "",
+                                        title = "",
+                                        content = "",
+                                        emotion = ""
+                                    )
+                                )
+                                noteAdded = true
+                            },
+                            enabled = !uiState.isLoading
                         ) {
                             Icon(
                                 modifier = Modifier.size(20.dp),
@@ -92,49 +132,71 @@ fun NoteScreen(
                             )
                             Spacer(Modifier.padding(horizontal = 3.dp))
                             Text(
-                                text = "ADD",
+                                text = stringResource(id = R.string.add_note),
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
+                    if (noteAdded) {
+                        onNavigateToNoteDetail(listNote.firstOrNull()?.id ?: "")
+                    }
+                    noteAdded = false
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    if (uiState.isLoading) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else if (!uiState.error.isNullOrEmpty()) {
+                    Text(
+                        text = uiState.error!!,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.background),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        itemsIndexed(listNote) { index, item ->
+                            NoteItem(
+                                data = ListNoteItem(
+                                    id = item.id.toString(),
+                                    title = item.title,
+                                    content = item.content,
+                                    updatedAt = item.updatedAt,
+                                    createdAt = item.createdAt
+                                ),
+                                onItemClick = { note ->
+                                    onNavigateToNoteDetail(note.id)
+                                },
+                                onItemDelete = { note ->
+                                    viewModel.deleteNote(note.id)
+                                }
+                            )
                         }
-                    } else if (!uiState.error.isNullOrEmpty()) {
-                        Text(
-                            text = uiState.error!!,
-                            color = MaterialTheme.colorScheme.error
+                    }
+                }
+                if (showToast) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        CustomToast(
+                            message = toastMessage,
+                            type = toastType,
+                            duration = 2000L,
+                            onDismiss = { showToast = false }
                         )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.background),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            itemsIndexed(listNote) { index, item ->
-                                NoteItem(
-                                    data = ListNoteItem(
-                                        id = item.id.toString(),
-                                        title = item.title,
-                                        content = item.content,
-                                        updatedAt = item.updatedAt,
-                                        createdAt = item.createdAt
-                                    ),
-                                    onItemClick = { note ->
-                                        onNavigateToNoteDetail(note.id)
-                                    },
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -142,11 +204,13 @@ fun NoteScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteItem(
     data: ListNoteItem,
     onItemClick: (ListNoteItem) -> Unit,
+    onItemDelete: (ListNoteItem) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var menuOffset by remember { mutableStateOf(Offset.Zero) }
@@ -204,7 +268,7 @@ fun NoteItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = data.createdAt ?: "",
+                    text = formatDate(data.createdAt.toString()),
                     style = TextStyle(
                         fontSize = 12.sp
                     )
@@ -227,8 +291,7 @@ fun NoteItem(
                     DropdownMenuItem(
                         onClick = {
                             showMenu = false
-                            /* TODO: Insert DELETE Logic Here
-                            *   */
+                            onItemDelete(data)
                         },
                         text = {
                             Row {
@@ -236,53 +299,52 @@ fun NoteItem(
                                     modifier = Modifier.size(20.dp),
                                     imageVector = Icons.Default.Delete,
                                     tint = MaterialTheme.colorScheme.error,
-                                    contentDescription = "Add",
+                                    contentDescription = "Del",
                                 )
                                 Spacer(Modifier.padding(horizontal = 4.dp))
                                 Text(color = MaterialTheme.colorScheme.error, text = "Delete")
                             }
-                        })
+                        }
+                    )
                 }
             }
         }
     }
-
-
 }
 
-@Preview(
-    name = "Dark Mode Preview",
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
-)
-@Composable
-fun PreviewNoteScreen() {
-    val mockNotes = listOf(
-        ListNoteItem(
-            "1",
-            "Aku sedih banget",
-            "Lorem ipsum dolor sit amet",
-            "Angry",
-            createdAt = "24-12-2024"
-        ),
-        ListNoteItem(
-            "2",
-            "Hari ini senang sekali",
-            "Lorem ipsum dolor sit amet",
-            "Happy",
-            createdAt = "24-12-2024"
-        ),
-        ListNoteItem(
-            "3",
-            "Gaada yang terjadi hari ini",
-            "Lorem ipsum dolor sit amet",
-            "Happy",
-            createdAt = "24-12-2024"
-        ),
-    )
-    MentalQTheme {
-        NoteScreen(
-            uiState = NoteScreenUiState(isLoading = false),
-            listNote = mockNotes
-        ) {}
-    }
-}
+//@Preview(
+//    name = "Dark Mode Preview",
+//    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+//)
+//@Composable
+//fun PreviewNoteScreen() {
+//    val mockNotes = listOf(
+//        ListNoteItem(
+//            "1",
+//            "Aku sedih banget",
+//            "Lorem ipsum dolor sit amet",
+//            "Angry",
+//            createdAt = "24-12-2024"
+//        ),
+//        ListNoteItem(
+//            "2",
+//            "Hari ini senang sekali",
+//            "Lorem ipsum dolor sit amet",
+//            "Happy",
+//            createdAt = "24-12-2024"
+//        ),
+//        ListNoteItem(
+//            "3",
+//            "Gaada yang terjadi hari ini",
+//            "Lorem ipsum dolor sit amet",
+//            "Happy",
+//            createdAt = "24-12-2024"
+//        ),
+//    )
+//    MentalQTheme {
+//        NoteScreen(
+//            uiState = NoteScreenUiState(isLoading = false),
+//            listNote = mockNotes
+//        ) {}
+//    }
+//}

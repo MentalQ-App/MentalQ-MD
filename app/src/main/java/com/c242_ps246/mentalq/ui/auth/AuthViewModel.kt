@@ -8,6 +8,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import com.c242_ps246.mentalq.data.local.repository.Result
 
+data class AuthScreenUIState(
+    val isLoading: Boolean = false,
+    val success: Boolean = false,
+    val error: String? = null
+)
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -79,9 +85,3 @@ class AuthViewModel @Inject constructor(
     }
 
 }
-
-data class AuthScreenUIState(
-    val isLoading: Boolean = false,
-    val success: Boolean = false,
-    val error: String? = null
-)

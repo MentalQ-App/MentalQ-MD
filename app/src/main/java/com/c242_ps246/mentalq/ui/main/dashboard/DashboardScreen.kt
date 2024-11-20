@@ -1,10 +1,13 @@
 package com.c242_ps246.mentalq.ui.main.dashboard
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -22,10 +26,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,12 +49,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
+import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
+    val viewModel: DashboardViewModel = hiltViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    val listNote by viewModel.listNote.collectAsState()
+    val userData by viewModel.userData.collectAsState()
+    val streakInfo by viewModel.streakInfo.collectAsState()
+    val (weekDay, day) = getTodayDateFormatted()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadLatestNotes()
+        viewModel.calculateStreak()
+        viewModel.getUserData()
+    }
+
     val scrollState = rememberScrollState()
     val toolbarHeight = 150.dp
     val minShrinkHeight = 0.dp
@@ -128,7 +154,8 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(horizontal = 16.dp)
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Row(
                             modifier = Modifier
@@ -160,7 +187,7 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                     )
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.hello_user),
+                                        text = (stringResource(id = R.string.hello_user) + userData?.name + "!"),
                                         modifier = Modifier.padding(start = 8.dp, top = 16.dp),
                                         fontWeight = FontWeight.Medium,
                                         color = Color.White
@@ -202,13 +229,18 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                             )
                                         )
                                         Text(
-                                            text = "7",
+                                            text = streakInfo.currentStreak.toString(),
                                             modifier = Modifier.padding(top = 8.dp),
                                             style = TextStyle(
                                                 fontSize = 32.sp,
                                                 color = MaterialTheme.colorScheme.onBackground,
                                                 fontWeight = FontWeight.Bold
                                             )
+                                        )
+                                    }
+                                    if (uiState.isLoading) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.align(Alignment.Center)
                                         )
                                     }
                                     Canvas(
@@ -279,13 +311,13 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.day_wed),
+                                        text = weekDay,
                                         fontSize = 14.sp,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontWeight = FontWeight.Medium
                                     )
                                     Text(
-                                        text = "19",
+                                        text = day,
                                         fontSize = 32.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
@@ -337,23 +369,25 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
 
-                        Column(
-                            modifier = Modifier.padding(bottom = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            repeat(7) {
-                                LatestDiaryCard(
-                                    ListNoteItem(
-                                        id = "id",
-                                        title = "Title",
-                                        content = "Content",
-                                        emotion = "Emotion",
-                                        updatedAt = "Updated At",
-                                        createdAt = "Created At"
-                                    )
-                                )
+                        if (uiState.isLoading) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
                             }
                         }
+
+                        Column(
+                            modifier = Modifier
+                                .heightIn(min = 500.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            repeat(listNote.size) { index ->
+                                LatestDiaryCard(listNote[index], onNavigateToNoteDetail)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
@@ -361,10 +395,13 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun LatestDiaryCard(note: ListNoteItem) {
+fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = { onItemClick(note.id) }),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -391,7 +428,7 @@ fun LatestDiaryCard(note: ListNoteItem) {
                 modifier = Modifier.padding(top = 4.dp)
             )
             Text(
-                text = note.createdAt ?: "",
+                text = formatDate(note.createdAt.toString()),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.padding(top = 4.dp)
@@ -400,6 +437,19 @@ fun LatestDiaryCard(note: ListNoteItem) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+fun getTodayDateFormatted(): Pair<String, String> {
+    val today = LocalDate.now()
+    val dayFormatter = DateTimeFormatter.ofPattern("d")
+    val weekDayFormatter = DateTimeFormatter.ofPattern("E")
+
+    val day = today.format(dayFormatter)
+    val weekDay = today.format(weekDayFormatter)
+
+    return Pair(weekDay, day)
+}
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Preview
 @Composable
 fun DashboardScreenPreview() {

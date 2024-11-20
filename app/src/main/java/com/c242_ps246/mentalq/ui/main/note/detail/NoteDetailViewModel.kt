@@ -60,20 +60,20 @@ class NoteDetailViewModel @Inject constructor(
 
     fun updateTitle(newTitle: String) {
         _title.value = newTitle
-        updateNote()
+        updateLocalNote()
     }
 
     fun updateContent(newContent: String) {
         _content.value = newContent
-        updateNote()
+        updateLocalNote()
     }
 
     fun updateEmotion(newEmotion: String) {
         _emotion.value = newEmotion
-        updateNote()
+        updateLocalNote()
     }
 
-    private fun updateNote() {
+    private fun updateLocalNote() {
         viewModelScope.launch {
             try {
                 _uiState.value.note?.let { note ->
@@ -84,6 +84,17 @@ class NoteDetailViewModel @Inject constructor(
                             emotion = _emotion.value
                         )
                     )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message)
+            }
+        }
+    }
+
+    fun updateRemoteNote() {
+        viewModelScope.launch {
+            try {
+                _uiState.value.note?.let { note ->
                     noteRepository.updateRemoteNote(
                         note.copy(
                             title = _title.value,

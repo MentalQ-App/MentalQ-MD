@@ -1,5 +1,7 @@
 package com.c242_ps246.mentalq.ui.main
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
@@ -20,14 +22,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.main.dashboard.DashboardScreen
 import com.c242_ps246.mentalq.ui.main.note.NoteScreen
-import com.c242_ps246.mentalq.ui.main.note.NoteScreenUiState
 import com.c242_ps246.mentalq.ui.main.note.detail.DetailNoteScreen
 import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
 import com.c242_ps246.mentalq.ui.navigation.Routes
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
@@ -82,35 +83,35 @@ fun MainScreen(
             composable(
                 route = Routes.NOTE
             ) {
-                val mockNotes = listOf(
-                    ListNoteItem(
-                        "1",
-                        "Aku sedih banget",
-                        "Lorem ipsum dolor sit amet",
-                        "Angry",
-                        createdAt = "24-12-2024"
-                    ),
-                    ListNoteItem(
-                        "2",
-                        "Hari ini senang sekali",
-                        "Lorem ipsum dolor sit amet",
-                        "Happy",
-                        createdAt = "24-12-2024"
-                    ),
-                    ListNoteItem(
-                        "3",
-                        "Gaada yang terjadi hari ini",
-                        "Lorem ipsum dolor sit amet",
-                        "Happy",
-                        createdAt = "24-12-2024"
-                    ),
-                )
+//                val mockNotes = listOf(
+//                    ListNoteItem(
+//                        "1",
+//                        "Aku sedih banget",
+//                        "Lorem ipsum dolor sit amet",
+//                        "Angry",
+//                        createdAt = "24-12-2024"
+//                    ),
+//                    ListNoteItem(
+//                        "2",
+//                        "Hari ini senang sekali",
+//                        "Lorem ipsum dolor sit amet",
+//                        "Happy",
+//                        createdAt = "24-12-2024"
+//                    ),
+//                    ListNoteItem(
+//                        "3",
+//                        "Gaada yang terjadi hari ini",
+//                        "Lorem ipsum dolor sit amet",
+//                        "Happy",
+//                        createdAt = "24-12-2024"
+//                    ),
+//                )
                 NoteScreen(
                     onNavigateToNoteDetail = { noteId ->
                         navController.navigate("${Routes.NOTE_DETAIL}/$noteId")
                     },
-                    uiState = NoteScreenUiState(isLoading = false),
-                    listNote = mockNotes
+//                    uiState = NoteScreenUiState(isLoading = false),
+//                    listNote = mockNotes
                 )
             }
             composable(
@@ -123,7 +124,11 @@ fun MainScreen(
                 DetailNoteScreen(
                     noteId = noteId,
                     onBackClick = {
-                        navController.navigateUp()
+                        navController.navigate(Routes.NOTE) {
+                            popUpTo(Routes.NOTE_DETAIL) {
+                                inclusive = true
+                            }
+                        }
                     }
                 )
             }

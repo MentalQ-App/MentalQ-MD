@@ -7,6 +7,7 @@ import androidx.lifecycle.liveData
 import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.AuthResponse
+import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -89,5 +90,19 @@ class AuthRepository(
 
     fun getToken(): LiveData<String> {
         return preferencesManager.getToken().asLiveData()
+    }
+
+    fun getUser(): LiveData<Result<UserData>> = liveData {
+        emit(Result.Loading)
+        try {
+            val user = userDao.getUserData()
+            if (user != null) {
+                emit(Result.Success(user))
+            } else {
+                emit(Result.Error("User not found"))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error(e.message.toString()))
+        }
     }
 }

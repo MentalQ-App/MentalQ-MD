@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.data.remote.retrofit
 
+import com.c242_ps246.mentalq.data.remote.response.DeleteNoteResponse
 import com.c242_ps246.mentalq.data.remote.response.DetailNoteResponse
 import com.c242_ps246.mentalq.data.remote.response.NoteResponse
 import retrofit2.Response
@@ -25,7 +26,7 @@ interface NoteApiService {
     ): DetailNoteResponse
 
     @FormUrlEncoded
-    @PUT("notes")
+    @PUT("notes/{id}")
     suspend fun updateNote(
         @Path("id") id: String,
         @Field("title") title: String,
@@ -33,8 +34,8 @@ interface NoteApiService {
         @Field("emotion") emotion: String
     ): DetailNoteResponse
 
-    @DELETE("notes")
+    @PUT("notes/delete/{id}")
     suspend fun deleteNote(
         @Path("id") id: String
-    ): Response<Void>
+    ): DeleteNoteResponse
 }

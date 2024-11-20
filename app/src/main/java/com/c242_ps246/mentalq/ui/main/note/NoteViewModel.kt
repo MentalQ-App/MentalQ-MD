@@ -11,6 +11,13 @@ import com.c242_ps246.mentalq.data.local.repository.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+data class NoteScreenUiState(
+    val isLoading: Boolean = true,
+    val note: ListNoteItem? = null,
+    val success: Boolean = false,
+    val error: String? = null
+)
+
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository
@@ -21,6 +28,10 @@ class NoteViewModel @Inject constructor(
     private val _listNote = MutableStateFlow<List<ListNoteItem>>(emptyList())
     val listNote = _listNote.asStateFlow()
 
+    init {
+        loadAllNotes()
+    }
+
     fun loadAllNotes() {
         viewModelScope.launch {
             noteRepository.getAllNotes().observeForever { result ->
@@ -30,7 +41,8 @@ class NoteViewModel @Inject constructor(
                     }
 
                     is Result.Success -> {
-                        _uiState.value = _uiState.value.copy(isLoading = false, error = null)
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = null)
                         _listNote.value = result.data
                     }
 
@@ -42,10 +54,54 @@ class NoteViewModel @Inject constructor(
             }
         }
     }
-}
 
-data class NoteScreenUiState(
-    val isLoading: Boolean = true,
-    val note: ListNoteItem? = null,
-    val error: String? = null
-)
+    fun addNote(note: ListNoteItem) {
+        viewModelScope.launch {
+            noteRepository.insertNote(note).observeForever { result ->
+                when (result) {
+                    Result.Loading -> {
+                        _uiState.value = _uiState.value.copy(isLoading = true)
+                    }
+
+                    is Result.Success -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = null, success = true)
+                        loadAllNotes()
+                    }
+
+                    is Result.Error -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = result.error)
+                    }
+                }
+            }
+        }
+    }
+
+    fun deleteNote(noteId: String) {
+        viewModelScope.launch {
+            noteRepository.deleteNoteById(noteId).observeForever { result ->
+                when (result) {
+                    Result.Loading -> {
+                        _uiState.value = _uiState.value.copy(isLoading = true)
+                    }
+
+                    is Result.Success -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = null, success = true)
+                        loadAllNotes()
+                    }
+
+                    is Result.Error -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = result.error)
+                    }
+                }
+            }
+        }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
+}

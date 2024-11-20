@@ -34,7 +34,7 @@
     <string name="show_password">Show password</string>
     <string name="hide_password">Hide password</string>
 
-    <string name="hello_user">Hello, Adikana !</string>
+    <string name="hello_user">Hello, </string>
     <string name="diary_streak">Diary streak</string>
     <string name="day_wed">Wed</string>
     <string name="current_state">Current State</string>
@@ -60,6 +60,16 @@
     <string name="terms_of_service">Terms of Service</string>
     <string name="logout">Logout</string>
     <string name="logout_message">Are you sure you want to logout? You\'ll need to login again to access your account.</string>
+    <string name="note_title">Title</string>
+    <string name="note_content">Content</string>
+    <string name="happy">Happy</string>
+    <string name="anxious">Anxious</string>
+    <string name="angry">Angry</string>
+    <string name="sad">Sad</string>
+    <string name="add_note">ADD</string>
+    <string name="streak_notification_title">Maintain Your Streak!</string>
+    <string name="streak_notification_content_1">You\'re on a</string>
+    <string name="streak_notification_content_2">-day streak! Log your entry today.</string>
     <!--    <string name="welcome">Welcome</string>-->
     <!--    <string name="get_started">Let\'s get started!</string>-->
     <!--    <string name="login">Login</string>-->
