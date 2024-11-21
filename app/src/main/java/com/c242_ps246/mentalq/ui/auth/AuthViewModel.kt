@@ -84,4 +84,8 @@ class AuthViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(error = null)
     }
 
+    fun clearSuccess() {
+        _uiState.value = _uiState.value.copy(success = false)
+    }
+
 }

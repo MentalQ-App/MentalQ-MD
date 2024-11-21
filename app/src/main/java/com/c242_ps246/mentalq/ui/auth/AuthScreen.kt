@@ -105,10 +105,13 @@ fun AuthScreen(onSuccess: () -> Unit) {
 
             uiState.success -> {
                 showToast = true
-                toastMessage = if (isLogin) "Login successful!" else "Registration successful!"
+                toastMessage =
+                    if (isLogin) "Login successful!" else "User registered successfully! Please check your email to verify your account."
                 toastType = ToastType.SUCCESS
-                viewModel.clearError()
-                onSuccess()
+                viewModel.clearSuccess()
+                if (isLogin) {
+                    onSuccess()
+                }
             }
         }
     }
@@ -514,6 +517,6 @@ fun DateInputField(birthdayDate: String, onDateChange: (String) -> Unit) {
 @Composable
 fun AuthScreenPreview() {
     MentalQTheme {
-        AuthScreen({})
+        AuthScreen {}
     }
 }

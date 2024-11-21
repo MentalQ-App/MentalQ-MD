@@ -43,7 +43,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
 @RequiresApi(Build.VERSION_CODES.O)

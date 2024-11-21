@@ -18,6 +18,14 @@ data class AuthResponse(
     val token: String? = null
 )
 
+data class RegisterResponse(
+    @field:SerializedName("error")
+    val error: Boolean? = null,
+
+    @field:SerializedName("message")
+    val message: String? = null
+)
+
 @Entity(tableName = "user_data")
 data class UserData(
     @PrimaryKey(autoGenerate = true)
