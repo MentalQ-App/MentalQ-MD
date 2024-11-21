@@ -1,7 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.note
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -55,11 +54,12 @@ fun NoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listNote by viewModel.listNote.collectAsState()
-    var noteAdded by remember { mutableStateOf(false) }
 
     var showToast by remember { mutableStateOf(false) }
     var toastMessage by remember { mutableStateOf("") }
     var toastType by remember { mutableStateOf(ToastType.INFO) }
+
+    val navigateToNoteDetail by viewModel.navigateToNoteDetail.collectAsState()
 
     LaunchedEffect(uiState) {
         when {
@@ -76,6 +76,13 @@ fun NoteScreen(
                 toastType = ToastType.SUCCESS
                 viewModel.clearError()
             }
+        }
+    }
+
+    LaunchedEffect(navigateToNoteDetail) {
+        navigateToNoteDetail?.let { noteId ->
+            onNavigateToNoteDetail(noteId)
+            viewModel.navigateToNoteDetailCompleted()
         }
     }
 
@@ -120,7 +127,6 @@ fun NoteScreen(
                                         emotion = ""
                                     )
                                 )
-                                noteAdded = true
                             },
                             enabled = !uiState.isLoading
                         ) {
@@ -137,66 +143,62 @@ fun NoteScreen(
                             )
                         }
                     }
-                    if (noteAdded) {
-                        onNavigateToNoteDetail(listNote.firstOrNull()?.id ?: "")
-                    }
-                    noteAdded = false
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                if (uiState.isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else if (!uiState.error.isNullOrEmpty()) {
-                    Text(
-                        text = uiState.error!!,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.background),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        itemsIndexed(listNote) { index, item ->
-                            NoteItem(
-                                data = ListNoteItem(
-                                    id = item.id.toString(),
-                                    title = item.title,
-                                    content = item.content,
-                                    updatedAt = item.updatedAt,
-                                    createdAt = item.createdAt
-                                ),
-                                onItemClick = { note ->
-                                    onNavigateToNoteDetail(note.id)
-                                },
-                                onItemDelete = { note ->
-                                    viewModel.deleteNote(note.id)
-                                }
-                            )
+                    if (uiState.isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (!uiState.error.isNullOrEmpty()) {
+                        Text(
+                            text = uiState.error!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.background),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            itemsIndexed(listNote) { index, item ->
+                                NoteItem(
+                                    data = ListNoteItem(
+                                        id = item.id.toString(),
+                                        title = item.title,
+                                        content = item.content,
+                                        updatedAt = item.updatedAt,
+                                        createdAt = item.createdAt
+                                    ),
+                                    onItemClick = { note ->
+                                        onNavigateToNoteDetail(note.id)
+                                    },
+                                    onItemDelete = { note ->
+                                        viewModel.deleteNote(note.id)
+                                    }
+                                )
+                            }
                         }
                     }
-                }
-                if (showToast) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Transparent),
-                        contentAlignment = Alignment.BottomCenter
-                    ) {
-                        CustomToast(
-                            message = toastMessage,
-                            type = toastType,
-                            duration = 2000L,
-                            onDismiss = { showToast = false }
-                        )
+                    if (showToast) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Transparent),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            CustomToast(
+                                message = toastMessage,
+                                type = toastType,
+                                duration = 2000L,
+                                onDismiss = { showToast = false }
+                            )
+                        }
                     }
                 }
             }

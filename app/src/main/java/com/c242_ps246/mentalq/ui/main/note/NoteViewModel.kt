@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.c242_ps246.mentalq.data.local.repository.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 data class NoteScreenUiState(
@@ -27,6 +28,9 @@ class NoteViewModel @Inject constructor(
 
     private val _listNote = MutableStateFlow<List<ListNoteItem>>(emptyList())
     val listNote = _listNote.asStateFlow()
+
+    private val _navigateToNoteDetail = MutableStateFlow<String?>(null)
+    val navigateToNoteDetail: StateFlow<String?> = _navigateToNoteDetail.asStateFlow()
 
     init {
         loadAllNotes()
@@ -64,14 +68,20 @@ class NoteViewModel @Inject constructor(
                     }
 
                     is Result.Success -> {
-                        _uiState.value =
-                            _uiState.value.copy(isLoading = false, error = null, success = true)
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = null,
+                            success = true
+                        )
+                        _navigateToNoteDetail.value = result.data.id
                         loadAllNotes()
                     }
 
                     is Result.Error -> {
-                        _uiState.value =
-                            _uiState.value.copy(isLoading = false, error = result.error)
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = result.error
+                        )
                     }
                 }
             }
@@ -99,6 +109,10 @@ class NoteViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun navigateToNoteDetailCompleted() {
+        _navigateToNoteDetail.value = null
     }
 
     fun clearError() {

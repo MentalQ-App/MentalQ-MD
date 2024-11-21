@@ -1,5 +1,7 @@
 package com.c242_ps246.mentalq.ui.main.note.detail
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,7 +25,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.ui.utils.Utils.getTodayDate
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +107,7 @@ fun DetailNoteScreen(
                 )
 
                 Text(
-                    text = date ?: todayDate,
+                    text = formatDate(date ?: todayDate),
                     color = MaterialTheme.colorScheme.tertiary,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -197,6 +201,7 @@ private fun EmotionButton(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun PreviewDetailNoteScreen() {

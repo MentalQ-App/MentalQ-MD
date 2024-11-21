@@ -9,8 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,17 +39,25 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import android.Manifest
+import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileScreen(onLogout: () -> Unit) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val userData by viewModel.userData.collectAsState()
+    val userData by viewModel.userData.collectAsStateWithLifecycle()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
     var showConfirmDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.getUserData()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Surface(
@@ -116,6 +122,7 @@ private fun ProfileHeader() {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ProfileInfo(userData: UserData?) {
     Box(
@@ -138,6 +145,7 @@ private fun ProfileInfo(userData: UserData?) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun UserDetailInfo(userData: UserData?) {
     Column(
@@ -163,7 +171,7 @@ private fun UserDetailInfo(userData: UserData?) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = userData?.birthday ?: "",
+            text = formatDate(userData?.birthday ?: ""),
             style = TextStyle(
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp
@@ -327,6 +335,7 @@ private fun LogoutDialog(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun ProfileScreenPreview() {
