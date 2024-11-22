@@ -304,7 +304,10 @@ fun NoteItem(
                                     contentDescription = "Del",
                                 )
                                 Spacer(Modifier.padding(horizontal = 4.dp))
-                                Text(color = MaterialTheme.colorScheme.error, text = "Delete")
+                                Text(
+                                    color = MaterialTheme.colorScheme.error,
+                                    text = stringResource(id = R.string.delete)
+                                )
                             }
                         }
                     )

@@ -1,9 +1,11 @@
 package com.c242_ps246.mentalq.ui.main.profile
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.local.repository.AuthRepository
+import com.c242_ps246.mentalq.data.local.repository.UserRepository
 import com.c242_ps246.mentalq.data.local.repository.Result
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.UserData
@@ -17,11 +19,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
     private val preferencesManager: MentalQAppPreferences,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -72,6 +77,39 @@ class ProfileViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(isLoading = false, error = result.error)
                 }
             }
+        }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun updateProfile(
+        name: RequestBody,
+        email: RequestBody,
+        birthday: RequestBody,
+        profileImage: MultipartBody.Part?
+    ) {
+        Log.d("ProfileViewModel", "updateProfile: $name, $email, $birthday, $profileImage")
+        viewModelScope.launch {
+            userRepository.updateProfile(name, email, birthday, profileImage)
+                .observeForever { result ->
+                    when (result) {
+                        Result.Loading -> {
+                            _uiState.value = _uiState.value.copy(isLoading = true)
+                        }
+
+                        is Result.Success -> {
+                            _uiState.value = _uiState.value.copy(isLoading = false, error = null)
+                            _userData.value = result.data
+                        }
+
+                        is Result.Error -> {
+                            _uiState.value =
+                                _uiState.value.copy(isLoading = false, error = result.error)
+                        }
+                    }
+                }
         }
     }
 }

@@ -9,9 +9,11 @@ import com.c242_ps246.mentalq.data.local.room.MentalQDatabase
 import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
 import com.c242_ps246.mentalq.data.local.repository.NoteRepository
+import com.c242_ps246.mentalq.data.local.repository.UserRepository
 import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
+import com.c242_ps246.mentalq.data.remote.retrofit.UserApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,6 +84,44 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideUserApiService(preferencesManager: MentalQAppPreferences): UserApiService {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        val authInterceptor = Interceptor { chain ->
+            val originalRequest = chain.request()
+            val newRequest = runBlocking {
+                withContext(Dispatchers.IO) {
+                    val token = preferencesManager.getToken().first()
+
+                    originalRequest.newBuilder()
+                        .apply {
+                            if (token.isNotEmpty()) {
+                                addHeader("Authorization", "Bearer $token")
+                            }
+                        }
+                        .build()
+                }
+            }
+
+            chain.proceed(newRequest)
+        }
+
+        return Retrofit.Builder()
+            .baseUrl("https://mentalq-backend.vercel.app/api/")
+            .client(
+                OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .addInterceptor(authInterceptor)
+                    .build()
+            )
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(UserApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideAuthApiService(): AuthApiService {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -138,5 +178,14 @@ object AppModule {
         preferencesManager: MentalQAppPreferences
     ): AuthRepository {
         return AuthRepository(authApiService, userDao, preferencesManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        userApiService: UserApiService,
+        userDao: UserDao
+    ): UserRepository {
+        return UserRepository(userApiService, userDao)
     }
 }

@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -29,7 +28,6 @@ class MentalQAppPreferences @Inject constructor(
         .map { preferences ->
             preferences[HAS_COMPLETED_ONBOARDING] != true
         }
-
 
     suspend fun completeOnboarding() {
         context.dataStore.edit { preferences ->
@@ -76,5 +74,4 @@ class MentalQAppPreferences @Inject constructor(
             preferences[NOTIFICATIONS_ENABLED] ?: false
         }
     }
-    
 }

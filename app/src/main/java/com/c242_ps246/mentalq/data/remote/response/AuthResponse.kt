@@ -39,5 +39,8 @@ data class UserData(
     val email: String,
 
     @field:SerializedName("birthday")
-    val birthday: String
+    val birthday: String,
+
+    @field:SerializedName("profile_photo_url")
+    val profilePhotoUrl: String? = null
 )

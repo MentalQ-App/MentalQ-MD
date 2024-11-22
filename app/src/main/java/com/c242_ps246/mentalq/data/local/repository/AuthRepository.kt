@@ -7,11 +7,14 @@ import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.AuthResponse
 import com.c242_ps246.mentalq.data.remote.response.RegisterResponse
+import com.c242_ps246.mentalq.data.remote.response.UpdateProfileResponse
 import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 class AuthRepository(
     private val authApiService: AuthApiService,
@@ -24,6 +27,7 @@ class AuthRepository(
             val response = authApiService.login(email, password)
             if (response.error == false) {
                 userDao.clearUserData()
+                response.user?.let { userDao.insertUser(it) }
                 response.token?.let { token ->
                     withContext(Dispatchers.IO) {
                         preferencesManager.saveToken(token)
@@ -34,7 +38,6 @@ class AuthRepository(
                         }
                     }
                 }
-                response.user?.let { userDao.insertUser(it) }
                 emit(Result.Success(response))
             } else {
                 emit(Result.Error(response.message.toString()))

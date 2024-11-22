@@ -1,12 +1,18 @@
+@file:Suppress("DEPRECATION")
+
 package com.c242_ps246.mentalq.ui.main.profile
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.size.Scale
 import androidx.compose.material3.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
@@ -39,11 +45,31 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import android.Manifest
+import android.net.Uri
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Cake
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.DatePickerDefaults.dateFormatter
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.c242_ps246.mentalq.ui.utils.Utils.compressImageSize
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
+import com.c242_ps246.mentalq.ui.utils.Utils.uriToFile
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -75,7 +101,12 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 }
 
                 item {
-                    ProfileInfo(userData = userData)
+                    ProfileInfo(userData = userData, onLogout = {
+                        if (!uiState.isLoading) {
+                            viewModel.logout()
+                            onLogout()
+                        }
+                    })
                 }
 
                 item {
@@ -102,9 +133,11 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 }
             }
             if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
         }
     }
@@ -121,9 +154,41 @@ private fun ProfileHeader() {
     )
 }
 
+@Composable
+fun ProfileImage(
+    imageUrl: String?,
+    imageUri: String?,
+    modifier: Modifier = Modifier,
+    size: Int = 100
+) {
+    val imageModel = if (!imageUri.isNullOrBlank()) {
+        imageUri
+    } else {
+        imageUrl
+    }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(imageModel)
+            .placeholder(R.drawable.default_profile)
+//            .error(R.drawable.default_profile)
+            .crossfade(true)
+            .scale(Scale.FILL)
+            .size(size)
+            .build(),
+        contentDescription = "Profile Picture",
+        modifier = modifier
+            .size(size.dp)
+            .clip(CircleShape),
+        contentScale = ContentScale.Crop
+    )
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun ProfileInfo(userData: UserData?) {
+private fun ProfileInfo(userData: UserData?, onLogout: () -> Unit) {
+    val viewModel: ProfileViewModel = hiltViewModel()
+    var showEditDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter
@@ -131,15 +196,244 @@ private fun ProfileInfo(userData: UserData?) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(R.drawable.default_profile),
-                contentDescription = "stringResource(id = R.string.profile_picture)",
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
+            ProfileImage(
+                imageUrl = userData?.profilePhotoUrl,
+                imageUri = null,
+                size = 100
             )
             Spacer(modifier = Modifier.height(8.dp))
             UserDetailInfo(userData = userData)
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = { showEditDialog = true },
+                modifier = Modifier
+                    .padding(8.dp)
+            ) {
+                Text(stringResource(id = R.string.edit_profile))
+            }
+        }
+        if (showEditDialog) {
+            EditProfileDialog(
+                userData = userData,
+                onDismiss = { showEditDialog = false },
+                onSave = { name, email, birthday, imageUri ->
+                    Log.e("ProfileScreen", "Name: $name, Email: $email, Birthday: $birthday")
+                    val nameRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), name)
+                    val emailRequestBody =
+                        RequestBody.create("text/plain".toMediaTypeOrNull(), email)
+                    val birthdayRequestBody =
+                        RequestBody.create("text/plain".toMediaTypeOrNull(), birthday)
+                    val profileImagePart = imageUri?.let {
+                        val file = uriToFile(it, context)
+                        val fileCompressed = file.compressImageSize()
+                        val requestFile =
+                            RequestBody.create("image/jpeg".toMediaTypeOrNull(), fileCompressed)
+                        MultipartBody.Part.createFormData("profileImage", file.name, requestFile)
+                    }
+                    Log.e("ProfileScreen", "Profile Image: $profileImagePart")
+                    viewModel.updateProfile(
+                        nameRequestBody,
+                        emailRequestBody,
+                        birthdayRequestBody,
+                        profileImagePart
+                    )
+                    if (email != userData?.email) {
+                        onLogout()
+                    }
+                }
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditProfileDialog(
+    userData: UserData?,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String, Uri?) -> Unit
+) {
+    var name by remember { mutableStateOf(userData?.name ?: "") }
+    var email by remember { mutableStateOf(userData?.email ?: "") }
+    var birthday by remember { mutableStateOf(userData?.birthday ?: "") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showEmailConfirmationDialog by remember { mutableStateOf(false) }
+    var pendingEmail by remember { mutableStateOf("") }
+
+    val datePickerState = rememberDatePickerState()
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = MaterialTheme.shapes.large
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.edit_profile),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clickable { launcher.launch("image/*") }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                    ) {
+                        ProfileImage(
+                            imageUrl = userData?.profilePhotoUrl,
+                            imageUri = null ?: imageUri?.toString(),
+                            size = 100
+                        )
+                    }
+                    IconButton(
+                        onClick = { launcher.launch("image/*") },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Camera,
+                            contentDescription = "Change Picture",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(id = R.string.label_name)) },
+                    leadingIcon = { Icon(Icons.Default.Person, null) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text(stringResource(id = R.string.label_email)) },
+                    leadingIcon = { Icon(Icons.Default.Email, null) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = birthday,
+                    onValueChange = { },
+                    label = { Text(stringResource(id = R.string.label_birthday)) },
+                    leadingIcon = { Icon(Icons.Default.Cake, null) },
+                    readOnly = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDatePicker = true },
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(Icons.Default.DateRange, "Select Date")
+                        }
+                    }
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(id = R.string.cancel))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            if (email != userData?.email) {
+                                pendingEmail = email
+                                showEmailConfirmationDialog = true
+                            } else {
+                                onSave(name, email, birthday, imageUri)
+                                onDismiss()
+                            }
+                        }
+                    ) {
+                        Text(stringResource(id = R.string.save))
+                    }
+                }
+            }
+        }
+    }
+
+    if (showEmailConfirmationDialog) {
+        CustomDialog(
+            dialogTitle = stringResource(id = R.string.confirm_email_update_title),
+            dialogMessage = (stringResource(id = R.string.update_email_confirmation_message_1) + pendingEmail + "." + stringResource(
+                id = R.string.update_email_confirmation_message_2
+            )),
+            onConfirm = {
+                onSave(name, pendingEmail, birthday, imageUri)
+                onDismiss()
+                showEmailConfirmationDialog = false
+            },
+            onDismiss = {
+                showEmailConfirmationDialog = false
+                email = userData?.email ?: ""
+            }
+        )
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val localDate = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                            birthday = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text(stringResource(id = R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState,
+                dateFormatter = remember { dateFormatter() },
+                title = {
+                    DatePickerDefaults.DatePickerTitle(
+                        displayMode = datePickerState.displayMode,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                },
+                headline = {
+                    DatePickerDefaults.DatePickerHeadline(
+                        selectedDateMillis = datePickerState.selectedDateMillis,
+                        displayMode = datePickerState.displayMode,
+                        dateFormatter = dateFormatter(),
+                        modifier = Modifier.padding(16.dp)
+                    )
+                },
+                showModeToggle = true,
+                colors = DatePickerDefaults.colors()
+            )
         }
     }
 }

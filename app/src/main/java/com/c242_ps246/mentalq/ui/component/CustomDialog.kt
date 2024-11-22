@@ -12,7 +12,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.c242_ps246.mentalq.R
 
 @Composable
 fun CustomDialog(
@@ -63,7 +65,7 @@ fun CustomDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(id = R.string.cancel))
                     }
 
                     Button(
@@ -73,7 +75,7 @@ fun CustomDialog(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text("OK")
+                        Text(stringResource(id = R.string.ok))
                     }
                 }
             }

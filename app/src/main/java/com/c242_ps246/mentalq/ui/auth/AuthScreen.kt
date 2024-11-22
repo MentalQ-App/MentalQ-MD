@@ -94,11 +94,16 @@ fun AuthScreen(onSuccess: () -> Unit) {
     var birthday by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
 
+    var loginFailed = stringResource(R.string.login_failed)
+    var registerFailed = stringResource(R.string.register_failed)
+    var loginSuccess = stringResource(R.string.login_success)
+    var registerSuccess = stringResource(R.string.register_success)
+
     LaunchedEffect(uiState) {
         when {
             uiState.error != null -> {
                 showToast = true
-                toastMessage = uiState.error ?: "Login failed"
+                toastMessage = uiState.error ?: loginFailed
                 toastType = ToastType.ERROR
                 viewModel.clearError()
             }
@@ -106,7 +111,7 @@ fun AuthScreen(onSuccess: () -> Unit) {
             uiState.success -> {
                 showToast = true
                 toastMessage =
-                    if (isLogin) "Login successful!" else "User registered successfully! Please check your email to verify your account."
+                    if (isLogin) loginSuccess else registerSuccess
                 toastType = ToastType.SUCCESS
                 viewModel.clearSuccess()
                 if (isLogin) {
