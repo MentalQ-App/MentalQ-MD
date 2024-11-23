@@ -5,8 +5,10 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -49,6 +51,12 @@ fun DetailNoteScreen(
         viewModel.loadNote(noteId)
     }
 
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onBackClick()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,11 +64,10 @@ fun DetailNoteScreen(
     ) {
         TopAppBar(
             navigationIcon = {
-                IconButton(onClick = {
-                    viewModel.updateRemoteNote()
-                    onBackClick()
-                })
-                {
+                IconButton(
+                    onClick = { viewModel.saveNoteImmediately() },
+                    enabled = !uiState.isSaving
+                ) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             },
@@ -75,12 +82,19 @@ fun DetailNoteScreen(
             )
         )
 
-        if (uiState.isLoading) {
+        if (uiState.isSaving) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                Text(
+                    text = stringResource(id = R.string.updating_note),
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         } else if (uiState.error != null) {
             Box(
@@ -93,6 +107,7 @@ fun DetailNoteScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
                 BasicTextField(
@@ -157,6 +172,7 @@ fun DetailNoteScreen(
         }
     }
 }
+
 
 @Composable
 private fun EmotionButton(

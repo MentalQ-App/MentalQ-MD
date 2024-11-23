@@ -16,7 +16,8 @@ data class NoteScreenUiState(
     val isLoading: Boolean = true,
     val note: ListNoteItem? = null,
     val success: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isCreatingNewNote: Boolean = false
 )
 
 @HiltViewModel
@@ -45,26 +46,33 @@ class NoteViewModel @Inject constructor(
                     }
 
                     is Result.Success -> {
-                        _uiState.value =
-                            _uiState.value.copy(isLoading = false, error = null)
-                        _listNote.value = result.data
+                        val notes = result.data
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = null,
+                            success = notes.isNotEmpty()
+                        )
+                        _listNote.value = notes
                     }
 
                     is Result.Error -> {
-                        _uiState.value =
-                            _uiState.value.copy(isLoading = false, error = result.error)
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = result.error
+                        )
                     }
                 }
             }
         }
     }
 
+
     fun addNote(note: ListNoteItem) {
         viewModelScope.launch {
             noteRepository.insertNote(note).observeForever { result ->
                 when (result) {
                     Result.Loading -> {
-                        _uiState.value = _uiState.value.copy(isLoading = true)
+                        _uiState.value = _uiState.value.copy(isCreatingNewNote = true)
                     }
 
                     is Result.Success -> {
@@ -73,8 +81,8 @@ class NoteViewModel @Inject constructor(
                             error = null,
                             success = true
                         )
+                        _listNote.value = _listNote.value + result.data
                         _navigateToNoteDetail.value = result.data.id
-                        loadAllNotes()
                     }
 
                     is Result.Error -> {
@@ -93,13 +101,13 @@ class NoteViewModel @Inject constructor(
             noteRepository.deleteNoteById(noteId).observeForever { result ->
                 when (result) {
                     Result.Loading -> {
-                        _uiState.value = _uiState.value.copy(isLoading = true)
+
                     }
 
                     is Result.Success -> {
                         _uiState.value =
                             _uiState.value.copy(isLoading = false, error = null, success = true)
-                        loadAllNotes()
+                        _listNote.value = _listNote.value.filter { it.id != noteId }
                     }
 
                     is Result.Error -> {

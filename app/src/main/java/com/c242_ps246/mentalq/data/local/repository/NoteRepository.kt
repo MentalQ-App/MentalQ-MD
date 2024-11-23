@@ -5,24 +5,27 @@ import androidx.lifecycle.liveData
 import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class NoteRepository(
     private val noteDao: NoteDao,
     private val noteApiService: NoteApiService
 ) {
-    fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData {
+    fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData(Dispatchers.IO) {
         emit(Result.Loading)
         try {
             val localData = noteDao.getAllNotes()
-            val response = noteApiService.getNotes()
-            val notes = response.listNote
+            if (localData.isNotEmpty()) {
+                emit(Result.Success(localData.sortedByDescending { it.createdAt }))
+            }
 
-            if (localData.isNotEmpty() && localData == notes && localData.size == notes.size) {
-                val sortedLocalData = localData.sortedByDescending { it.createdAt }
-                emit(Result.Success(sortedLocalData))
-            } else {
-                try {
-                    val noteList = notes!!.map { note ->
+            try {
+                val response = noteApiService.getNotes()
+                val remoteNotes = response.listNote
+
+                if (remoteNotes != null) {
+                    val noteList = remoteNotes.map { note ->
                         ListNoteItem(
                             note.id,
                             note.title,
@@ -32,25 +35,31 @@ class NoteRepository(
                             note.createdAt
                         )
                     }
-                    noteDao.clearAllNotes()
-                    noteDao.insertAllNotes(noteList)
-                    val sortedNoteList = noteList.sortedByDescending { it.createdAt }
-                    emit(Result.Success(sortedNoteList))
-                } catch (e: Exception) {
-                    emit(Result.Error("An error occurred: ${e.message}"))
+                    if (localData != noteList) {
+                        noteDao.clearAllNotes()
+                        noteDao.insertAllNotes(noteList)
+                        emit(Result.Success(noteList.sortedByDescending { it.createdAt }))
+                    }
+                }
+            } catch (e: Exception) {
+                if (localData.isEmpty()) {
+                    emit(Result.Error("Failed to fetch remote data: ${e.message}"))
                 }
             }
         } catch (e: Exception) {
-            emit(Result.Error("An error occurred: ${e.message}"))
+            emit(Result.Error("Database error: ${e.message}"))
         }
-
     }
 
-    suspend fun getNoteById(noteId: String): ListNoteItem {
-        return noteDao.getNoteById(noteId)
+    suspend fun getNoteById(noteId: String): ListNoteItem? = withContext(Dispatchers.IO) {
+        try {
+            noteDao.getNoteById(noteId)
+        } catch (e: Exception) {
+            null
+        }
     }
 
-    fun insertNote(note: ListNoteItem): LiveData<Result<ListNoteItem>> = liveData {
+    fun insertNote(note: ListNoteItem): LiveData<Result<ListNoteItem>> = liveData(Dispatchers.IO) {
         emit(Result.Loading)
         try {
             val response = noteApiService.createNote(
@@ -58,52 +67,57 @@ class NoteRepository(
                 content = note.content ?: "",
                 emotion = note.emotion ?: ""
             )
-            if (response.error == false) {
+            if (response.error == false && response.note != null) {
                 val newNote = ListNoteItem(
-                    response.note?.id ?: "",
-                    response.note?.title,
-                    response.note?.content,
-                    response.note?.emotion,
-                    response.note?.updatedAt,
-                    response.note?.createdAt
+                    response.note.id,
+                    response.note.title,
+                    response.note.content,
+                    response.note.emotion,
+                    response.note.updatedAt,
+                    response.note.createdAt
                 )
                 noteDao.insertNote(newNote)
                 emit(Result.Success(newNote))
             } else {
-                emit(Result.Error("An error occurred: ${response.message}"))
+                emit(Result.Error("Failed to create note: ${response.message}"))
             }
         } catch (e: Exception) {
-            emit(Result.Error("An error occurred: ${e.message}"))
+            emit(Result.Error("Network error: ${e.message}"))
         }
     }
 
-    suspend fun updateRemoteNote(note: ListNoteItem) {
-        noteApiService.updateNote(
-            id = note.id,
-            title = note.title ?: "",
-            content = note.content ?: "",
-            emotion = note.emotion ?: ""
-        )
-    }
-
-    suspend fun updateLocalNote(note: ListNoteItem) {
-        noteDao.updateNote(note)
-    }
-
-    fun deleteNoteById(noteId: String): LiveData<Result<String>> = liveData {
-        emit(Result.Loading)
+    suspend fun updateNote(note: ListNoteItem): Result<ListNoteItem> = withContext(Dispatchers.IO) {
         try {
-            val response = noteApiService.deleteNote(
-                id = noteId
+            val response = noteApiService.updateNote(
+                id = note.id,
+                title = note.title ?: "",
+                content = note.content ?: "",
+                emotion = note.emotion ?: ""
             )
+
             if (response.error == false) {
-                noteDao.deleteNoteById(noteId)
-                emit(Result.Success(response.message ?: ""))
+                noteDao.updateNote(note)
+                Result.Success(note)
             } else {
-                emit(Result.Error("An error occurred: ${response.message}"))
+                Result.Error("Failed to update note: ${response.message}")
             }
         } catch (e: Exception) {
-            emit(Result.Error("An error occurred: ${e.message}"))
+            Result.Error("Network error: ${e.message}")
+        }
+    }
+
+    fun deleteNoteById(noteId: String): LiveData<Result<String>> = liveData(Dispatchers.IO) {
+        emit(Result.Loading)
+        try {
+            val response = noteApiService.deleteNote(id = noteId)
+            if (response.error == false) {
+                noteDao.deleteNoteById(noteId)
+                emit(Result.Success(response.message ?: "Note deleted successfully"))
+            } else {
+                emit(Result.Error("Failed to delete note: ${response.message}"))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("Network error: ${e.message}"))
         }
     }
 }
