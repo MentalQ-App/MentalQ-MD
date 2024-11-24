@@ -2,14 +2,13 @@ package com.c242_ps246.mentalq.di
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
-import com.c242_ps246.mentalq.data.local.repository.AuthRepository
+import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.local.room.MentalQDatabase
 import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
-import com.c242_ps246.mentalq.data.local.repository.NoteRepository
-import com.c242_ps246.mentalq.data.local.repository.UserRepository
+import com.c242_ps246.mentalq.data.repository.NoteRepository
+import com.c242_ps246.mentalq.data.repository.UserRepository
 import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService

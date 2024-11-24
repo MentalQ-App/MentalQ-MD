@@ -2,6 +2,7 @@ package com.c242_ps246.mentalq.data.remote.retrofit
 
 import com.c242_ps246.mentalq.data.remote.response.AuthResponse
 import com.c242_ps246.mentalq.data.remote.response.RegisterResponse
+import com.c242_ps246.mentalq.data.remote.response.RequestResetPasswordResponse
 import com.c242_ps246.mentalq.data.remote.response.UpdateProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -30,4 +31,24 @@ interface AuthApiService {
         @Field("birthday") birthday: String
     ): RegisterResponse
 
+    @FormUrlEncoded
+    @POST("request-reset")
+    suspend fun requestResetPassword(
+        @Field("email") email: String
+    ): RequestResetPasswordResponse
+
+    @FormUrlEncoded
+    @POST("verify-otp")
+    suspend fun verifyOTP(
+        @Field("email") email: String,
+        @Field("otp") otp: String
+    ): AuthResponse
+
+    @FormUrlEncoded
+    @POST("reset-password")
+    suspend fun resetPassword(
+        @Field("email") email: String,
+        @Field("otp") otp: String,
+        @Field("newPassword") newPassword: String
+    ): AuthResponse
 }

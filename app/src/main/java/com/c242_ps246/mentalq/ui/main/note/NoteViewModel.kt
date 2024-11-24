@@ -3,11 +3,11 @@ package com.c242_ps246.mentalq.ui.main.note
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
-import com.c242_ps246.mentalq.data.local.repository.NoteRepository
+import com.c242_ps246.mentalq.data.repository.NoteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.c242_ps246.mentalq.data.local.repository.Result
+import com.c242_ps246.mentalq.data.repository.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject

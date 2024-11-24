@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.c242_ps246.mentalq.ui.auth
 
 import android.app.DatePickerDialog
@@ -26,7 +28,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Lock
@@ -57,8 +61,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,6 +86,7 @@ fun AuthScreen(onSuccess: () -> Unit) {
     var showToast by remember { mutableStateOf(false) }
     var toastMessage by remember { mutableStateOf("") }
     var toastType by remember { mutableStateOf(ToastType.INFO) }
+    var showForgotPassword by remember { mutableStateOf(false) }
 
     LaunchedEffect(token) {
         if (!token.isNullOrEmpty()) {
@@ -88,6 +95,7 @@ fun AuthScreen(onSuccess: () -> Unit) {
     }
 
     var isLogin by remember { mutableStateOf(true) }
+    var isRegister by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -95,8 +103,8 @@ fun AuthScreen(onSuccess: () -> Unit) {
     var showPassword by remember { mutableStateOf(false) }
 
     var loginFailed = stringResource(R.string.login_failed)
-    var registerFailed = stringResource(R.string.register_failed)
     var loginSuccess = stringResource(R.string.login_success)
+    var updatePasswordSuccess = stringResource(R.string.update_password_success)
     var registerSuccess = stringResource(R.string.register_success)
 
     LaunchedEffect(uiState) {
@@ -111,7 +119,7 @@ fun AuthScreen(onSuccess: () -> Unit) {
             uiState.success -> {
                 showToast = true
                 toastMessage =
-                    if (isLogin) loginSuccess else registerSuccess
+                    if (isLogin) loginSuccess else if (isRegister) registerSuccess else updatePasswordSuccess
                 toastType = ToastType.SUCCESS
                 viewModel.clearSuccess()
                 if (isLogin) {
@@ -159,101 +167,183 @@ fun AuthScreen(onSuccess: () -> Unit) {
         }
     }
 
-    fun validatePassword(password: String): Boolean {
-        return if (password.isEmpty()) {
-            passwordError = R.string.error_password_empty
-            false
-        } else if (password.length < 8) {
-            passwordError = R.string.error_password_length
-            false
-        } else {
-            passwordError = null
-            true
+    fun validatePassword(password: String, isRegister: Boolean): Boolean {
+        return when {
+            password.isEmpty() -> {
+                passwordError = R.string.error_password_empty
+                false
+            }
+
+            password.length < 8 -> {
+                passwordError = R.string.error_password_length
+                false
+            }
+
+            isRegister && !password.any { it.isUpperCase() } -> {
+                passwordError = R.string.error_password_uppercase
+                false
+            }
+
+            isRegister && !password.any { it.isDigit() } -> {
+                passwordError = R.string.error_password_digit
+                false
+            }
+
+            else -> {
+                passwordError = null
+                true
+            }
         }
     }
 
     fun validateForm(): Boolean {
         val isEmailValid = validateEmail(email)
-        val isPasswordValid = validatePassword(password)
+        val isPasswordValid = validatePassword(password, isRegister)
         val isNameValid = if (!isLogin) validateName(name) else true
         val isBirthdayValid = if (!isLogin) validateBirthday(birthday) else true
         return isEmailValid && isPasswordValid && isNameValid && isBirthdayValid
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
+    if (showForgotPassword) {
+        ForgotPasswordFlow(
+            onBack = {
+                showForgotPassword = false
+                isLogin = true
+                isRegister = false
+            },
+            viewModel = viewModel
+        )
+    } else {
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-                .animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )
-                ),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            Card(
                 modifier = Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.mentalq),
-                    contentDescription = "MentalQ Logo",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .padding(bottom = 8.dp)
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .animateContentSize(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    ),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
-                AnimatedContent(
-                    targetState = isLogin,
-                    transitionSpec = {
-                        slideInVertically { height -> height } + fadeIn() with
-                                slideOutVertically { height -> -height } + fadeOut()
-                    },
-                    label = ""
-                ) { isLoginState ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = stringResource(
-                                if (isLoginState) R.string.welcome_back
-                                else R.string.create_account
-                            ),
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = stringResource(
-                                if (isLoginState) R.string.login_subtitle
-                                else R.string.register_subtitle
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible = !isLogin,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.mentalq),
+                        contentDescription = "MentalQ Logo",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .padding(bottom = 8.dp)
+                    )
+                    AnimatedContent(
+                        targetState = isLogin,
+                        transitionSpec = {
+                            slideInVertically { height -> height } + fadeIn() with
+                                    slideOutVertically { height -> -height } + fadeOut()
+                        },
+                        label = ""
+                    ) { isLoginState ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = stringResource(
+                                    if (isLoginState) R.string.welcome_back
+                                    else R.string.create_account
+                                ),
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(
+                                    if (isLoginState) R.string.login_subtitle
+                                    else R.string.register_subtitle
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isRegister,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column {
+                            OutlinedTextField(
+                                value = name,
+                                onValueChange = {
+                                    name = it
+                                    if (nameError != null) validateName(it)
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    errorBorderColor = MaterialTheme.colorScheme.error
+                                ),
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                label = { Text(stringResource(R.string.label_name)) },
+                                isError = nameError != null,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            nameError?.let {
+                                Text(
+                                    text = stringResource(it),
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isRegister,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column {
+                            DateInputField(
+                                birthdayDate = birthday,
+                                onDateChange = { newDate ->
+                                    birthday = newDate
+                                }
+                            )
+                            birthdayError?.let {
+                                Text(
+                                    text = stringResource(it),
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
                     Column {
                         OutlinedTextField(
-                            value = name,
+                            value = email,
                             onValueChange = {
-                                name = it
-                                if (nameError != null) validateName(it)
+                                email = it
+                                if (emailError != null) validateEmail(it)
                             },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -261,16 +351,17 @@ fun AuthScreen(onSuccess: () -> Unit) {
                             ),
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Default.Person,
+                                    imageVector = Icons.Default.MailOutline,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             },
-                            label = { Text(stringResource(R.string.label_name)) },
-                            isError = nameError != null,
-                            modifier = Modifier.fillMaxWidth()
+                            label = { Text(stringResource(R.string.label_email)) },
+                            isError = emailError != null,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
                         )
-                        nameError?.let {
+                        emailError?.let {
                             Text(
                                 text = stringResource(it),
                                 color = MaterialTheme.colorScheme.error,
@@ -279,21 +370,50 @@ fun AuthScreen(onSuccess: () -> Unit) {
                             )
                         }
                     }
-                }
 
-                AnimatedVisibility(
-                    visible = !isLogin,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
                     Column {
-                        DateInputField(
-                            birthdayDate = birthday,
-                            onDateChange = { newDate ->
-                                birthday = newDate
-                            }
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = {
+                                password = it
+                                if (passwordError != null) validatePassword(it, isRegister)
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                errorBorderColor = MaterialTheme.colorScheme.error
+                            ),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = { showPassword = !showPassword }) {
+                                    Icon(
+                                        imageVector = if (showPassword)
+                                            Icons.Default.Visibility
+                                        else
+                                            Icons.Default.VisibilityOff,
+                                        contentDescription = if (showPassword)
+                                            stringResource(R.string.hide_password)
+                                        else
+                                            stringResource(R.string.show_password),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            },
+                            label = { Text(stringResource(R.string.label_password)) },
+                            visualTransformation = if (showPassword)
+                                VisualTransformation.None
+                            else
+                                PasswordVisualTransformation(),
+                            isError = passwordError != null,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
                         )
-                        birthdayError?.let {
+                        passwordError?.let {
                             Text(
                                 text = stringResource(it),
                                 color = MaterialTheme.colorScheme.error,
@@ -302,168 +422,107 @@ fun AuthScreen(onSuccess: () -> Unit) {
                             )
                         }
                     }
-                }
 
-                Column {
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = {
-                            email = it
-                            if (emailError != null) validateEmail(it)
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            errorBorderColor = MaterialTheme.colorScheme.error
-                        ),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.MailOutline,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                    AnimatedVisibility(
+                        visible = isLogin,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        TextButton(
+                            onClick = {
+                                isLogin = false
+                                isRegister = false
+                                email = ""
+                                password = ""
+                                showForgotPassword = true
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.forgot_password),
+                                color = MaterialTheme.colorScheme.primary
                             )
-                        },
-                        label = { Text(stringResource(R.string.label_email)) },
-                        isError = emailError != null,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    emailError?.let {
-                        Text(
-                            text = stringResource(it),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
-                }
-
-                Column {
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = {
-                            password = it
-                            if (passwordError != null) validatePassword(it)
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            errorBorderColor = MaterialTheme.colorScheme.error
-                        ),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = { showPassword = !showPassword }) {
-                                Icon(
-                                    imageVector = if (showPassword)
-                                        Icons.Default.Visibility
-                                    else
-                                        Icons.Default.VisibilityOff,
-                                    contentDescription = if (showPassword)
-                                        stringResource(R.string.hide_password)
-                                    else
-                                        stringResource(R.string.show_password),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        },
-                        label = { Text(stringResource(R.string.label_password)) },
-                        visualTransformation = if (showPassword)
-                            VisualTransformation.None
-                        else
-                            PasswordVisualTransformation(),
-                        isError = passwordError != null,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    passwordError?.let {
-                        Text(
-                            text = stringResource(it),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
-                }
-
-                Button(
-                    onClick = {
-                        if (validateForm()) {
-                            if (isLogin) {
-                                viewModel.login(email, password)
-                            } else {
-                                viewModel.register(name, email, password, birthday)
-                            }
                         }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    enabled = !uiState.isLoading
-                ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(
-                                if (isLogin) R.string.button_login
-                                else R.string.button_register
-                            ),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
                     }
-                }
-                if (showToast) {
-                    CustomToast(
-                        message = toastMessage,
-                        type = toastType,
-                        duration = 2000L,
-                        onDismiss = { showToast = false }
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(
-                            if (isLogin) R.string.text_no_account_prefix
-                            else R.string.text_have_account_prefix
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    TextButton(
+
+                    Button(
                         onClick = {
-                            isLogin = !isLogin
-                            emailError = null
-                            passwordError = null
-                            nameError = null
-                            name = ""
-                            email = ""
-                            password = ""
+                            if (validateForm()) {
+                                if (isLogin) {
+                                    viewModel.login(email, password)
+                                } else {
+                                    viewModel.register(name, email, password, birthday)
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        enabled = !uiState.isLoading
+                    ) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(
+                                    if (isLogin && !isRegister) R.string.button_login
+                                    else R.string.button_register
+                                ),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
+                    }
+                    if (showToast) {
+                        CustomToast(
+                            message = toastMessage,
+                            type = toastType,
+                            duration = 2000L,
+                            onDismiss = { showToast = false }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = stringResource(
-                                if (isLogin) R.string.text_no_account_action
-                                else R.string.text_have_account_action
+                                if (isLogin && !isRegister) R.string.text_no_account_prefix
+                                else R.string.text_have_account_prefix
                             ),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        TextButton(
+                            onClick = {
+                                isLogin = !isLogin
+                                isRegister = !isRegister
+                                emailError = null
+                                passwordError = null
+                                nameError = null
+                                name = ""
+                                email = ""
+                                password = ""
+                            }
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    if (isLogin && !isRegister) R.string.text_no_account_action
+                                    else R.string.text_have_account_action
+                                ),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
         }
+
     }
 }
 
@@ -516,6 +575,439 @@ fun DateInputField(birthdayDate: String, onDateChange: (String) -> Unit) {
         },
         modifier = Modifier.fillMaxWidth()
     )
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ForgotPasswordFlow(
+    onBack: () -> Unit,
+    viewModel: AuthViewModel
+) {
+    var currentStep by remember { mutableStateOf(ForgotPasswordStep.EMAIL) }
+    var email by remember { mutableStateOf("") }
+    var otp by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var showNewPassword by remember { mutableStateOf(false) }
+    var showConfirmPassword by remember { mutableStateOf(false) }
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    var showToast by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf("") }
+    var toastType by remember { mutableStateOf(ToastType.INFO) }
+
+    var errorOccurred = stringResource(R.string.error_occurred)
+    var passwordResetSuccess = stringResource(R.string.update_password_success)
+    var passwordsNotMatch = stringResource(R.string.error_password_match)
+
+    LaunchedEffect(uiState) {
+        when {
+            uiState.error != null -> {
+                showToast = true
+                toastMessage = uiState.error ?: errorOccurred
+                toastType = ToastType.ERROR
+                viewModel.clearError()
+            }
+
+            uiState.success -> {
+                when (currentStep) {
+                    ForgotPasswordStep.EMAIL -> {
+                        currentStep = ForgotPasswordStep.OTP
+                    }
+
+                    ForgotPasswordStep.OTP -> {
+                        currentStep = ForgotPasswordStep.NEW_PASSWORD
+                    }
+
+                    ForgotPasswordStep.NEW_PASSWORD -> {
+                        showToast = true
+                        toastMessage = passwordResetSuccess
+                        toastType = ToastType.SUCCESS
+                        onBack()
+                    }
+                }
+                viewModel.clearSuccess()
+            }
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.align(Alignment.Start)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+
+            AnimatedContent(
+                targetState = currentStep,
+                transitionSpec = {
+                    slideInVertically { height -> height } + fadeIn() with
+                            slideOutVertically { height -> -height } + fadeOut()
+                },
+                label = ""
+            ) { step ->
+                when (step) {
+                    ForgotPasswordStep.EMAIL -> {
+                        EmailStep(
+                            email = email,
+                            onEmailChange = { email = it },
+                            onSubmit = {
+                                viewModel.requestResetPassword(email)
+                            },
+                            isLoading = uiState.isLoading
+                        )
+                    }
+
+                    ForgotPasswordStep.OTP -> {
+                        OTPStep(
+                            otp = otp,
+                            onOtpChange = { otp = it },
+                            onSubmit = {
+                                viewModel.verifyOTP(email, otp)
+                            },
+                            isLoading = uiState.isLoading
+                        )
+                    }
+
+                    ForgotPasswordStep.NEW_PASSWORD -> {
+                        NewPasswordStep(
+                            newPassword = newPassword,
+                            confirmPassword = confirmPassword,
+                            showNewPassword = showNewPassword,
+                            showConfirmPassword = showConfirmPassword,
+                            onNewPasswordChange = { newPassword = it },
+                            onConfirmPasswordChange = { confirmPassword = it },
+                            onToggleNewPassword = { showNewPassword = !showNewPassword },
+                            onToggleConfirmPassword = {
+                                showConfirmPassword = !showConfirmPassword
+                            },
+                            onSubmit = {
+                                if (newPassword == confirmPassword) {
+                                    viewModel.resetPassword(email, otp, newPassword)
+                                } else {
+                                    showToast = true
+                                    toastMessage = passwordsNotMatch
+                                    toastType = ToastType.ERROR
+                                }
+                            },
+                            isLoading = uiState.isLoading
+                        )
+                    }
+                }
+            }
+
+            if (showToast) {
+                CustomToast(
+                    message = toastMessage,
+                    type = toastType,
+                    duration = 2000L,
+                    onDismiss = { showToast = false }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmailStep(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    isLoading: Boolean
+) {
+    var forgotPasswordTitle = stringResource(R.string.forgot_password_title)
+    var forgotPasswordSubtitle = stringResource(R.string.forgot_password_subtitle)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = forgotPasswordTitle,
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Text(
+            text = forgotPasswordSubtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = onEmailChange,
+            label = { Text(stringResource(id = R.string.label_email)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.MailOutline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Button(
+            onClick = onSubmit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            enabled = !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(stringResource(R.string.send_verification_code))
+            }
+        }
+    }
+}
+
+@Composable
+private fun OTPStep(
+    otp: String,
+    onOtpChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    isLoading: Boolean
+) {
+    var otpStepTitle = stringResource(R.string.otp_step_title)
+    var otpStepSubtitle = stringResource(R.string.otp_step_subtitle)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = otpStepTitle,
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Text(
+            text = otpStepSubtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        OutlinedTextField(
+            value = otp,
+            onValueChange = {
+                if (it.length <= 6 && it.all { char -> char.isDigit() }) {
+                    onOtpChange(it)
+                }
+            },
+            label = { Text(stringResource(id = R.string.verification_code)) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        Button(
+            onClick = onSubmit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            enabled = otp.length == 6 && !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(stringResource(R.string.verify_code))
+            }
+        }
+    }
+}
+
+@Composable
+private fun NewPasswordStep(
+    newPassword: String,
+    confirmPassword: String,
+    showNewPassword: Boolean,
+    showConfirmPassword: Boolean,
+    onNewPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    onToggleNewPassword: () -> Unit,
+    onToggleConfirmPassword: () -> Unit,
+    onSubmit: () -> Unit,
+    isLoading: Boolean
+) {
+    var passwordError by remember { mutableStateOf<Int?>(null) }
+    var newPasswordStepTitle = stringResource(R.string.new_password_step_title)
+    var newPasswordStepSubtitle = stringResource(R.string.new_password_step_subtitle)
+
+    fun validatePassword(password: String): Boolean {
+        return if (password.isEmpty()) {
+            passwordError = R.string.error_password_empty
+            false
+        } else if (password.length < 8) {
+            passwordError = R.string.error_password_length
+            false
+        } else if (password != confirmPassword) {
+            passwordError = R.string.error_password_match
+            false
+        } else {
+            passwordError = null
+            true
+        }
+    }
+
+    fun validateForm(): Boolean {
+        val isNewPasswordValid = validatePassword(newPassword)
+        val isConfirmPasswordValid = validatePassword(confirmPassword)
+        return isNewPasswordValid && isConfirmPasswordValid
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = newPasswordStepTitle,
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Text(
+            text = newPasswordStepSubtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Column {
+            OutlinedTextField(
+                value = newPassword,
+                onValueChange = onNewPasswordChange,
+                label = { Text(stringResource(R.string.new_password)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = onToggleNewPassword) {
+                        Icon(
+                            imageVector = if (showNewPassword)
+                                Icons.Default.Visibility
+                            else
+                                Icons.Default.VisibilityOff,
+                            contentDescription = if (showNewPassword)
+                                "Hide password"
+                            else
+                                "Show password"
+                        )
+                    }
+                },
+                visualTransformation = if (showNewPassword)
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            passwordError?.let {
+                Text(
+                    text = stringResource(it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+        }
+
+        Column {
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = onConfirmPasswordChange,
+                label = { Text(stringResource(R.string.confirm_email)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = onToggleConfirmPassword) {
+                        Icon(
+                            imageVector = if (showConfirmPassword)
+                                Icons.Default.Visibility
+                            else
+                                Icons.Default.VisibilityOff,
+                            contentDescription = if (showConfirmPassword)
+                                "Hide password"
+                            else
+                                "Show password"
+                        )
+                    }
+                },
+                visualTransformation = if (showConfirmPassword)
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            passwordError?.let {
+                Text(
+                    text = stringResource(it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+        }
+
+        Button(
+            onClick = {
+                if (validateForm()) {
+                    onSubmit()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            enabled = newPassword.isNotEmpty() && confirmPassword.isNotEmpty() && !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(stringResource(R.string.reset_password))
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)

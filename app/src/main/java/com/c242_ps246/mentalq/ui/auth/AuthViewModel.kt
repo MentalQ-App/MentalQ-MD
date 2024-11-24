@@ -1,18 +1,27 @@
 package com.c242_ps246.mentalq.ui.auth
 
 import androidx.lifecycle.ViewModel
-import com.c242_ps246.mentalq.data.local.repository.AuthRepository
+import androidx.lifecycle.viewModelScope
+import com.c242_ps246.mentalq.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
-import com.c242_ps246.mentalq.data.local.repository.Result
+import com.c242_ps246.mentalq.data.repository.Result
+import kotlinx.coroutines.launch
 
 data class AuthScreenUIState(
     val isLoading: Boolean = false,
     val success: Boolean = false,
     val error: String? = null
 )
+
+enum class ForgotPasswordStep {
+    EMAIL,
+    OTP,
+    NEW_PASSWORD
+}
+
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
@@ -86,6 +95,81 @@ class AuthViewModel @Inject constructor(
 
     fun clearSuccess() {
         _uiState.value = _uiState.value.copy(success = false)
+    }
+
+    fun requestResetPassword(email: String) {
+        viewModelScope.launch {
+            authRepository.requestResetPassword(email).observeForever { result ->
+                when (result) {
+                    Result.Loading -> {
+                        _uiState.value = _uiState.value.copy(isLoading = true)
+                    }
+
+                    is Result.Success -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = null, success = true)
+                    }
+
+                    is Result.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = result.error,
+                            success = false
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun verifyOTP(email: String, otp: String) {
+        viewModelScope.launch {
+            authRepository.verifyOTP(email, otp).observeForever { result ->
+                when (result) {
+                    Result.Loading -> {
+                        _uiState.value = _uiState.value.copy(isLoading = true)
+                    }
+
+                    is Result.Success -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = null, success = true)
+                    }
+
+                    is Result.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = result.error,
+                            success = false
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun resetPassword(email: String, otp: String, newPassword: String) {
+        viewModelScope.launch {
+            authRepository.resetPassword(email, otp, newPassword).observeForever { result ->
+                when (result) {
+                    Result.Loading -> {
+                        _uiState.value = _uiState.value.copy(isLoading = true)
+                    }
+
+                    is Result.Success -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = null, success = true)
+                    }
+
+                    is Result.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = result.error,
+                            success = false
+                        )
+                    }
+                }
+            }
+        }
     }
 
 }

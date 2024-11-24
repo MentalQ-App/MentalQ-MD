@@ -1,4 +1,4 @@
-package com.c242_ps246.mentalq.data.local.repository
+package com.c242_ps246.mentalq.data.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData

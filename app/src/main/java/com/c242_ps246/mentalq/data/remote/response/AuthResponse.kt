@@ -26,6 +26,14 @@ data class RegisterResponse(
     val message: String? = null
 )
 
+data class RequestResetPasswordResponse(
+    @field:SerializedName("error")
+    val error: Boolean? = null,
+
+    @field:SerializedName("message")
+    val message: String? = null
+)
+
 @Entity(tableName = "user_data")
 data class UserData(
     @PrimaryKey(autoGenerate = true)

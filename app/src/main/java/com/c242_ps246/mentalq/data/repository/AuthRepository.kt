@@ -1,4 +1,4 @@
-package com.c242_ps246.mentalq.data.local.repository
+package com.c242_ps246.mentalq.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
@@ -7,14 +7,11 @@ import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.AuthResponse
 import com.c242_ps246.mentalq.data.remote.response.RegisterResponse
-import com.c242_ps246.mentalq.data.remote.response.UpdateProfileResponse
 import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 
 class AuthRepository(
     private val authApiService: AuthApiService,
@@ -93,4 +90,47 @@ class AuthRepository(
             emit(Result.Error(e.message.toString()))
         }
     }
+
+    fun requestResetPassword(email: String): LiveData<Result<Unit>> = liveData {
+        emit(Result.Loading)
+        try {
+            val response = authApiService.requestResetPassword(email)
+            if (response.error == false) {
+                emit(Result.Success(Unit))
+            } else {
+                emit(Result.Error(response.message.toString()))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("An error occurred: ${e.message}"))
+        }
+    }
+
+    fun verifyOTP(email: String, otp: String): LiveData<Result<Unit>> = liveData {
+        emit(Result.Loading)
+        try {
+            val response = authApiService.verifyOTP(email, otp)
+            if (response.error == false) {
+                emit(Result.Success(Unit))
+            } else {
+                emit(Result.Error(response.message.toString()))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("An error occurred: ${e.message}"))
+        }
+    }
+
+    fun resetPassword(email: String, otp: String, password: String): LiveData<Result<Unit>> =
+        liveData {
+            emit(Result.Loading)
+            try {
+                val response = authApiService.resetPassword(email, otp, password)
+                if (response.error == false) {
+                    emit(Result.Success(Unit))
+                } else {
+                    emit(Result.Error(response.message.toString()))
+                }
+            } catch (e: Exception) {
+                emit(Result.Error("An error occurred: ${e.message}"))
+            }
+        }
 }
