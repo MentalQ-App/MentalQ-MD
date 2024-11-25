@@ -22,6 +22,7 @@ class MentalQAppPreferences @Inject constructor(
         private val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         private val LAST_ENTRY_DATE = stringPreferencesKey("last_entry_date")
         private val STREAK_COUNT = stringPreferencesKey("streak_count")
+        private val ROLE = stringPreferencesKey("role")
     }
 
     val shouldShowOnboarding: Flow<Boolean> = context.dataStore.data
@@ -72,6 +73,18 @@ class MentalQAppPreferences @Inject constructor(
     fun getNotificationsState(): Flow<Boolean> {
         return context.dataStore.data.map { preferences ->
             preferences[NOTIFICATIONS_ENABLED] ?: false
+        }
+    }
+
+    suspend fun saveUserRole(role: String) {
+        context.dataStore.edit { preferences ->
+            preferences[ROLE] = role
+        }
+    }
+
+    fun getUserRole(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[ROLE] ?: ""
         }
     }
 }

@@ -3,6 +3,7 @@
 package com.c242_ps246.mentalq.ui.auth
 
 import android.app.DatePickerDialog
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -75,13 +76,13 @@ import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import java.util.Calendar
 
-@Suppress("DEPRECATION")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AuthScreen(onSuccess: () -> Unit) {
+fun AuthScreen(onSuccess: (String) -> Unit) {
     val viewModel: AuthViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val token by viewModel.token.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
 
     var showToast by remember { mutableStateOf(false) }
     var toastMessage by remember { mutableStateOf("") }
@@ -90,17 +91,22 @@ fun AuthScreen(onSuccess: () -> Unit) {
 
     LaunchedEffect(token) {
         if (!token.isNullOrEmpty()) {
-            onSuccess()
+            viewModel.getUserRole()
+            val authenticatedRole = role
+            if (authenticatedRole != null) {
+                Log.e("Role", authenticatedRole)
+                onSuccess(authenticatedRole)
+            }
         }
     }
 
     var isLogin by remember { mutableStateOf(true) }
     var isRegister by remember { mutableStateOf(false) }
+    var showPassword by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
-    var showPassword by remember { mutableStateOf(false) }
 
     var loginFailed = stringResource(R.string.login_failed)
     var loginSuccess = stringResource(R.string.login_success)
@@ -123,7 +129,11 @@ fun AuthScreen(onSuccess: () -> Unit) {
                 toastType = ToastType.SUCCESS
                 viewModel.clearSuccess()
                 if (isLogin) {
-                    onSuccess()
+                    viewModel.getUserRole()
+                    val authenticatedRole = role
+                    if (authenticatedRole != null) {
+                        onSuccess(authenticatedRole)
+                    }
                 }
             }
         }

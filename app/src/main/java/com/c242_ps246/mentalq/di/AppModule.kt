@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.c242_ps246.mentalq.data.local.room.AnalysisDao
+import com.c242_ps246.mentalq.data.local.room.ChatDao
 import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.local.room.MentalQDatabase
 import com.c242_ps246.mentalq.data.local.room.NoteDao
@@ -16,6 +17,7 @@ import com.c242_ps246.mentalq.data.remote.retrofit.AnalysisApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.UserApiService
 import com.c242_ps246.mentalq.data.repository.AnalysisRepository
+import com.c242_ps246.mentalq.data.repository.ChatRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -209,6 +211,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideChatDao(mentalQDatabase: MentalQDatabase): ChatDao {
+        return mentalQDatabase.chatDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideNoteRepository(
         noteDao: NoteDao,
         noteApiService: NoteApiService
@@ -219,12 +227,13 @@ object AppModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        userDao: UserDao,
         authApiService: AuthApiService,
+        userDao: UserDao,
         noteDao: NoteDao,
+        analysisDao: AnalysisDao,
         preferencesManager: MentalQAppPreferences
     ): AuthRepository {
-        return AuthRepository(authApiService, userDao, noteDao, preferencesManager)
+        return AuthRepository(authApiService, userDao, noteDao, analysisDao, preferencesManager)
     }
 
     @Provides
@@ -243,5 +252,14 @@ object AppModule {
         analysisDao: AnalysisDao
     ): AnalysisRepository {
         return AnalysisRepository(analysisApiService, analysisDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatRepository(
+        userDao: UserDao,
+        chatDao: ChatDao
+    ): ChatRepository {
+        return ChatRepository(userDao, chatDao)
     }
 }

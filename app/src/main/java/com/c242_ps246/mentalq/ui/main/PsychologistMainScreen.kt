@@ -23,17 +23,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
-import com.c242_ps246.mentalq.ui.main.chat.ChatRoomScreen
 import com.c242_ps246.mentalq.ui.main.chat.ChatScreen
-import com.c242_ps246.mentalq.ui.main.dashboard.DashboardScreen
-import com.c242_ps246.mentalq.ui.main.note.NoteScreen
-import com.c242_ps246.mentalq.ui.main.note.detail.DetailNoteScreen
+import com.c242_ps246.mentalq.ui.main.chat.ChatRoomScreen
 import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
 import com.c242_ps246.mentalq.ui.navigation.Routes
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun MainScreen(
+fun PsychologistMainScreen(
     modifier: Modifier = Modifier,
     onLogout: () -> Unit,
     userRole: String
@@ -43,7 +40,7 @@ fun MainScreen(
     val currentRoute = navBackStackEntry?.destination?.route
 
     val shouldShowBottomBar = when (currentRoute) {
-        Routes.DASHBOARD, Routes.NOTE, Routes.CHAT, Routes.PROFILE -> true
+        Routes.DASHBOARD, Routes.CHAT, Routes.PROFILE -> true
         else -> false
     }
 
@@ -51,10 +48,8 @@ fun MainScreen(
 
     LaunchedEffect(currentRoute) {
         selectedItem = when (currentRoute) {
-            Routes.DASHBOARD -> 0
-            Routes.NOTE -> 1
-            Routes.CHAT -> 2
-            Routes.PROFILE -> 3
+            Routes.CHAT -> 0
+            Routes.PROFILE -> 1
             else -> selectedItem
         }
     }
@@ -66,7 +61,7 @@ fun MainScreen(
     ) {
         NavHost(
             navController = navController,
-            startDestination = Routes.DASHBOARD,
+            startDestination = Routes.CHAT,
             enterTransition = {
                 EnterTransition.None
             },
@@ -74,42 +69,6 @@ fun MainScreen(
                 ExitTransition.None
             }
         ) {
-            composable(
-                route = Routes.DASHBOARD
-            ) {
-                DashboardScreen(
-                    onNavigateToNoteDetail = { noteId ->
-                        navController.navigate("${Routes.NOTE_DETAIL}/$noteId")
-                    }
-                )
-            }
-            composable(
-                route = Routes.NOTE
-            ) {
-                NoteScreen(
-                    onNavigateToNoteDetail = { noteId ->
-                        navController.navigate("${Routes.NOTE_DETAIL}/$noteId")
-                    },
-                )
-            }
-            composable(
-                route = "${Routes.NOTE_DETAIL}/{noteId}",
-                arguments = listOf(
-                    navArgument("noteId") { type = NavType.StringType }
-                )
-            ) { backStackEntry ->
-                val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
-                DetailNoteScreen(
-                    noteId = noteId,
-                    onBackClick = {
-                        navController.navigate(Routes.NOTE) {
-                            popUpTo(Routes.NOTE_DETAIL) {
-                                inclusive = true
-                            }
-                        }
-                    }
-                )
-            }
             composable(
                 route = Routes.CHAT
             ) {

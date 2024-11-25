@@ -3,6 +3,7 @@ package com.c242_ps246.mentalq.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
+import com.c242_ps246.mentalq.data.local.room.AnalysisDao
 import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
@@ -18,6 +19,7 @@ class AuthRepository(
     private val authApiService: AuthApiService,
     private val userDao: UserDao,
     private val noteDao: NoteDao,
+    private val analysisDao: AnalysisDao,
     private val preferencesManager: MentalQAppPreferences
 ) {
     fun login(email: String, password: String): LiveData<Result<AuthResponse>> = liveData {
@@ -25,18 +27,29 @@ class AuthRepository(
         try {
             val response = authApiService.login(email, password)
             if (response.error == false) {
-                userDao.clearUserData()
-                response.user?.let { userDao.insertUser(it) }
-                response.token?.let { token ->
-                    withContext(Dispatchers.IO) {
+                val role = response.user?.role
+                if (role.isNullOrEmpty()) {
+                    emit(Result.Error("No user role found"))
+                    return@liveData
+                }
+
+                withContext(Dispatchers.IO) {
+                    response.token?.let { token ->
                         preferencesManager.saveToken(token)
-                        preferencesManager.getToken().first().also { savedToken ->
-                            if (savedToken.isEmpty()) {
-                                throw Exception("Token failed to save")
-                            }
+                        val savedToken = preferencesManager.getToken().first()
+                        if (savedToken.isEmpty()) {
+                            throw Exception("Token failed to save")
                         }
                     }
+                    preferencesManager.saveUserRole(role)
+                    val savedRole = preferencesManager.getUserRole().first()
+                    if (savedRole.isEmpty()) {
+                        throw Exception("User role failed to save")
+                    }
                 }
+                userDao.clearUserData()
+                response.user.let { userDao.insertUser(it) }
+
                 emit(Result.Success(response))
             } else {
                 emit(Result.Error(response.message.toString()))
@@ -68,8 +81,11 @@ class AuthRepository(
     suspend fun logout() = runCatching {
         withContext(Dispatchers.IO) {
             preferencesManager.saveToken("")
+            preferencesManager.saveUserRole("")
+            preferencesManager.saveStreakInfo("", 0)
             userDao.clearUserData()
             noteDao.clearAllNotes()
+            analysisDao.clearAllAnalysis()
         }
     }.fold(
         onSuccess = { Result.Success(Unit) },
@@ -136,4 +152,8 @@ class AuthRepository(
                 emit(Result.Error("An error occurred: ${e.message}"))
             }
         }
+
+    fun getUserRole(): LiveData<String> {
+        return preferencesManager.getUserRole().asLiveData()
+    }
 }

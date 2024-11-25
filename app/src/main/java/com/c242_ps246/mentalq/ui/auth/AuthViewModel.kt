@@ -22,7 +22,6 @@ enum class ForgotPasswordStep {
     NEW_PASSWORD
 }
 
-
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -32,6 +31,9 @@ class AuthViewModel @Inject constructor(
 
     private val _token = MutableStateFlow<String?>(null)
     val token = _token.asStateFlow()
+
+    private val _role = MutableStateFlow<String?>(null)
+    val role = _role.asStateFlow()
 
     init {
         getToken()
@@ -86,6 +88,12 @@ class AuthViewModel @Inject constructor(
     private fun getToken() {
         authRepository.getToken().observeForever {
             _token.value = it
+        }
+    }
+
+    fun getUserRole() {
+        authRepository.getUserRole().observeForever {
+            _role.value = it
         }
     }
 
@@ -171,5 +179,4 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
-
 }
