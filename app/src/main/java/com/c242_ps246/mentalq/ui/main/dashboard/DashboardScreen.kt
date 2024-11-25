@@ -65,12 +65,14 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
     val listNote by viewModel.listNote.collectAsState()
     val userData by viewModel.userData.collectAsState()
     val streakInfo by viewModel.streakInfo.collectAsState()
+    val predictedStatusMode by viewModel.predictedStatusMode.collectAsState()
     val (weekDay, day) = getTodayDateFormatted()
 
     LaunchedEffect(Unit) {
         viewModel.loadLatestNotes()
         viewModel.calculateStreak()
         viewModel.getUserData()
+        viewModel.getPredictedStatusMode()
     }
 
     val scrollState = rememberScrollState()
@@ -346,13 +348,27 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = stringResource(R.string.state_anxiety),
+                                    text = predictedStatusMode
+                                        ?: stringResource(id = R.string.note_not_sufficient),
                                     fontSize = 16.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
                                 Text(
-                                    text = stringResource(R.string.lorem_ipsum),
+                                    text = if (predictedStatusMode != null) {
+                                        when (predictedStatusMode) {
+                                            "Anxiety" -> stringResource(R.string.anxiety_message)
+                                            "Bipolar" -> stringResource(R.string.bipolar_message)
+                                            "Depression" -> stringResource(R.string.depression_message)
+                                            "Normal" -> stringResource(R.string.normal_message)
+                                            "Personality Disorder" -> stringResource(R.string.personality_disorder_message)
+                                            "Stress" -> stringResource(R.string.stress_message)
+                                            "Suicidal" -> stringResource(R.string.suicidal_message)
+                                            else -> stringResource(R.string.unknown_condition_message)
+                                        }
+                                    } else {
+                                        stringResource(R.string.add_more_note)
+                                    },
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.tertiary,
                                     modifier = Modifier.padding(top = 8.dp),

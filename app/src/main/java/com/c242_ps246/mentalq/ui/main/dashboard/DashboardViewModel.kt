@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit
 import com.c242_ps246.mentalq.data.repository.Result
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.UserData
+import com.c242_ps246.mentalq.data.repository.AnalysisRepository
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -24,6 +25,7 @@ import java.time.ZoneId
 class DashboardViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val authRepository: AuthRepository,
+    private val analysisRepository: AnalysisRepository,
     private val preferencesManager: MentalQAppPreferences
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DashboardScreenUiState())
@@ -37,6 +39,9 @@ class DashboardViewModel @Inject constructor(
 
     private val _userData = MutableStateFlow<UserData?>(null)
     val userData = _userData.asStateFlow()
+
+    private val _predictedStatusMode = MutableStateFlow<String?>(null)
+    val predictedStatusMode = _predictedStatusMode.asStateFlow()
 
     fun loadLatestNotes() {
         noteRepository.getAllNotes().observeForever { result ->
@@ -150,6 +155,26 @@ class DashboardViewModel @Inject constructor(
             currentStreak = currentStreak,
             lastEntryDate = lastEntryDate
         )
+    }
+
+    fun getPredictedStatusMode() {
+        analysisRepository.getAnalysis().observeForever { result ->
+            when (result) {
+                Result.Loading -> {
+                    _uiState.value = _uiState.value.copy(isLoading = true)
+                }
+
+                is Result.Success -> {
+                    val (analysisList, mode) = result.data
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = null)
+                    _predictedStatusMode.value = mode
+                }
+
+                is Result.Error -> {
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = result.error)
+                }
+            }
+        }
     }
 }
 

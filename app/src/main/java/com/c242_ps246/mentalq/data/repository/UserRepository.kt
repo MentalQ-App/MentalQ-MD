@@ -20,10 +20,8 @@ class UserRepository(
         profileImage: MultipartBody.Part?
     ): LiveData<Result<UserData?>> = liveData {
         emit(Result.Loading)
-        Log.e("UserRepository", "updateProfile: $name, $email, $birthday, $profileImage")
         try {
             val response = userApiService.updateProfile(profileImage, name, email, birthday)
-            Log.e("UserRepository", "updateProfile: $response")
             if (response.error == false) {
                 userDao.clearUserData()
                 response.user?.let { userDao.insertUser(it) }

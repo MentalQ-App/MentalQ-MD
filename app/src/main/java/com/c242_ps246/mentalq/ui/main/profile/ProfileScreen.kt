@@ -45,6 +45,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import android.Manifest
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -61,6 +62,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.c242_ps246.mentalq.ui.notification.NotificationHelper
+import com.c242_ps246.mentalq.ui.notification.StreakWorker
 import com.c242_ps246.mentalq.ui.utils.Utils.compressImageSize
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 import com.c242_ps246.mentalq.ui.utils.Utils.uriToFile
@@ -485,6 +488,8 @@ fun PreferencesSection(
         onResult = { isGranted ->
             if (isGranted) {
                 onNotificationChange(true)
+                NotificationHelper.createNotificationChannel(context)
+                StreakWorker.schedule(context)
             }
         }
     )
@@ -527,6 +532,8 @@ fun PreferencesSection(
                             )) {
                                 PackageManager.PERMISSION_GRANTED -> {
                                     onNotificationChange(true)
+                                    NotificationHelper.createNotificationChannel(context)
+                                    StreakWorker.schedule(context)
                                 }
 
                                 else -> {
@@ -535,9 +542,12 @@ fun PreferencesSection(
                             }
                         } else {
                             onNotificationChange(true)
+                            NotificationHelper.createNotificationChannel(context)
+                            StreakWorker.schedule(context)
                         }
                     } else {
                         onNotificationChange(false)
+                        StreakWorker.cancel(context)
                     }
                 }
             )

@@ -50,5 +50,8 @@ data class UserData(
     val birthday: String,
 
     @field:SerializedName("profile_photo_url")
-    val profilePhotoUrl: String? = null
+    val profilePhotoUrl: String? = null,
+
+    @field:SerializedName("role")
+    val role: String
 )

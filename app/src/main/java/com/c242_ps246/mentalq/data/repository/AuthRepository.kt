@@ -3,6 +3,7 @@ package com.c242_ps246.mentalq.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
+import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.AuthResponse
@@ -16,6 +17,7 @@ import kotlinx.coroutines.withContext
 class AuthRepository(
     private val authApiService: AuthApiService,
     private val userDao: UserDao,
+    private val noteDao: NoteDao,
     private val preferencesManager: MentalQAppPreferences
 ) {
     fun login(email: String, password: String): LiveData<Result<AuthResponse>> = liveData {
@@ -67,6 +69,7 @@ class AuthRepository(
         withContext(Dispatchers.IO) {
             preferencesManager.saveToken("")
             userDao.clearUserData()
+            noteDao.clearAllNotes()
         }
     }.fold(
         onSuccess = { Result.Success(Unit) },
