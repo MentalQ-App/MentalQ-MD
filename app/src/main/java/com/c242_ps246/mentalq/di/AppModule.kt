@@ -301,9 +301,8 @@ object AppModule {
     fun provideChatRepository(
         userDao: UserDao,
         chatDao: ChatDao,
-        chatApiService: ChatApiService
     ): ChatRepository {
-        return ChatRepository(userDao, chatDao, chatApiService)
+        return ChatRepository(userDao, chatDao)
     }
 
 //    @Provides
