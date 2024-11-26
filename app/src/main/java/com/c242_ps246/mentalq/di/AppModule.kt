@@ -3,21 +3,23 @@ package com.c242_ps246.mentalq.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.c242_ps246.mentalq.BuildConfig
 import com.c242_ps246.mentalq.data.local.room.AnalysisDao
 import com.c242_ps246.mentalq.data.local.room.ChatDao
-import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.local.room.MentalQDatabase
 import com.c242_ps246.mentalq.data.local.room.NoteDao
-import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
-import com.c242_ps246.mentalq.data.repository.NoteRepository
-import com.c242_ps246.mentalq.data.repository.UserRepository
 import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.retrofit.AnalysisApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
+import com.c242_ps246.mentalq.data.remote.retrofit.ChatApiService
+import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.UserApiService
 import com.c242_ps246.mentalq.data.repository.AnalysisRepository
+import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.ChatRepository
+import com.c242_ps246.mentalq.data.repository.NoteRepository
+import com.c242_ps246.mentalq.data.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,6 +38,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    private const val BASE_URL = BuildConfig.BASE_URL
+
     @Provides
     @Singleton
     fun provideContext(application: Application): Context {
@@ -74,7 +78,7 @@ object AppModule {
         }
 
         return Retrofit.Builder()
-            .baseUrl("https://mentalq-backend.vercel.app/api/")
+            .baseUrl(BASE_URL)
             .client(
                 OkHttpClient.Builder()
                     .addInterceptor(logging)
@@ -112,7 +116,7 @@ object AppModule {
         }
 
         return Retrofit.Builder()
-            .baseUrl("https://mentalq-backend.vercel.app/api/")
+            .baseUrl(BASE_URL)
             .client(
                 OkHttpClient.Builder()
                     .addInterceptor(logging)
@@ -150,7 +154,7 @@ object AppModule {
         }
 
         return Retrofit.Builder()
-            .baseUrl("https://mentalq-backend.vercel.app/api/")
+            .baseUrl(BASE_URL)
             .client(
                 OkHttpClient.Builder()
                     .addInterceptor(logging)
@@ -174,11 +178,49 @@ object AppModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("https://mentalq-backend.vercel.app/api/")
+            .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AuthApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideChatApiService(preferencesManager: MentalQAppPreferences): ChatApiService {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        val authInterceptor = Interceptor { chain ->
+            val originalRequest = chain.request()
+            val newRequest = runBlocking {
+                withContext(Dispatchers.IO) {
+                    val token = preferencesManager.getToken().first()
+
+                    originalRequest.newBuilder()
+                        .apply {
+                            if (token.isNotEmpty()) {
+                                addHeader("Authorization", "Bearer $token")
+                            }
+                        }
+                        .build()
+                }
+            }
+
+            chain.proceed(newRequest)
+        }
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(
+                OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .addInterceptor(authInterceptor)
+                    .build()
+            )
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ChatApiService::class.java)
     }
 
     @Provides
@@ -258,8 +300,15 @@ object AppModule {
     @Singleton
     fun provideChatRepository(
         userDao: UserDao,
-        chatDao: ChatDao
+        chatDao: ChatDao,
+        chatApiService: ChatApiService
     ): ChatRepository {
-        return ChatRepository(userDao, chatDao)
+        return ChatRepository(userDao, chatDao, chatApiService)
     }
+
+//    @Provides
+//    @Singleton
+//    fun provideSocketManager(): SocketManager {
+//        return SocketManager()
+//    }
 }

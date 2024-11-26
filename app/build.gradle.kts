@@ -27,6 +27,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://mentalq-backend.vercel.app/api/\"")
+        }
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://mentalq-backend.vercel.app/api/\"")
         }
     }
     compileOptions {
@@ -38,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -88,5 +93,9 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.coil.compose)
+
+//    implementation("io.socket:socket.io-client:2.1.0") {
+//        exclude("org.json")
+//    }
 
 }
