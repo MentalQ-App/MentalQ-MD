@@ -1,14 +1,18 @@
 package com.c242_ps246.mentalq.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.repository.AuthRepository
+import com.c242_ps246.mentalq.data.repository.Result
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
-import com.c242_ps246.mentalq.data.repository.Result
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class AuthScreenUIState(
     val isLoading: Boolean = false,
@@ -24,7 +28,8 @@ enum class ForgotPasswordStep {
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthScreenUIState())
     val uiState = _uiState.asStateFlow()
@@ -58,6 +63,76 @@ class AuthViewModel @Inject constructor(
                         success = false
                     )
                 }
+            }
+        }
+    }
+
+    fun loginWithGoogle(account: GoogleSignInAccount) {
+        viewModelScope.launch {
+            val idToken = account.idToken
+            Log.d("GoogleLogin", "Attempting login with ID Token: $idToken")
+
+            if (idToken != null) {
+                try {
+                    val credential = GoogleAuthProvider.getCredential(idToken, null)
+
+                    firebaseAuth.signInWithCredential(credential)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val user = firebaseAuth.currentUser
+                                if (user != null) {
+                                    Log.d(
+                                        "GoogleLogin",
+                                        "Firebase authentication successful for user: ${user.uid}"
+                                    )
+                                    authRepository.googleLogin(user.uid).observeForever { result ->
+                                        when (result) {
+                                            Result.Loading -> {
+                                                Log.d("GoogleLogin", "Login process loading")
+                                                _uiState.value =
+                                                    _uiState.value.copy(isLoading = true)
+                                            }
+
+                                            is Result.Success -> {
+                                                Log.d("GoogleLogin", "Login successful")
+                                                _uiState.value = _uiState.value.copy(
+                                                    isLoading = false,
+                                                    error = null,
+                                                    success = true
+                                                )
+                                            }
+
+                                            is Result.Error -> {
+                                                Log.e(
+                                                    "GoogleLogin",
+                                                    "Login failed: ${result.error}"
+                                                )
+                                                _uiState.value = _uiState.value.copy(
+                                                    isLoading = false,
+                                                    error = result.error,
+                                                    success = false
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Log.e(
+                                        "GoogleLogin",
+                                        "Firebase user is null after successful authentication"
+                                    )
+                                }
+                            } else {
+                                Log.e(
+                                    "GoogleLogin",
+                                    "Firebase authentication failed: ${task.exception?.message}"
+                                )
+                            }
+                        }
+                } catch (e: Exception) {
+                    Log.e("GoogleLogin", "Error during Google login: ${e.message}")
+                }
+            } else {
+                Log.e("GoogleLogin", "ID Token is null")
             }
         }
     }

@@ -2,9 +2,13 @@
 
 package com.c242_ps246.mentalq.ui.auth
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.util.Log
 import android.util.Patterns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -24,11 +28,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -74,6 +80,9 @@ import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import java.util.Calendar
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -88,6 +97,42 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     var toastMessage by remember { mutableStateOf("") }
     var toastType by remember { mutableStateOf(ToastType.INFO) }
     var showForgotPassword by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    var googleSignInResult by remember { mutableStateOf<ActivityResult?>(null) }
+
+    val googleSignInFailedMessage = stringResource(R.string.google_sign_in_failed)
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        googleSignInResult = result
+    }
+
+    LaunchedEffect(Unit) {
+        googleSignInResult?.let { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                try {
+                    val account = task.getResult(ApiException::class.java)
+                    Log.d("GoogleSignIn", "Account obtained: ${account?.email}")
+                    Log.d("GoogleSignIn", "ID Token: ${account?.idToken ?: "No token"}")
+                    account?.let {
+                        viewModel.loginWithGoogle(it)
+                    }
+                } catch (e: ApiException) {
+                    // More detailed logging
+                    Log.e("GoogleSignIn", "Sign-in failed with error code: ${e.statusCode}")
+                    Log.e("GoogleSignIn", "Detailed error: ${e.message}")
+
+                    showToast = true
+                    toastMessage = googleSignInFailedMessage
+                    toastType = ToastType.ERROR
+                }
+                googleSignInResult = null
+            }
+        }
+    }
 
     LaunchedEffect(token) {
         if (!token.isNullOrEmpty()) {
@@ -488,6 +533,46 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                             )
                         }
                     }
+
+                    AnimatedVisibility(
+                        visible = isLogin,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val clientId = context.getString(R.string.default_web_client_id)
+                        Log.e("ClientID", clientId)
+                        Button(
+                            onClick = {
+                                val gso =
+                                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                        .requestIdToken(clientId)
+                                        .requestEmail()
+                                        .build()
+
+                                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                                val signInIntent = googleSignInClient.signInIntent
+                                googleSignInLauncher.launch(signInIntent)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.google_icon),
+                                contentDescription = stringResource(R.string.sign_in_with_google),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.sign_in_with_google),
+                                color = MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
+                    }
                     if (showToast) {
                         CustomToast(
                             message = toastMessage,
@@ -532,7 +617,6 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                 }
             }
         }
-
     }
 }
 

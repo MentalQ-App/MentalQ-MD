@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.data.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
@@ -22,10 +23,54 @@ class AuthRepository(
     private val analysisDao: AnalysisDao,
     private val preferencesManager: MentalQAppPreferences
 ) {
-    fun login(email: String, password: String): LiveData<Result<AuthResponse>> = liveData {
+    fun login(
+        email: String,
+        password: String
+    ): LiveData<Result<AuthResponse>> = liveData {
         emit(Result.Loading)
         try {
             val response = authApiService.login(email, password)
+            if (response.error == false) {
+                val role = response.user?.role
+                if (role.isNullOrEmpty()) {
+                    emit(Result.Error("No user role found"))
+                    return@liveData
+                }
+
+                withContext(Dispatchers.IO) {
+                    response.token?.let { token ->
+                        preferencesManager.saveToken(token)
+                        val savedToken = preferencesManager.getToken().first()
+                        if (savedToken.isEmpty()) {
+                            throw Exception("Token failed to save")
+                        }
+                    }
+                    preferencesManager.saveUserRole(role)
+                    val savedRole = preferencesManager.getUserRole().first()
+                    if (savedRole.isEmpty()) {
+                        throw Exception("User role failed to save")
+                    }
+                }
+                userDao.clearUserData()
+                response.user.let { userDao.insertUser(it) }
+
+                emit(Result.Success(response))
+            } else {
+                emit(Result.Error(response.message.toString()))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("An error occurred: ${e.message}"))
+        }
+    }
+
+    fun googleLogin(
+        firebaseToken: String
+    ): LiveData<Result<AuthResponse>> = liveData {
+        emit(Result.Loading)
+        Log.e("GoogleLogin", "Firebase token: $firebaseToken")
+        try {
+            Log.e("GoogleLogin", "Trying to login")
+            val response = authApiService.googleLogin(firebaseToken)
             if (response.error == false) {
                 val role = response.user?.role
                 if (role.isNullOrEmpty()) {

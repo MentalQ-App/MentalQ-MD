@@ -20,6 +20,8 @@ import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.ChatRepository
 import com.c242_ps246.mentalq.data.repository.NoteRepository
 import com.c242_ps246.mentalq.data.repository.UserRepository
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,6 +53,16 @@ object AppModule {
     fun provideMentalQAppPreferences(context: Context): MentalQAppPreferences {
         return MentalQAppPreferences(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+
+    @Provides
+    @Singleton
+    fun provideFirebaseApp(context: Context): FirebaseApp =
+        FirebaseApp.initializeApp(context)
+            ?: throw IllegalStateException("FirebaseApp initialization failed")
 
     @Provides
     @Singleton
