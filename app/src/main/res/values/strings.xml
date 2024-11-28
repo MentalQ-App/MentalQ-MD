@@ -104,14 +104,8 @@
     <string name="new_password">New Password</string>
     <string name="confirm_email">Confirm Password</string>
     <string name="reset_password">Reset Password</string>
+
     <string name="note_not_sufficient">Notes are not sufficient</string>
-    <!--    <string name="welcome">Welcome</string>-->
-    <!--    <string name="get_started">Let\'s get started!</string>-->
-    <!--    <string name="login">Login</string>-->
-    <!--    <string name="register">Register</string>-->
-    <!--    <string name="full_name">Full Name</string>-->
-    <!--    <string name="username">Username</string>-->
-    <!--    <string name="password">Password</string>-->
     <string name="anxiety_message">Your feelings of anxiety are valid, and it\'s brave of you to acknowledge what you\'re experiencing. Please consider reaching out to a mental health professional who can provide you with effective coping strategies.</string>
     <string name="bipolar_message">While managing mood fluctuations can feel overwhelming, remember that you have the strength to navigate through these challenges. Consider consulting with a psychiatrist who can develop a treatment plan that works for you.</string>
     <string name="depression_message">The weight you\'re carrying is real, and seeking help isn\'t a sign of weakness but a step toward healing. A mental health professional can offer you support and evidence-based treatments.</string>
@@ -120,8 +114,8 @@
     <string name="stress_message">Your body and mind are telling you something important, and it\'s okay to address the pressure you\'re feeling. A mental health professional can teach you practical management techniques.</string>
     <string name="suicidal_message">Your life has value and meaning, and there are people who want to support you - you\'re not alone. Please reach out to a mental health professional or crisis hotline immediately.</string>
     <string name="unknown_condition_message">Whatever you\'re experiencing, your feelings are valid and deserve attention. Consider speaking with a mental health professional who can provide proper guidance.</string>
+
     <string name="add_more_note">Please provide more information about how you\'re feeling to receive a more accurate assessment (at least 7 notes).</string>
-    <string name="default_web_client_id">1056734232546-iate9qqt2lj4m6la44vohi4odedc8fqg.apps.googleusercontent.com</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="google_sign_in_failed">Google Sign-In failed</string>
 </resources>

@@ -7,7 +7,6 @@ import android.app.DatePickerDialog
 import android.util.Log
 import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -35,7 +34,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -82,7 +83,6 @@ import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import java.util.Calendar
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -99,37 +99,46 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     var showForgotPassword by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    var googleSignInResult by remember { mutableStateOf<ActivityResult?>(null) }
-
-    val googleSignInFailedMessage = stringResource(R.string.google_sign_in_failed)
+    val clientId = remember {
+        val id = context.getString(R.string.default_web_client_id)
+        Log.e("GoogleSignIn", "Configured Client ID: $id")
+        id
+    }
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        googleSignInResult = result
-    }
-
-    LaunchedEffect(Unit) {
-        googleSignInResult?.let { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account = task.getResult(ApiException::class.java)
-                    Log.d("GoogleSignIn", "Account obtained: ${account?.email}")
-                    Log.d("GoogleSignIn", "ID Token: ${account?.idToken ?: "No token"}")
-                    account?.let {
-                        viewModel.loginWithGoogle(it)
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                val data = result.data
+                if (data != null) {
+                    try {
+                        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                        if (task.isSuccessful) {
+                            val account = task.result
+                            viewModel.loginWithGoogle(account)
+                        } else {
+                            showToast = true
+                            toastMessage = "Google Sign-In Failed: ${task.exception?.message}"
+                        }
+                    } catch (e: Exception) {
+                        showToast = true
+                        toastMessage = "Google Sign-In Failed: ${e.message}"
                     }
-                } catch (e: ApiException) {
-                    // More detailed logging
-                    Log.e("GoogleSignIn", "Sign-in failed with error code: ${e.statusCode}")
-                    Log.e("GoogleSignIn", "Detailed error: ${e.message}")
-
+                } else {
                     showToast = true
-                    toastMessage = googleSignInFailedMessage
-                    toastType = ToastType.ERROR
+                    toastMessage = "No data returned from Google Sign-In"
                 }
-                googleSignInResult = null
+            }
+
+            Activity.RESULT_CANCELED -> {
+                showToast = true
+                toastMessage = "Google Sign-In Cancelled"
+            }
+
+            else -> {
+                showToast = true
+                toastMessage = "Unexpected error during Google Sign-In"
             }
         }
     }
@@ -287,12 +296,13 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                     ),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
             ) {
                 Column(
                     modifier = Modifier
                         .padding(24.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -540,37 +550,52 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                         exit = shrinkVertically() + fadeOut()
                     ) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        val clientId = context.getString(R.string.default_web_client_id)
-                        Log.e("ClientID", clientId)
                         Button(
                             onClick = {
-                                val gso =
-                                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                        .requestIdToken(clientId)
-                                        .requestEmail()
-                                        .build()
+                                try {
+                                    val gso =
+                                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                            .requestIdToken(clientId)
+                                            .requestEmail()
+                                            .requestProfile()
+                                            .build()
 
-                                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                                val signInIntent = googleSignInClient.signInIntent
-                                googleSignInLauncher.launch(signInIntent)
+                                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+
+                                    googleSignInClient.signOut()
+
+                                    val signInIntent = googleSignInClient.signInIntent
+                                    googleSignInLauncher.launch(signInIntent)
+                                } catch (e: Exception) {
+                                    showToast = true
+                                    toastMessage = "Error preparing Google Sign-In: ${e.message}"
+                                }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
-                            )
+                            ),
+                            enabled = !uiState.isLoading
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.google_icon),
-                                contentDescription = stringResource(R.string.sign_in_with_google),
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.sign_in_with_google),
-                                color = MaterialTheme.colorScheme.onSecondary
-                            )
+                            if (uiState.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.google_icon),
+                                    contentDescription = stringResource(R.string.sign_in_with_google),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(R.string.sign_in_with_google),
+                                    color = MaterialTheme.colorScheme.onSecondary
+                                )
+                            }
                         }
                     }
                     if (showToast) {

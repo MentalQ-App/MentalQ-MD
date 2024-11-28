@@ -70,7 +70,6 @@ class AuthViewModel @Inject constructor(
     fun loginWithGoogle(account: GoogleSignInAccount) {
         viewModelScope.launch {
             val idToken = account.idToken
-            Log.d("GoogleLogin", "Attempting login with ID Token: $idToken")
 
             if (idToken != null) {
                 try {
@@ -81,40 +80,59 @@ class AuthViewModel @Inject constructor(
                             if (task.isSuccessful) {
                                 val user = firebaseAuth.currentUser
                                 if (user != null) {
-                                    Log.d(
-                                        "GoogleLogin",
-                                        "Firebase authentication successful for user: ${user.uid}"
-                                    )
-                                    authRepository.googleLogin(user.uid).observeForever { result ->
-                                        when (result) {
-                                            Result.Loading -> {
-                                                Log.d("GoogleLogin", "Login process loading")
-                                                _uiState.value =
-                                                    _uiState.value.copy(isLoading = true)
-                                            }
 
-                                            is Result.Success -> {
-                                                Log.d("GoogleLogin", "Login successful")
-                                                _uiState.value = _uiState.value.copy(
-                                                    isLoading = false,
-                                                    error = null,
-                                                    success = true
+                                    user.getIdToken(true)
+                                        .addOnCompleteListener { tokenTask ->
+                                            if (tokenTask.isSuccessful) {
+                                                val firebaseIdToken = tokenTask.result?.token
+                                                Log.d(
+                                                    "GoogleLogin",
+                                                    "Firebase ID Token: $firebaseIdToken"
                                                 )
-                                            }
 
-                                            is Result.Error -> {
+                                                if (firebaseIdToken != null) {
+                                                    authRepository.googleLogin(firebaseIdToken)
+                                                        .observeForever { result ->
+                                                            when (result) {
+                                                                Result.Loading -> {
+                                                                    _uiState.value =
+                                                                        _uiState.value.copy(
+                                                                            isLoading = true
+                                                                        )
+                                                                }
+
+                                                                is Result.Success -> {
+                                                                    _uiState.value =
+                                                                        _uiState.value.copy(
+                                                                            isLoading = false,
+                                                                            error = null,
+                                                                            success = true
+                                                                        )
+                                                                }
+
+                                                                is Result.Error -> {
+                                                                    _uiState.value =
+                                                                        _uiState.value.copy(
+                                                                            isLoading = false,
+                                                                            error = result.error,
+                                                                            success = false
+                                                                        )
+                                                                }
+                                                            }
+                                                        }
+                                                } else {
+                                                    Log.e(
+                                                        "GoogleLogin",
+                                                        "Firebase ID Token is null"
+                                                    )
+                                                }
+                                            } else {
                                                 Log.e(
                                                     "GoogleLogin",
-                                                    "Login failed: ${result.error}"
-                                                )
-                                                _uiState.value = _uiState.value.copy(
-                                                    isLoading = false,
-                                                    error = result.error,
-                                                    success = false
+                                                    "Failed to get Firebase ID Token: ${tokenTask.exception?.message}"
                                                 )
                                             }
                                         }
-                                    }
                                 } else {
                                     Log.e(
                                         "GoogleLogin",
@@ -132,10 +150,11 @@ class AuthViewModel @Inject constructor(
                     Log.e("GoogleLogin", "Error during Google login: ${e.message}")
                 }
             } else {
-                Log.e("GoogleLogin", "ID Token is null")
+                Log.e("GoogleLogin", "Google ID Token is null")
             }
         }
     }
+
 
     fun register(name: String, email: String, password: String, birthday: String) {
         authRepository.register(name, email, password, birthday).observeForever { result ->

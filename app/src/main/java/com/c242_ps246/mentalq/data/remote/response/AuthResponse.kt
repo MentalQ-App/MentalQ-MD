@@ -47,7 +47,7 @@ data class UserData(
     val email: String,
 
     @field:SerializedName("birthday")
-    val birthday: String,
+    val birthday: String? = null,
 
     @field:SerializedName("profile_photo_url")
     val profilePhotoUrl: String? = null,
