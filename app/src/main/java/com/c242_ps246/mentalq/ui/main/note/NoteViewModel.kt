@@ -1,15 +1,16 @@
 package com.c242_ps246.mentalq.ui.main.note
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.data.repository.NoteRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import com.c242_ps246.mentalq.data.repository.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class NoteScreenUiState(
@@ -27,7 +28,7 @@ class NoteViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(NoteScreenUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _listNote = MutableStateFlow<List<ListNoteItem>>(emptyList())
+    private val _listNote = MutableStateFlow<List<ListNoteItem>?>(emptyList())
     val listNote = _listNote.asStateFlow()
 
     private val _navigateToNoteDetail = MutableStateFlow<String?>(null)
@@ -42,15 +43,17 @@ class NoteViewModel @Inject constructor(
             noteRepository.getAllNotes().observeForever { result ->
                 when (result) {
                     Result.Loading -> {
+                        Log.d("NoteViewModel", "loadAllNotes: Loading")
                         _uiState.value = _uiState.value.copy(isLoading = true)
                     }
 
                     is Result.Success -> {
+                        Log.d("NoteViewModel", "loadAllNotes: ${result.data}")
                         val notes = result.data
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
                             error = null,
-                            success = notes.isNotEmpty()
+                            success = true
                         )
                         _listNote.value = notes
                     }
@@ -81,7 +84,7 @@ class NoteViewModel @Inject constructor(
                             error = null,
                             success = true
                         )
-                        _listNote.value = _listNote.value + result.data
+                        _listNote.value = _listNote.value?.plus(result.data)
                         _navigateToNoteDetail.value = result.data.id
                     }
 
@@ -107,7 +110,7 @@ class NoteViewModel @Inject constructor(
                     is Result.Success -> {
                         _uiState.value =
                             _uiState.value.copy(isLoading = false, error = null, success = true)
-                        _listNote.value = _listNote.value.filter { it.id != noteId }
+                        _listNote.value = _listNote.value?.filter { it.id != noteId }
                     }
 
                     is Result.Error -> {

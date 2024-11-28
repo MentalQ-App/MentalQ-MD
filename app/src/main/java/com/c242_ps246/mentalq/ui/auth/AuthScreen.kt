@@ -93,6 +93,21 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     val token by viewModel.token.collectAsStateWithLifecycle()
     val role by viewModel.role.collectAsStateWithLifecycle()
 
+    LaunchedEffect(token) {
+        if (!token.isNullOrEmpty()) {
+            viewModel.getUserRole()
+        }
+    }
+
+    LaunchedEffect(role) {
+        if (role != null) {
+            val authenticatedRole = role
+            if (authenticatedRole != null) {
+                onSuccess(authenticatedRole)
+            }
+        }
+    }
+
     var showToast by remember { mutableStateOf(false) }
     var toastMessage by remember { mutableStateOf("") }
     var toastType by remember { mutableStateOf(ToastType.INFO) }
@@ -139,17 +154,6 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
             else -> {
                 showToast = true
                 toastMessage = "Unexpected error during Google Sign-In"
-            }
-        }
-    }
-
-    LaunchedEffect(token) {
-        if (!token.isNullOrEmpty()) {
-            viewModel.getUserRole()
-            val authenticatedRole = role
-            if (authenticatedRole != null) {
-                Log.e("Role", authenticatedRole)
-                onSuccess(authenticatedRole)
             }
         }
     }

@@ -8,45 +8,39 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import android.content.res.Configuration
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
-import com.c242_ps246.mentalq.ui.component.ToastType
-import com.c242_ps246.mentalq.ui.theme.MentalQTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import com.c242_ps246.mentalq.ui.component.CustomToast
+import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -58,7 +52,6 @@ fun NoteScreen(
     val uiState by viewModel.uiState.collectAsState()
     val listNote by viewModel.listNote.collectAsState()
 
-    // Use configuration to determine screen width
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
@@ -68,7 +61,6 @@ fun NoteScreen(
 
     val navigateToNoteDetail by viewModel.navigateToNoteDetail.collectAsState()
 
-    // Responsive padding based on screen width
     val screenPadding = when {
         screenWidth < 600.dp -> 16.dp
         screenWidth < 840.dp -> 24.dp
@@ -134,13 +126,13 @@ fun NoteScreen(
                             CreatingNoteState()
                         }
 
-                        listNote.isEmpty() -> {
+                        listNote.isNullOrEmpty() -> {
                             EmptyState()
                         }
 
                         else -> {
                             ResponsiveNoteList(
-                                notes = listNote,
+                                notes = listNote ?: emptyList(),
                                 onItemClick = onNavigateToNoteDetail,
                                 onItemDelete = { note -> viewModel.deleteNote(note.id) },
                                 screenWidth = screenWidth

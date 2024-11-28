@@ -182,12 +182,16 @@ class AuthViewModel @Inject constructor(
     private fun getToken() {
         authRepository.getToken().observeForever {
             _token.value = it
+
+            authRepository.getToken().removeObserver { this }
         }
     }
 
     fun getUserRole() {
         authRepository.getUserRole().observeForever {
             _role.value = it
+
+            authRepository.getUserRole().removeObserver { this }
         }
     }
 

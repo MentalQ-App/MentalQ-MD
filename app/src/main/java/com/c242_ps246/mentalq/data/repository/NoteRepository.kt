@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.data.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.c242_ps246.mentalq.data.local.room.NoteDao
@@ -12,17 +13,17 @@ class NoteRepository(
     private val noteDao: NoteDao,
     private val noteApiService: NoteApiService
 ) {
-    fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData(Dispatchers.IO) {
+    fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData {
+        Log.d("NoteRepository", "getAllNotes called")
         emit(Result.Loading)
         try {
             val localData = noteDao.getAllNotes()
-            if (localData.isNotEmpty()) {
-                emit(Result.Success(localData.sortedByDescending { it.createdAt }))
-            }
+            emit(Result.Success(localData.sortedByDescending { it.createdAt }))
 
             try {
                 val response = noteApiService.getNotes()
                 val remoteNotes = response.listNote
+                Log.d("NoteRepository", "remoteNotes: $remoteNotes")
 
                 if (remoteNotes != null) {
                     val noteList = remoteNotes.map { note ->
