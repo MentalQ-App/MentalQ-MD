@@ -14,3 +14,4 @@
 .cxx
 local.properties
 debug.keystore
+/app/google-services.json
