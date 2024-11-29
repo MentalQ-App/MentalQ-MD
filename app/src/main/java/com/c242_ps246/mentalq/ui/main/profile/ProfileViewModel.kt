@@ -4,11 +4,11 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.c242_ps246.mentalq.data.repository.AuthRepository
-import com.c242_ps246.mentalq.data.repository.UserRepository
-import com.c242_ps246.mentalq.data.repository.Result
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.UserData
+import com.c242_ps246.mentalq.data.repository.AuthRepository
+import com.c242_ps246.mentalq.data.repository.Result
+import com.c242_ps246.mentalq.data.repository.UserRepository
 import com.c242_ps246.mentalq.ui.auth.AuthScreenUIState
 import com.c242_ps246.mentalq.ui.notification.NotificationHelper
 import com.c242_ps246.mentalq.ui.notification.StreakWorker
@@ -78,10 +78,6 @@ class ProfileViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
     }
 
     fun updateProfile(
