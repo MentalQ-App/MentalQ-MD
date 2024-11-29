@@ -28,10 +28,18 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://mentalq-backend.vercel.app/api/\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
+            )
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://mentalq-backend.vercel.app/api/\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
+            )
         }
     }
     compileOptions {
@@ -96,6 +104,8 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.coil.compose)
+
+    implementation(libs.androidx.core.splashscreen)
 
 //    implementation("io.socket:socket.io-client:2.1.0") {
 //        exclude("org.json")

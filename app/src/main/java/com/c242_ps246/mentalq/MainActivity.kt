@@ -13,14 +13,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.ui.navigation.AppNavigation
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingViewModel
+import com.c242_ps246.mentalq.ui.splash.SplashScreen
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.internal.InjectedFieldSignature
 import javax.inject.Inject
 import kotlin.getValue
 
@@ -36,7 +39,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AppContent(onboardingViewModel, preferencesManager)
+            var showSplashScreen by remember { mutableStateOf(true) }
+
+            if (showSplashScreen) {
+                MentalQTheme {
+                    SplashScreen { token, role ->
+                        showSplashScreen = false
+                    }
+                }
+            } else {
+                AppContent(onboardingViewModel, preferencesManager)
+            }
         }
     }
 }
