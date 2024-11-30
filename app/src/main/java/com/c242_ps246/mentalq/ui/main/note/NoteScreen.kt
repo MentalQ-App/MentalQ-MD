@@ -1,6 +1,7 @@
 package com.c242_ps246.mentalq.ui.main.note
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -29,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalConfiguration
@@ -48,6 +48,10 @@ import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeParseException
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -67,6 +71,21 @@ fun NoteScreen(
 
     val navigateToNoteDetail by viewModel.navigateToNoteDetail.collectAsState()
 
+    val today = LocalDate.now(ZoneId.systemDefault())
+
+    val isTodayAlreadyAdded = listNote?.any { note ->
+        note.createdAt?.let { createdAt ->
+            try {
+                val instant = Instant.parse(createdAt)
+                val createdAtDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDate()
+                createdAtDateTime == today
+            } catch (e: DateTimeParseException) {
+                Log.e("NoteScreen", "Date parsing error: ${e.message}")
+                false
+            }
+        } == true
+    } == true
+
     val screenPadding = when {
         screenWidth < 600.dp -> 16.dp
         screenWidth < 840.dp -> 24.dp
@@ -80,6 +99,16 @@ fun NoteScreen(
                 toastMessage = uiState.error ?: "An Error Occurred"
                 toastType = ToastType.ERROR
                 viewModel.clearError()
+            }
+        }
+    }
+
+    LaunchedEffect(isTodayAlreadyAdded) {
+        when {
+            isTodayAlreadyAdded == true -> {
+                showToast = true
+                toastMessage = "You have already added a note for today, come back again tomorrow!"
+                toastType = ToastType.INFO
             }
         }
     }
@@ -113,7 +142,7 @@ fun NoteScreen(
                                 )
                             )
                         },
-                        isEnabled = !uiState.isCreatingNewNote,
+                        isEnabled = !uiState.isCreatingNewNote && isTodayAlreadyAdded == false,
                         screenWidth = screenWidth
                     )
 
@@ -412,19 +441,12 @@ private fun ResponsiveToast(
     type: ToastType,
     onDismiss: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Transparent),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        CustomToast(
-            message = message,
-            type = type,
-            duration = 2000L,
-            onDismiss = onDismiss
-        )
-    }
+    CustomToast(
+        message = message,
+        type = type,
+        duration = 2000L,
+        onDismiss = onDismiss,
+    )
 }
 
 @Composable
