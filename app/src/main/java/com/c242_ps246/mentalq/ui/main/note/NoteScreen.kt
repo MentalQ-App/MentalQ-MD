@@ -2,6 +2,12 @@ package com.c242_ps246.mentalq.ui.main.note
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -114,10 +120,6 @@ fun NoteScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     when {
-                        uiState.isLoading -> {
-                            LoadingState()
-                        }
-
                         !uiState.error.isNullOrEmpty() -> {
                             ErrorState(error = uiState.error!!)
                         }
@@ -135,7 +137,8 @@ fun NoteScreen(
                                 notes = listNote ?: emptyList(),
                                 onItemClick = onNavigateToNoteDetail,
                                 onItemDelete = { note -> viewModel.deleteNote(note.id) },
-                                screenWidth = screenWidth
+                                screenWidth = screenWidth,
+                                isLoading = uiState.isLoading
                             )
                         }
                     }
@@ -205,10 +208,11 @@ private fun ResponsiveHeader(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ResponsiveNoteList(
-    notes: List<ListNoteItem>,
+    notes: List<ListNoteItem>?,
     onItemClick: (String) -> Unit,
     onItemDelete: (ListNoteItem) -> Unit,
-    screenWidth: Dp
+    screenWidth: Dp,
+    isLoading: Boolean
 ) {
     val listWidth = if (screenWidth >= 840.dp) {
         Modifier.fillMaxWidth(0.8f)
@@ -220,23 +224,37 @@ private fun ResponsiveNoteList(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        LazyColumn(
-            modifier = listWidth
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.background),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            itemsIndexed(notes) { index, item ->
-                ResponsiveNoteItem(
-                    data = item,
-                    onItemClick = onItemClick,
-                    onItemDelete = onItemDelete,
-                    screenWidth = screenWidth
-                )
+        if (isLoading) {
+            LazyColumn(
+                modifier = listWidth
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(1) {
+                    SkeletonNoteItem(screenWidth)
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = listWidth
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(notes ?: emptyList()) { _, item ->
+                    ResponsiveNoteItem(
+                        data = item,
+                        onItemClick = onItemClick,
+                        onItemDelete = onItemDelete,
+                        screenWidth = screenWidth
+                    )
+                }
             }
         }
     }
 }
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
@@ -356,17 +374,6 @@ private fun ResponsiveNoteItem(
     }
 }
 
-
-@Composable
-private fun LoadingState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
 @Composable
 private fun ErrorState(error: String) {
     Box(
@@ -435,3 +442,55 @@ fun EmptyState() {
         )
     }
 }
+
+@Composable
+private fun SkeletonNoteItem(screenWidth: Dp) {
+    val cardPadding = if (screenWidth < 600.dp) 12.dp else 16.dp
+    val placeholderBaseColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val shimmerAlpha = infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+    val placeholderColor = placeholderBaseColor.copy(alpha = shimmerAlpha.value)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(cardPadding)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(20.dp)
+                    .background(placeholderColor, shape = RoundedCornerShape(8.dp))
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(14.dp)
+                    .background(placeholderColor, shape = RoundedCornerShape(8.dp))
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .height(14.dp)
+                    .background(placeholderColor, shape = RoundedCornerShape(8.dp))
+            )
+        }
+    }
+}
+
+

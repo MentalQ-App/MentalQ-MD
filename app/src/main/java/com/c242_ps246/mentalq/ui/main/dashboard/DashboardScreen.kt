@@ -2,7 +2,12 @@ package com.c242_ps246.mentalq.ui.main.dashboard
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.graphics.Path
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -19,9 +24,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -39,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -390,7 +398,7 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                SkeletonLoader()
                             }
                         }
 
@@ -449,6 +457,70 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.padding(top = 4.dp)
             )
+        }
+    }
+}
+
+@Composable
+fun SkeletonLoader(modifier: Modifier = Modifier, itemCount: Int = 3) {
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+
+    val shimmerAlpha = infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+    val placeholderColor = Color.Gray.copy(alpha = shimmerAlpha.value)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        repeat(itemCount) { index ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(placeholderColor, shape = CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .height(16.dp)
+                                .fillMaxWidth(0.7f + (0.1f * index))
+                                .background(placeholderColor, shape = RoundedCornerShape(8.dp))
+                        )
+                        // Placeholder for content (shorter width, dynamic)
+                        Box(
+                            modifier = Modifier
+                                .height(14.dp)
+                                .fillMaxWidth(0.5f + (0.1f * index))  // Varying width per item
+                                .background(placeholderColor, shape = RoundedCornerShape(8.dp))
+                        )
+                    }
+                }
+            }
         }
     }
 }

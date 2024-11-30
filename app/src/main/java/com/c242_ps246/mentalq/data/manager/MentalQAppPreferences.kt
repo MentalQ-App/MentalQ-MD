@@ -1,6 +1,7 @@
 package com.c242_ps246.mentalq.data.manager
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -53,6 +54,7 @@ class MentalQAppPreferences @Inject constructor(
         context.dataStore.edit { preferences ->
             preferences[LAST_ENTRY_DATE] = lastEntryDate
             preferences[STREAK_COUNT] = streakCount.toString()
+            Log.d("StreakInfoSave", "Last Entry Date: $lastEntryDate, Streak Count: $streakCount")
         }
     }
 
@@ -60,6 +62,7 @@ class MentalQAppPreferences @Inject constructor(
         return context.dataStore.data.map { preferences ->
             val lastEntryDate = preferences[LAST_ENTRY_DATE] ?: ""
             val streakCount = preferences[STREAK_COUNT]?.toInt() ?: 0
+            Log.d("StreakInfoGet", "Last Entry Date: $lastEntryDate, Streak Count: $streakCount")
             Pair(lastEntryDate, streakCount)
         }
     }
@@ -72,7 +75,7 @@ class MentalQAppPreferences @Inject constructor(
 
     fun getNotificationsState(): Flow<Boolean> {
         return context.dataStore.data.map { preferences ->
-            preferences[NOTIFICATIONS_ENABLED] ?: false
+            preferences[NOTIFICATIONS_ENABLED] == true
         }
     }
 

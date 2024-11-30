@@ -1,9 +1,12 @@
 package com.c242_ps246.mentalq.ui.main.profile
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.data.repository.AuthRepository
@@ -13,7 +16,6 @@ import com.c242_ps246.mentalq.ui.auth.AuthScreenUIState
 import com.c242_ps246.mentalq.ui.notification.NotificationHelper
 import com.c242_ps246.mentalq.ui.notification.StreakWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,8 +29,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val preferencesManager: MentalQAppPreferences,
-    @ApplicationContext private val context: Context
+    private val preferencesManager: MentalQAppPreferences
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthScreenUIState())
@@ -49,15 +50,16 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun setNotificationsEnabled(enabled: Boolean) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun setNotificationsEnabled(enabled: Boolean, context: Context) {
         viewModelScope.launch {
-            if (enabled) {
-                NotificationHelper.createNotificationChannel(context)
-                StreakWorker.schedule(context)
-            } else {
-                StreakWorker.cancel(context)
-            }
             preferencesManager.setNotificationsEnabled(enabled)
+            if (enabled) {
+                StreakWorker.scheduleNextNotification(context)
+            } else {
+                WorkManager.getInstance(context)
+                    .cancelUniqueWork(NotificationHelper.WORK_NAME)
+            }
         }
     }
 

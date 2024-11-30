@@ -3,18 +3,21 @@ package com.c242_ps246.mentalq.ui.notification
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.work.Constraints
 import androidx.work.CoroutineWorker
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
 class StreakWorker(
@@ -22,54 +25,66 @@ class StreakWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
-    companion object {
-        private const val WORK_NAME = "streak_checker"
-
-        fun schedule(context: Context) {
-            val workRequest = PeriodicWorkRequestBuilder<StreakWorker>(
-                1, TimeUnit.DAYS
-            ).build()
-
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                WORK_NAME,
-                ExistingPeriodicWorkPolicy.UPDATE,
-                workRequest
-            )
-        }
-
-        fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun doWork(): Result {
-        try {
-            val streakInfo = runBlocking { getStreakInfo().first() }
-            val lastEntryDate = streakInfo.first
-            val streakCount = streakInfo.second
+        return try {
+            val streakInfo = getStreakInfo(applicationContext).firstOrNull()
 
-            val today = LocalDate.now()
-            val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+            streakInfo?.let { (lastEntryDate, streakCount) ->
+                val today = LocalDate.now()
+                val formatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-            if (lastEntryDate.isNotEmpty()) {
-                val lastEntryLocalDate = LocalDate.parse(lastEntryDate, formatter)
-                val hoursSinceLastEntry = ChronoUnit.HOURS.between(
-                    lastEntryLocalDate.atStartOfDay(),
-                    today.atStartOfDay()
-                )
-
-                if (hoursSinceLastEntry >= 23 && hoursSinceLastEntry < 24) {
-                    NotificationHelper.showStreakNotification(streakCount, applicationContext)
+                if (lastEntryDate.isNotEmpty()) {
+                    val lastEntryLocalDate = LocalDate.parse(lastEntryDate, formatter)
+                    if (lastEntryLocalDate != today) {
+                        showNotification(streakCount)
+                    }
                 }
             }
-            return Result.success()
+            scheduleNextNotification(applicationContext)
+
+            Result.success()
         } catch (e: Exception) {
-            return Result.failure()
+            Result.failure()
         }
     }
 
-    private fun getStreakInfo(): Flow<Pair<String, Int>> {
-        return MentalQAppPreferences(applicationContext).getStreakInfo()
+    private fun showNotification(streakCount: Int) {
+        val notificationHelper = NotificationHelper(applicationContext)
+        notificationHelper.showStreakNotification(streakCount)
+    }
+
+    private suspend fun getStreakInfo(context: Context) = withContext(Dispatchers.IO) {
+        MentalQAppPreferences(context).getStreakInfo()
+    }
+
+    companion object {
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun scheduleNextNotification(context: Context) {
+            val now = LocalDateTime.now()
+            val nextMidnight = now.plusDays(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0)
+
+            val initialDelay = Duration.between(now, nextMidnight).toMillis()
+
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                .build()
+
+            val dailyWorkRequest = OneTimeWorkRequestBuilder<StreakWorker>()
+                .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+                .setConstraints(constraints)
+                .build()
+
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(
+                    NotificationHelper.WORK_NAME,
+                    ExistingWorkPolicy.REPLACE,
+                    dailyWorkRequest
+                )
+        }
     }
 }

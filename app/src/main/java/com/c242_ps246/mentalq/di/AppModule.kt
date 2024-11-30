@@ -3,6 +3,7 @@ package com.c242_ps246.mentalq.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import androidx.work.WorkManager
 import com.c242_ps246.mentalq.BuildConfig
 import com.c242_ps246.mentalq.data.local.room.AnalysisDao
 import com.c242_ps246.mentalq.data.local.room.ChatDao
@@ -46,6 +47,12 @@ object AppModule {
     @Singleton
     fun provideContext(application: Application): Context {
         return application.applicationContext
+    }
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(context: Context): WorkManager {
+        return WorkManager.getInstance(context)
     }
 
     @Provides

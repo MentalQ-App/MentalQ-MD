@@ -30,6 +30,7 @@ import androidx.compose.material3.DatePickerDefaults.dateFormatter
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +58,6 @@ import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.ui.component.CustomDialog
 import com.c242_ps246.mentalq.ui.notification.NotificationHelper
-import com.c242_ps246.mentalq.ui.notification.StreakWorker
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.c242_ps246.mentalq.ui.utils.Utils.compressImageSize
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
@@ -77,6 +77,7 @@ fun ProfileScreen(onLogout: () -> Unit) {
     val userData by viewModel.userData.collectAsStateWithLifecycle()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsStateWithLifecycle()
     var showConfirmDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.getUserData()
@@ -99,21 +100,27 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 }
 
                 item {
-                    ProfileInfo(userData = userData, onLogout = {
-                        if (!uiState.isLoading) {
-                            viewModel.logout()
-                            onLogout()
-                        }
-                    })
+                    ProfileInfo(
+                        userData = userData, onLogout = {
+                            if (!uiState.isLoading) {
+                                viewModel.logout()
+                                onLogout()
+                            }
+                        },
+                        viewModel = viewModel
+                    )
                 }
 
                 item {
                     PreferencesSection(
                         notificationsEnabled = notificationsEnabled,
                         onNotificationChange = { isEnabled ->
-                            viewModel.setNotificationsEnabled(isEnabled)
+                            val notificationHelper = NotificationHelper(context)
+                            notificationHelper.createNotificationChannel()
+                            viewModel.setNotificationsEnabled(isEnabled, context)
                         },
-                        onShowLogoutDialog = { showConfirmDialog = true }
+                        onShowLogoutDialog = { showConfirmDialog = true },
+                        viewModel = viewModel
                     )
                 }
 
@@ -131,7 +138,11 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 }
             }
             if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
+                ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -184,10 +195,14 @@ fun ProfileImage(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun ProfileInfo(userData: UserData?, onLogout: () -> Unit) {
-    val viewModel: ProfileViewModel = hiltViewModel()
+private fun ProfileInfo(
+    userData: UserData?,
+    onLogout: () -> Unit,
+    viewModel: ProfileViewModel
+) {
     var showEditDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter
@@ -206,7 +221,8 @@ private fun ProfileInfo(userData: UserData?, onLogout: () -> Unit) {
             Button(
                 onClick = { showEditDialog = true },
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(8.dp),
+                enabled = !uiState.isLoading
             ) {
                 Text(stringResource(id = R.string.edit_profile))
             }
@@ -472,11 +488,13 @@ private fun UserDetailInfo(userData: UserData?) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PreferencesSection(
     notificationsEnabled: Boolean,
     onNotificationChange: (Boolean) -> Unit,
-    onShowLogoutDialog: () -> Unit
+    onShowLogoutDialog: () -> Unit,
+    viewModel: ProfileViewModel
 ) {
     val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -484,8 +502,12 @@ fun PreferencesSection(
         onResult = { isGranted ->
             if (isGranted) {
                 onNotificationChange(true)
-                NotificationHelper.createNotificationChannel(context)
-                StreakWorker.schedule(context)
+                val notificationHelper = NotificationHelper(context)
+                notificationHelper.createNotificationChannel()
+                viewModel.setNotificationsEnabled(true, context)
+            } else {
+                onNotificationChange(false)
+                viewModel.setNotificationsEnabled(false, context)
             }
         }
     )
@@ -528,8 +550,9 @@ fun PreferencesSection(
                             )) {
                                 PackageManager.PERMISSION_GRANTED -> {
                                     onNotificationChange(true)
-                                    NotificationHelper.createNotificationChannel(context)
-                                    StreakWorker.schedule(context)
+                                    val notificationHelper = NotificationHelper(context)
+                                    notificationHelper.createNotificationChannel()
+                                    viewModel.setNotificationsEnabled(true, context)
                                 }
 
                                 else -> {
@@ -538,12 +561,11 @@ fun PreferencesSection(
                             }
                         } else {
                             onNotificationChange(true)
-                            NotificationHelper.createNotificationChannel(context)
-                            StreakWorker.schedule(context)
+                            viewModel.setNotificationsEnabled(true, context)
                         }
                     } else {
                         onNotificationChange(false)
-                        StreakWorker.cancel(context)
+                        viewModel.setNotificationsEnabled(false, context)
                     }
                 }
             )
