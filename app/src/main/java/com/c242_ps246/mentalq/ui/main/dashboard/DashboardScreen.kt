@@ -74,6 +74,7 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
     val userData by viewModel.userData.collectAsState()
     val streakInfo by viewModel.streakInfo.collectAsState()
     val predictedStatusMode by viewModel.predictedStatusMode.collectAsState()
+    val analysisSize by viewModel.analysisSize.collectAsState()
     val (weekDay, day) = getTodayDateFormatted()
 
     LaunchedEffect(Unit) {
@@ -382,6 +383,20 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                                     modifier = Modifier.padding(top = 8.dp),
                                     textAlign = TextAlign.Center
                                 )
+                                Text(
+                                    text = if (analysisSize < 28) {
+                                        stringResource(R.string.not_sufficient_data_disclaimer)
+                                    } else if (analysisSize >= 28) {
+                                        stringResource(R.string.sufficient_data_disclaimer)
+                                    } else {
+                                        ""
+                                    },
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         }
 
@@ -425,7 +440,8 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onItemClick(note.id) }),
+            .clickable(onClick = { onItemClick(note.id) })
+            .clip(RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -511,11 +527,10 @@ fun SkeletonLoader(modifier: Modifier = Modifier, itemCount: Int = 3) {
                                 .fillMaxWidth(0.7f + (0.1f * index))
                                 .background(placeholderColor, shape = RoundedCornerShape(8.dp))
                         )
-                        // Placeholder for content (shorter width, dynamic)
                         Box(
                             modifier = Modifier
                                 .height(14.dp)
-                                .fillMaxWidth(0.5f + (0.1f * index))  // Varying width per item
+                                .fillMaxWidth(0.5f + (0.1f * index))
                                 .background(placeholderColor, shape = RoundedCornerShape(8.dp))
                         )
                     }

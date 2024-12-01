@@ -10,14 +10,14 @@ class AnalysisRepository(
     private val analysisApiService: AnalysisApiService,
     private val analysisDao: AnalysisDao
 ) {
-    fun getAnalysis(): LiveData<Result<Pair<List<ListAnalysisItem>, String?>>> = liveData {
+    fun getAnalysis(): LiveData<Result<Triple<List<ListAnalysisItem>, Int, String?>>> = liveData {
         emit(Result.Loading)
         try {
-            val localData = analysisDao.getAllAnalysis()
+            val localData = analysisDao.getAllAnalysis().takeLast(28)
             if (localData.isNotEmpty()) {
                 val predictedStatusList = localData.map { it.predictedStatus }
-                val modePredictedStatus = calculateMode(predictedStatusList)
-                emit(Result.Success(Pair(localData, modePredictedStatus)))
+                val (size, modePredictedStatus) = calculateMode(predictedStatusList)
+                emit(Result.Success(Triple(localData, size, modePredictedStatus)))
             }
 
             try {
@@ -25,11 +25,13 @@ class AnalysisRepository(
                 val remoteAnalysis = response.listAnalysis
 
                 if (remoteAnalysis != null) {
-                    val predictedStatusList = remoteAnalysis.map { it.predictedStatus }
-                    val modePredictedStatus = calculateMode(predictedStatusList)
-                    val analysisList = remoteAnalysis.map { analysis ->
+                    val slicedRemoteData = remoteAnalysis.takeLast(28)
+                    val predictedStatusList = slicedRemoteData.map { it.predictedStatus }
+                    val (size, modePredictedStatus) = calculateMode(predictedStatusList)
+                    val analysisList = slicedRemoteData.map { analysis ->
                         ListAnalysisItem(
                             analysis.id,
+                            analysis.noteId,
                             analysis.predictedStatus,
                             analysis.updatedAt,
                             analysis.createdAt
@@ -38,8 +40,8 @@ class AnalysisRepository(
                     if (localData != analysisList) {
                         analysisDao.clearAllAnalysis()
                         analysisDao.insertAllAnalysis(analysisList)
-                        emit(Result.Success(Pair(analysisList, modePredictedStatus)))
                     }
+                    emit(Result.Success(Triple(analysisList, size, modePredictedStatus)))
                 }
             } catch (e: Exception) {
                 if (localData.isEmpty()) {
@@ -51,17 +53,17 @@ class AnalysisRepository(
         }
     }
 
-    private fun calculateMode(values: List<String?>): String? {
-        if (values.size < 7) {
-            return null
-        }
+    private fun calculateMode(values: List<String?>): Pair<Int, String?> {
+        val size = values.size
 
-        return values
+        val mode = values
             .filterNotNull()
             .groupingBy { it }
             .eachCount()
             .maxByOrNull { it.value }
             ?.key
+
+        return Pair(size, mode)
     }
 
 }

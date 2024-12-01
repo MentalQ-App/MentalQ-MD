@@ -21,6 +21,9 @@ data class ListAnalysisItem(
     @field:SerializedName("analysis_id")
     val id: String,
 
+    @field:SerializedName("note_id")
+    val noteId: String? = null,
+
     @field:SerializedName("predicted_status")
     val predictedStatus: String,
 

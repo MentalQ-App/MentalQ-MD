@@ -3,10 +3,13 @@
 package com.c242_ps246.mentalq.ui.main.profile
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
+import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -57,6 +60,7 @@ import coil.size.Scale
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.ui.component.CustomDialog
+import com.c242_ps246.mentalq.ui.component.TermsWebView
 import com.c242_ps246.mentalq.ui.notification.NotificationHelper
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.c242_ps246.mentalq.ui.utils.Utils.compressImageSize
@@ -66,6 +70,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -149,6 +154,7 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 }
             }
         }
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
@@ -284,6 +290,53 @@ fun EditProfileDialog(
         imageUri = uri
     }
 
+    val today = LocalDate.now()
+    val minDate = today.minusYears(17)
+
+    var emailError by remember { mutableStateOf<Int?>(null) }
+    var nameError by remember { mutableStateOf<Int?>(null) }
+    var birthdayError by remember { mutableStateOf<Int?>(null) }
+
+    fun validateName(name: String): Boolean {
+        return if (name.isEmpty()) {
+            nameError = R.string.error_name_empty
+            false
+        } else {
+            nameError = null
+            true
+        }
+    }
+
+    fun validateBirthday(birthday: String): Boolean {
+        return if (birthday.isEmpty()) {
+            birthdayError = R.string.error_birthday_empty
+            false
+        } else {
+            birthdayError = null
+            true
+        }
+    }
+
+    fun validateEmail(email: String): Boolean {
+        return if (email.isEmpty()) {
+            emailError = R.string.error_email_empty
+            false
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailError = R.string.error_email_invalid
+            false
+        } else {
+            emailError = null
+            true
+        }
+    }
+
+    fun validateForm(): Boolean {
+        val isEmailValid = validateEmail(email)
+        val isNameValid = validateName(name)
+        val isBirthdayValid = validateBirthday(birthday)
+        return isEmailValid && isNameValid && isBirthdayValid
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -330,35 +383,85 @@ fun EditProfileDialog(
                         )
                     }
                 }
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(id = R.string.label_name)) },
-                    leadingIcon = { Icon(Icons.Default.Person, null) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text(stringResource(id = R.string.label_email)) },
-                    leadingIcon = { Icon(Icons.Default.Email, null) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = birthday,
-                    onValueChange = { },
-                    label = { Text(stringResource(id = R.string.label_birthday)) },
-                    leadingIcon = { Icon(Icons.Default.Cake, null) },
-                    readOnly = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showDatePicker = true },
-                    trailingIcon = {
-                        IconButton(onClick = { showDatePicker = true }) {
-                            Icon(Icons.Default.DateRange, "Select Date")
+                Column {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text(stringResource(id = R.string.label_name)) },
+                        leadingIcon = { Icon(Icons.Default.Person, null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            errorBorderColor = MaterialTheme.colorScheme.error
+                        ),
+                        maxLines = 1
+                    )
+                    nameError?.let { error ->
+                        nameError?.let {
+                            Text(
+                                text = stringResource(it),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
                         }
                     }
-                )
+                }
+                Column {
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text(stringResource(id = R.string.label_email)) },
+                        leadingIcon = { Icon(Icons.Default.Email, null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            errorBorderColor = MaterialTheme.colorScheme.error
+                        ),
+                        maxLines = 1
+                    )
+                    emailError?.let { error ->
+                        emailError?.let {
+                            Text(
+                                text = stringResource(it),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
+                        }
+                    }
+                }
+                Column {
+                    OutlinedTextField(
+                        value = birthday,
+                        onValueChange = { },
+                        label = { Text(stringResource(id = R.string.label_birthday)) },
+                        leadingIcon = { Icon(Icons.Default.Cake, null) },
+                        readOnly = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDatePicker = true },
+                        trailingIcon = {
+                            IconButton(onClick = { showDatePicker = true }) {
+                                Icon(Icons.Default.DateRange, "Select Date")
+                            }
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            errorBorderColor = MaterialTheme.colorScheme.error
+                        ),
+                    )
+                    birthdayError?.let { error ->
+                        birthdayError?.let {
+                            Text(
+                                text = stringResource(it),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            )
+                        }
+                    }
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -371,12 +474,14 @@ fun EditProfileDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            if (email != userData?.email) {
-                                pendingEmail = email
-                                showEmailConfirmationDialog = true
-                            } else {
-                                onSave(name, email, birthday, imageUri)
-                                onDismiss()
+                            if (validateForm()) {
+                                if (email != userData?.email) {
+                                    pendingEmail = email
+                                    showEmailConfirmationDialog = true
+                                } else {
+                                    onSave(name, email, birthday, imageUri)
+                                    onDismiss()
+                                }
                             }
                         }
                     ) {
@@ -412,12 +517,18 @@ fun EditProfileDialog(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
-                            val localDate = Instant.ofEpochMilli(millis)
+                            val selectedDate = Instant.ofEpochMilli(millis)
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
-                            birthday = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
+                            if (selectedDate.isAfter(minDate) && !selectedDate.isAfter(today)) {
+                                birthday =
+                                    selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                showDatePicker = false
+                            } else {
+                                // do nothing brok
+                            }
                         }
-                        showDatePicker = false
                     }
                 ) {
                     Text(stringResource(id = R.string.ok))
@@ -511,7 +622,10 @@ fun PreferencesSection(
             }
         }
     )
-
+    var showTermsDialog by remember { mutableStateOf(false) }
+    var showPrivacyAndPolicyDialog by remember { mutableStateOf(false) }
+    val termsUrl = "https://mentalq-backend.vercel.app/api/terms-of-service"
+    val privacyPolicyUrl = "https://mentalq-backend.vercel.app/api/privacy-policy"
     Text(
         text = stringResource(id = R.string.preferences),
         style = TextStyle(
@@ -570,15 +684,35 @@ fun PreferencesSection(
                 }
             )
             PreferenceItem(
-                title = stringResource(id = R.string.language)
+                title = stringResource(id = R.string.language),
+                onClick = {
+                    val intent = Intent(Settings.ACTION_LOCALE_SETTINGS)
+                    context.startActivity(intent)
+                }
+            )
+
+            PreferenceItem(
+                title = stringResource(id = R.string.privacy_and_policy),
+                onClick = {
+                    showPrivacyAndPolicyDialog = true
+                }
             )
             PreferenceItem(
-                title = stringResource(id = R.string.privacy_and_policy)
-            )
-            PreferenceItem(
-                title = stringResource(id = R.string.terms_of_service)
+                title = stringResource(id = R.string.terms_of_service),
+                onClick = {
+                    showTermsDialog = true
+                }
             )
             LogoutItem(onClick = onShowLogoutDialog)
+        }
+        if (showTermsDialog) {
+            TermsWebView(url = termsUrl, onDismiss = { showTermsDialog = false })
+        }
+        if (showPrivacyAndPolicyDialog) {
+            TermsWebView(
+                url = privacyPolicyUrl,
+                onDismiss = { showPrivacyAndPolicyDialog = false }
+            )
         }
     }
 }
@@ -593,32 +727,40 @@ private fun PreferenceItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
+            .clickable(
+                enabled = onCheckedChange == null,
+                onClick = onClick
+            )
+            .padding(vertical = 8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(
-                    enabled = onCheckedChange == null,
-                    onClick = onClick
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(title)
-            if (onCheckedChange != null) {
-                Switch(
-                    checked = isChecked,
-                    onCheckedChange = onCheckedChange
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null
-                )
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(title, modifier = Modifier.weight(1f))
+                if (onCheckedChange != null) {
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = onCheckedChange
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null
+                    )
+                }
             }
         }
     }
+    Divider(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+    )
 }
 
 @Composable

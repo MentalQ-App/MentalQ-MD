@@ -1,6 +1,7 @@
 package com.c242_ps246.mentalq.ui.main.note.detail
 
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,19 +14,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.c242_ps246.mentalq.ui.utils.Utils.getTodayDate
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
@@ -43,9 +44,10 @@ fun DetailNoteScreen(
     val content: String? by viewModel.content.collectAsStateWithLifecycle()
     val date: String? by viewModel.date.collectAsStateWithLifecycle()
     val selectedEmotion: String? by viewModel.emotion.collectAsStateWithLifecycle()
-    val todayDate = getTodayDate()
-    val defaultTitle = stringResource(id = R.string.note_title)
-    val defaultContent = stringResource(id = R.string.note_content)
+
+    BackHandler {
+        viewModel.saveNoteImmediately()
+    }
 
     LaunchedEffect(noteId) {
         viewModel.loadNote(noteId)
@@ -73,7 +75,7 @@ fun DetailNoteScreen(
             },
             title = {
                 Text(
-                    text = "Back",
+                    text = stringResource(id = R.string.back),
                     color = MaterialTheme.colorScheme.onBackground
                 )
             },
@@ -111,25 +113,39 @@ fun DetailNoteScreen(
                     .padding(16.dp)
             ) {
                 BasicTextField(
-                    value = title ?: defaultTitle,
+                    value = title!!,
                     onValueChange = { viewModel.updateTitle(it) },
                     textStyle = TextStyle(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                    decorationBox = { innerTextField ->
+                        if (title.isNullOrEmpty()) {
+                            Text(
+                                text = stringResource(id = R.string.title_placeholder),
+                                style = TextStyle(
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                )
+                            )
+                        }
+                        innerTextField()
+                    }
                 )
 
                 Text(
-                    text = formatDate(date ?: todayDate),
+                    text = formatDate(date!!),
                     color = MaterialTheme.colorScheme.tertiary,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
 
                 BasicTextField(
-                    value = content ?: defaultContent,
+                    value = content!!,
                     onValueChange = { viewModel.updateContent(it) },
                     textStyle = TextStyle(
                         fontSize = 16.sp,
@@ -137,7 +153,20 @@ fun DetailNoteScreen(
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp)
+                        .padding(vertical = 16.dp),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                    decorationBox = { innerTextField ->
+                        if (content.isNullOrEmpty()) {
+                            Text(
+                                text = stringResource(id = R.string.content_placeholder),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                )
+                            )
+                        }
+                        innerTextField()
+                    }
                 )
 
                 Text(

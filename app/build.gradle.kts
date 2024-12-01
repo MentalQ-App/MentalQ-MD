@@ -107,11 +107,6 @@ dependencies {
 
     implementation(libs.androidx.core.splashscreen)
 
-//    implementation("io.socket:socket.io-client:2.1.0") {
-//        exclude("org.json")
-//    }
-
     implementation(libs.firebase.database)
     implementation(platform(libs.firebase.bom))
-
 }

@@ -118,4 +118,15 @@
     <string name="add_more_note">Please provide more information about how you\'re feeling to receive a more accurate assessment (at least 7 notes).</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="google_sign_in_failed">Google Sign-In failed</string>
+
+    <string name="not_sufficient_data_disclaimer">The analysis isn\'t accurate yet. Please add more notes until there are at least 28 for better results.</string>
+    <string name="sufficient_data_disclaimer">The analysis is accurate now because enough notes have been added.</string>
+
+    <string name="title_placeholder">Enter title</string>
+    <string name="content_placeholder">Write your note here…</string>
+
+    <string name="agree_to_terms_prefix">I agree to the</string>
+    <string name="error_terms_not_accepted">Please accept the Terms of Service to continue</string>
+    <string name="cannot_add_note">You have already added a note for today, come back again tomorrow!</string>
+    <string name="back">Back</string>
 </resources>

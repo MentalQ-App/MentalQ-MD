@@ -4,17 +4,28 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.exifinterface.media.ExifInterface
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -119,5 +130,56 @@ object Utils {
             source, 0, 0, source.width, source.height,
             matrix, true
         )
+    }
+
+    fun fetchServerTime(
+        onTimeFetched: (LocalDateTime) -> Unit,
+        onError: ((String) -> Unit)? = null
+    ) {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://worldtimeapi.org/api/timezone/Asia/Jakarta")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("ServerTime", "Error fetching server time", e)
+                Handler(Looper.getMainLooper()).post {
+                    onError?.invoke(e.message ?: "Unknown error")
+                    onTimeFetched(LocalDateTime.now())
+                }
+            }
+
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun onResponse(call: Call, response: Response) {
+                try {
+                    if (!response.isSuccessful) {
+                        Log.e("ServerTime", "Unsuccessful response: ${response.code}")
+                        Handler(Looper.getMainLooper()).post {
+                            onError?.invoke("Unsuccessful response")
+                            onTimeFetched(LocalDateTime.now())
+                        }
+                        return
+                    }
+
+                    response.body?.string()?.let { responseData ->
+                        val json = JSONObject(responseData)
+                        val dateTime = json.getString("datetime")
+                        val serverTime = LocalDateTime.parse(dateTime.substring(0, 19))
+
+                        Handler(Looper.getMainLooper()).post {
+                            onTimeFetched(serverTime)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("ServerTime", "Error parsing server time", e)
+                    Handler(Looper.getMainLooper()).post {
+                        onError?.invoke(e.message ?: "Parsing error")
+                        onTimeFetched(LocalDateTime.now())
+                    }
+                }
+            }
+        })
     }
 }

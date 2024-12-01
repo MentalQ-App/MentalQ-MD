@@ -1,7 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.note
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -48,10 +47,6 @@ import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeParseException
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -71,26 +66,13 @@ fun NoteScreen(
 
     val navigateToNoteDetail by viewModel.navigateToNoteDetail.collectAsState()
 
-    val today = LocalDate.now(ZoneId.systemDefault())
-
-    val isTodayAlreadyAdded = listNote?.any { note ->
-        note.createdAt?.let { createdAt ->
-            try {
-                val instant = Instant.parse(createdAt)
-                val createdAtDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDate()
-                createdAtDateTime == today
-            } catch (e: DateTimeParseException) {
-                Log.e("NoteScreen", "Date parsing error: ${e.message}")
-                false
-            }
-        } == true
-    } == true
-
     val screenPadding = when {
         screenWidth < 600.dp -> 16.dp
         screenWidth < 840.dp -> 24.dp
         else -> 32.dp
     }
+
+    var cannotAddNoteMessage = stringResource(id = R.string.cannot_add_note)
 
     LaunchedEffect(uiState) {
         when {
@@ -100,14 +82,10 @@ fun NoteScreen(
                 toastType = ToastType.ERROR
                 viewModel.clearError()
             }
-        }
-    }
 
-    LaunchedEffect(isTodayAlreadyAdded) {
-        when {
-            isTodayAlreadyAdded == true -> {
+            uiState.canAddNewNote == false -> {
                 showToast = true
-                toastMessage = "You have already added a note for today, come back again tomorrow!"
+                toastMessage = cannotAddNoteMessage
                 toastType = ToastType.INFO
             }
         }
@@ -142,7 +120,7 @@ fun NoteScreen(
                                 )
                             )
                         },
-                        isEnabled = !uiState.isCreatingNewNote && isTodayAlreadyAdded == false,
+                        isEnabled = !uiState.isCreatingNewNote,
                         screenWidth = screenWidth
                     )
 

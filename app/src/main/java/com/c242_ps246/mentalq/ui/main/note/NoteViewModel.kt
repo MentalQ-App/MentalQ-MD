@@ -1,16 +1,23 @@
 package com.c242_ps246.mentalq.ui.main.note
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.data.repository.NoteRepository
 import com.c242_ps246.mentalq.data.repository.Result
+import com.c242_ps246.mentalq.ui.utils.Utils.fetchServerTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeParseException
 import javax.inject.Inject
 
 data class NoteScreenUiState(
@@ -18,9 +25,11 @@ data class NoteScreenUiState(
     val note: ListNoteItem? = null,
     val success: Boolean = false,
     val error: String? = null,
-    val isCreatingNewNote: Boolean = false
+    val isCreatingNewNote: Boolean = false,
+    val canAddNewNote: Boolean? = true
 )
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository
@@ -34,8 +43,49 @@ class NoteViewModel @Inject constructor(
     private val _navigateToNoteDetail = MutableStateFlow<String?>(null)
     val navigateToNoteDetail: StateFlow<String?> = _navigateToNoteDetail.asStateFlow()
 
+    private val _todayDate = MutableStateFlow<LocalDate?>(null)
+    val todayDate: StateFlow<LocalDate?> = _todayDate.asStateFlow()
+
     init {
         loadAllNotes()
+        updateTodayFromServer()
+    }
+
+    fun updateTodayFromServer() {
+        fetchServerTime(
+            onTimeFetched = { serverTime ->
+                val today = serverTime.toLocalDate()
+                _todayDate.value = today
+                Log.d("ServerDate", "Successfully updated today's date: $today")
+            },
+            onError = { error ->
+                Log.e("ServerDate", "Failed to fetch server time: $error")
+            }
+        )
+    }
+
+    fun isNoteTodayAlreadyAdded(): Boolean {
+        val currentServerDate = _todayDate.value ?: return false
+        val currentNoteList = _listNote.value ?: return false
+
+        return currentNoteList.any { note ->
+            note.createdAt?.let { createdAt ->
+                try {
+                    val instant = Instant.parse(createdAt)
+                    val createdAtDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDate()
+
+                    Log.d(
+                        "NoteScreen",
+                        "Detailed Check - Server Today: $currentServerDate, Note Date: $createdAtDateTime, Match: ${createdAtDateTime == currentServerDate}"
+                    )
+
+                    createdAtDateTime == currentServerDate
+                } catch (e: DateTimeParseException) {
+                    Log.e("NoteScreen", "Date parsing error: ${e.message}")
+                    false
+                }
+            } == true
+        }
     }
 
     fun loadAllNotes() {
@@ -69,9 +119,17 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-
     fun addNote(note: ListNoteItem) {
         viewModelScope.launch {
+            val cannotAddNote = isNoteTodayAlreadyAdded()
+            if (cannotAddNote) {
+                _uiState.value = _uiState.value.copy(
+                    isCreatingNewNote = false,
+                    isLoading = false,
+                    canAddNewNote = false
+                )
+                return@launch
+            }
             noteRepository.insertNote(note).observeForever { result ->
                 when (result) {
                     Result.Loading -> {
@@ -109,7 +167,12 @@ class NoteViewModel @Inject constructor(
 
                     is Result.Success -> {
                         _uiState.value =
-                            _uiState.value.copy(isLoading = false, error = null, success = true)
+                            _uiState.value.copy(
+                                isLoading = false,
+                                error = null,
+                                success = true,
+                                canAddNewNote = true
+                            )
                         _listNote.value = _listNote.value?.filter { it.id != noteId }
                     }
 

@@ -4,22 +4,22 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
+import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
+import com.c242_ps246.mentalq.data.remote.response.UserData
+import com.c242_ps246.mentalq.data.repository.AnalysisRepository
 import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.NoteRepository
-import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
+import com.c242_ps246.mentalq.data.repository.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import com.c242_ps246.mentalq.data.repository.Result
-import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
-import com.c242_ps246.mentalq.data.remote.response.UserData
-import com.c242_ps246.mentalq.data.repository.AnalysisRepository
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -42,6 +42,9 @@ class DashboardViewModel @Inject constructor(
 
     private val _predictedStatusMode = MutableStateFlow<String?>(null)
     val predictedStatusMode = _predictedStatusMode.asStateFlow()
+
+    private val _analysisSize = MutableStateFlow<Int>(0)
+    val analysisSize = _analysisSize.asStateFlow()
 
     fun loadLatestNotes() {
         noteRepository.getAllNotes().observeForever { result ->
@@ -165,8 +168,9 @@ class DashboardViewModel @Inject constructor(
                 }
 
                 is Result.Success -> {
-                    val (analysisList, mode) = result.data
+                    val (_, size, mode) = result.data
                     _uiState.value = _uiState.value.copy(isLoading = false, error = null)
+                    _analysisSize.value = size
                     _predictedStatusMode.value = mode
                 }
 

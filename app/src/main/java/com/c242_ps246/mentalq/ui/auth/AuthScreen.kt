@@ -26,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,6 +51,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -79,6 +82,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.component.CustomToast
+import com.c242_ps246.mentalq.ui.component.TermsWebView
 import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -165,6 +169,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
+    var acceptedTerms by remember { mutableStateOf(false) }
 
     var loginFailed = stringResource(R.string.login_failed)
     var loginSuccess = stringResource(R.string.login_success)
@@ -201,6 +206,17 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     var passwordError by remember { mutableStateOf<Int?>(null) }
     var nameError by remember { mutableStateOf<Int?>(null) }
     var birthdayError by remember { mutableStateOf<Int?>(null) }
+    var termsError by remember { mutableStateOf<Int?>(null) }
+
+    fun validateTerms(isLogin: Boolean, isRegister: Boolean, acceptedTerms: Boolean): Boolean {
+        return if (isRegister || isLogin && !acceptedTerms) {
+            termsError = R.string.error_terms_not_accepted
+            false
+        } else {
+            termsError = null
+            true
+        }
+    }
 
     fun validateName(name: String): Boolean {
         return if (name.isEmpty()) {
@@ -269,7 +285,8 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
         val isPasswordValid = validatePassword(password, isRegister)
         val isNameValid = if (!isLogin) validateName(name) else true
         val isBirthdayValid = if (!isLogin) validateBirthday(birthday) else true
-        return isEmailValid && isPasswordValid && isNameValid && isBirthdayValid
+        val isTermsValid = validateTerms(isRegister, isLogin, acceptedTerms)
+        return isEmailValid && isPasswordValid && isNameValid && isBirthdayValid && isTermsValid
     }
 
     if (showForgotPassword) {
@@ -556,23 +573,27 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                try {
-                                    val gso =
-                                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                            .requestIdToken(clientId)
-                                            .requestEmail()
-                                            .requestProfile()
-                                            .build()
+                                if (validateTerms(isLogin, isRegister, acceptedTerms)) {
+                                    try {
+                                        val gso =
+                                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                                .requestIdToken(clientId)
+                                                .requestEmail()
+                                                .requestProfile()
+                                                .build()
 
-                                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                                        val googleSignInClient =
+                                            GoogleSignIn.getClient(context, gso)
 
-                                    googleSignInClient.signOut()
+                                        googleSignInClient.signOut()
 
-                                    val signInIntent = googleSignInClient.signInIntent
-                                    googleSignInLauncher.launch(signInIntent)
-                                } catch (e: Exception) {
-                                    showToast = true
-                                    toastMessage = "Error preparing Google Sign-In: ${e.message}"
+                                        val signInIntent = googleSignInClient.signInIntent
+                                        googleSignInLauncher.launch(signInIntent)
+                                    } catch (e: Exception) {
+                                        showToast = true
+                                        toastMessage =
+                                            "Error preparing Google Sign-In: ${e.message}"
+                                    }
                                 }
                             },
                             modifier = Modifier
@@ -610,6 +631,68 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                             onDismiss = { showToast = false }
                         )
                     }
+
+                    AnimatedVisibility(
+                        visible = isRegister || isLogin,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        var showTermsDialog by remember { mutableStateOf(false) }
+                        val termsUrl = "https://mentalq-backend.vercel.app/api/terms-of-service"
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = acceptedTerms,
+                                onCheckedChange = {
+                                    acceptedTerms = it
+                                    if (it) termsError = null
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                            Column {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(start = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.agree_to_terms_prefix),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    TextButton(
+                                        onClick = { showTermsDialog = true },
+                                        contentPadding = PaddingValues(horizontal = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.terms_of_service),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                                termsError?.let {
+                                    Text(
+                                        text = stringResource(it),
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                                    )
+                                }
+                            }
+                            if (showTermsDialog) {
+                                TermsWebView(
+                                    url = termsUrl,
+                                    onDismiss = { showTermsDialog = false }
+                                )
+                            }
+                        }
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
@@ -632,6 +715,9 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                                 name = ""
                                 email = ""
                                 password = ""
+                                birthday = ""
+                                acceptedTerms = false
+                                termsError = null
                             }
                         ) {
                             Text(
@@ -650,31 +736,55 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
 }
 
 @Composable
-fun DateInputField(birthdayDate: String, onDateChange: (String) -> Unit) {
+fun DateInputField(
+    birthdayDate: String,
+    onDateChange: (String) -> Unit,
+    minimumAge: Int = 17,
+    onValidationError: (String) -> Unit = {}
+) {
     val context = LocalContext.current
     val datePickerDialog = remember { mutableStateOf<DatePickerDialog?>(null) }
+
+    fun isAgeValid(selectedDate: Calendar): Boolean {
+        val today = Calendar.getInstance()
+        val age = today.get(Calendar.YEAR) - selectedDate.get(Calendar.YEAR)
+
+        if (today.get(Calendar.DAY_OF_YEAR) < selectedDate.get(Calendar.DAY_OF_YEAR)) {
+            return (age - 1) >= minimumAge
+        }
+        return age >= minimumAge
+    }
 
     val openDatePicker = {
         val calendar = Calendar.getInstance()
         val datePicker = DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                val selectedDate = "$dayOfMonth/${month + 1}/$year"
-                onDateChange(selectedDate)
+                val selectedCalendar = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth)
+                }
+
+                if (isAgeValid(selectedCalendar)) {
+                    val selectedDate = "$dayOfMonth/${month + 1}/$year"
+                    onDateChange(selectedDate)
+                } else {
+                    onValidationError("Must be at least $minimumAge years old")
+                }
             },
-            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.YEAR) - minimumAge,
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         )
+
+        datePicker.datePicker.maxDate = System.currentTimeMillis()
+
         datePickerDialog.value = datePicker
         datePicker.show()
     }
 
     OutlinedTextField(
         value = birthdayDate,
-        onValueChange = {
-
-        },
+        onValueChange = { },
         label = {
             Text(
                 text = stringResource(R.string.label_birthday),
@@ -696,6 +806,10 @@ fun DateInputField(birthdayDate: String, onDateChange: (String) -> Unit) {
                 )
             }
         },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            errorBorderColor = MaterialTheme.colorScheme.error
+        ),
         modifier = Modifier.fillMaxWidth()
     )
 }
