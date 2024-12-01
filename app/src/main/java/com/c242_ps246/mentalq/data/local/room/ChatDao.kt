@@ -6,7 +6,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.c242_ps246.mentalq.data.remote.response.ChatMessageItem
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
-import java.util.Date
 
 @Dao
 interface ChatDao {
@@ -18,7 +17,7 @@ interface ChatDao {
 
     //    TODO: Might need to change later
     @Query("UPDATE chat_room SET deletedAt = :timestamp WHERE id = :id")
-    suspend fun deleteChatRoom(id: String, timestamp: Date = Date())
+    suspend fun deleteChatRoom(id: String, timestamp: Long = System.currentTimeMillis())
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChatMessages(messages: List<ChatMessageItem>)
