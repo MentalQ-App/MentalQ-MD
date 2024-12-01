@@ -111,4 +111,7 @@ dependencies {
 //        exclude("org.json")
 //    }
 
+    implementation(libs.firebase.database)
+    implementation(platform(libs.firebase.bom))
+
 }

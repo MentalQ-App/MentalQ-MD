@@ -24,16 +24,22 @@ data class ChatRoomItem(
     val id: String,
 
     @field:SerializedName("user_id")
-    val userId: String? = null,
+    val userId: String,
 
     @field:SerializedName("psychologist_id")
-    val psychologistId: String? = null,
+    val psychologistId: String,
 
-    @field:SerializedName("updatedAt")
+    @field:SerializedName("last_message")
+    val lastMessage: String? = null,
+
+    @field:SerializedName("updated_at")
     val updatedAt: String? = null,
 
-    @field:SerializedName("createdAt")
-    val createdAt: String? = null
+    @field:SerializedName("created_at")
+    val createdAt: String,
+
+    @field:SerializedName("deleted_at")
+    val deletedAt: String? = null
 )
 
 data class ChatMessageResponse(
