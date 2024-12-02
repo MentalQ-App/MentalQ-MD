@@ -1,7 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.note
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -17,8 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -48,7 +46,7 @@ import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
-@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteScreen(
     viewModel: NoteViewModel = hiltViewModel(),
@@ -98,19 +96,13 @@ fun NoteScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(screenPadding)
-            ) {
-                Column {
-                    ResponsiveHeader(
-                        onAddNote = {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.your_note)) },
+                actions = {
+                    IconButton(
+                        onClick = {
                             viewModel.addNote(
                                 ListNoteItem(
                                     id = "",
@@ -120,33 +112,62 @@ fun NoteScreen(
                                 )
                             )
                         },
-                        isEnabled = !uiState.isCreatingNewNote,
-                        screenWidth = screenWidth
-                    )
+                        enabled = !uiState.isCreatingNewNote,
+                        colors = IconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(id = R.string.add_note)
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(screenPadding)
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        when {
+                            !uiState.error.isNullOrEmpty() -> {
+                                ErrorState(error = uiState.error!!)
+                            }
 
-                    when {
-                        !uiState.error.isNullOrEmpty() -> {
-                            ErrorState(error = uiState.error!!)
-                        }
+                            uiState.isCreatingNewNote -> {
+                                CreatingNoteState()
+                            }
 
-                        uiState.isCreatingNewNote -> {
-                            CreatingNoteState()
-                        }
+                            listNote.isNullOrEmpty() -> {
+                                EmptyState()
+                            }
 
-                        listNote.isNullOrEmpty() -> {
-                            EmptyState()
-                        }
-
-                        else -> {
-                            ResponsiveNoteList(
-                                notes = listNote ?: emptyList(),
-                                onItemClick = onNavigateToNoteDetail,
-                                onItemDelete = { note -> viewModel.deleteNote(note.id) },
-                                screenWidth = screenWidth,
-                                isLoading = uiState.isLoading
-                            )
+                            else -> {
+                                ResponsiveNoteList(
+                                    notes = listNote ?: emptyList(),
+                                    onItemClick = onNavigateToNoteDetail,
+                                    onItemDelete = { note -> viewModel.deleteNote(note.id) },
+                                    screenWidth = screenWidth,
+                                    isLoading = uiState.isLoading
+                                )
+                            }
                         }
                     }
                 }
@@ -159,60 +180,65 @@ fun NoteScreen(
                     onDismiss = { showToast = false }
                 )
             }
+
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
     }
 }
 
-@Composable
-private fun ResponsiveHeader(
-    onAddNote: () -> Unit,
-    isEnabled: Boolean,
-    screenWidth: Dp
-) {
-    val buttonSize = if (screenWidth < 600.dp) 36.dp else 42.dp
-    val titleSize = when {
-        screenWidth < 600.dp -> 24.sp
-        screenWidth < 840.dp -> 28.sp
-        else -> 32.sp
-    }
+//@Composable
+//private fun ResponsiveHeader(
+//    onAddNote: () -> Unit,
+//    isEnabled: Boolean,
+//    screenWidth: Dp
+//) {
+//    val buttonSize = if (screenWidth < 600.dp) 36.dp else 42.dp
+//    val titleSize = when {
+//        screenWidth < 600.dp -> 24.sp
+//        screenWidth < 840.dp -> 28.sp
+//        else -> 32.sp
+//    }
+//
+//    Row(
+//        modifier = Modifier.fillMaxWidth(),
+//        verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.SpaceBetween
+//    ) {
+//        Text(
+//            text = stringResource(id = R.string.your_note),
+//            style = TextStyle(
+//                fontWeight = FontWeight.Bold,
+//                fontSize = titleSize
+//            ),
+//        )
+//        Button(
+//            modifier = Modifier
+//                .wrapContentWidth()
+//                .height(buttonSize),
+//            shape = RoundedCornerShape(12.dp),
+//            contentPadding = PaddingValues(horizontal = 12.dp),
+//            onClick = onAddNote,
+//            enabled = isEnabled
+//        ) {
+//            Icon(
+//                modifier = Modifier.size(20.dp),
+//                imageVector = Icons.Default.PostAdd,
+//                tint = MaterialTheme.colorScheme.onPrimary,
+//                contentDescription = "Add",
+//            )
+//            Spacer(Modifier.padding(horizontal = 3.dp))
+//            Text(
+//                text = stringResource(id = R.string.add_note),
+//                color = MaterialTheme.colorScheme.onPrimary
+//            )
+//        }
+//    }
+//}
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = stringResource(id = R.string.your_note),
-            style = TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = titleSize
-            ),
-        )
-        Button(
-            modifier = Modifier
-                .wrapContentWidth()
-                .height(buttonSize),
-            shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(horizontal = 12.dp),
-            onClick = onAddNote,
-            enabled = isEnabled
-        ) {
-            Icon(
-                modifier = Modifier.size(20.dp),
-                imageVector = Icons.Default.PostAdd,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = "Add",
-            )
-            Spacer(Modifier.padding(horizontal = 3.dp))
-            Text(
-                text = stringResource(id = R.string.add_note),
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ResponsiveNoteList(
     notes: List<ListNoteItem>?,
@@ -262,8 +288,6 @@ private fun ResponsiveNoteList(
     }
 }
 
-
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ResponsiveNoteItem(

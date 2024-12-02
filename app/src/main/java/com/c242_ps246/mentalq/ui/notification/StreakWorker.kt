@@ -1,8 +1,6 @@
 package com.c242_ps246.mentalq.ui.notification
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -25,7 +23,6 @@ class StreakWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun doWork(): Result {
         return try {
             val streakInfo = getStreakInfo(applicationContext).firstOrNull()
@@ -45,13 +42,14 @@ class StreakWorker(
 
             Result.success()
         } catch (e: Exception) {
+            e.printStackTrace()
             Result.failure()
         }
     }
 
     private fun showNotification(streakCount: Int) {
-        val notificationHelper = NotificationHelper(applicationContext)
-        notificationHelper.showStreakNotification(streakCount)
+        val streakNotificationHelper = StreakNotificationHelper(applicationContext)
+        streakNotificationHelper.showStreakNotification(streakCount)
     }
 
     private suspend fun getStreakInfo(context: Context) = withContext(Dispatchers.IO) {
@@ -59,7 +57,6 @@ class StreakWorker(
     }
 
     companion object {
-        @RequiresApi(Build.VERSION_CODES.O)
         fun scheduleNextNotification(context: Context) {
             val now = LocalDateTime.now()
             val nextMidnight = now.plusDays(1)
@@ -81,7 +78,7 @@ class StreakWorker(
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(
-                    NotificationHelper.WORK_NAME,
+                    StreakNotificationHelper.WORK_NAME,
                     ExistingWorkPolicy.REPLACE,
                     dailyWorkRequest
                 )

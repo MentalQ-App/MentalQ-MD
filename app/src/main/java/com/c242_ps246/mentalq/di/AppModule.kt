@@ -353,10 +353,4 @@ object AppModule {
     ): PsychologistRepository {
         return PsychologistRepository(psychologistApiService)
     }
-
-//    @Provides
-//    @Singleton
-//    fun provideSocketManager(): SocketManager {
-//        return SocketManager()
-//    }
 }

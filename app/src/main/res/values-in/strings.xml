@@ -11,7 +11,7 @@
     <string name="onboarding_page3_title">Bergabung Komunitas</string>
     <string name="onboarding_page3_description">Terhubung dengan orang lain dalam lingkungan yang aman</string>
 
-    <string name="welcome_back">Selamat Datang Kembali</string>
+    <string name="welcome_back">Selamat Datang</string>
     <string name="create_account">Buat Akun</string>
     <string name="label_name">Nama</string>
     <string name="label_email">Email</string>
@@ -138,4 +138,11 @@
 
     <string name="voice_stop_recording">Hentikan Perekaman</string>
     <string name="voice_start_input">Mulai Input Suara</string>
+
+    <string name="daily_reminder_title">Pengingat Catatan Harian</string>
+    <string name="daily_reminder_content">Saatnya merenung dan menulis catatan harian Anda!</string>
+
+    <string name="your_messages">Pesan Anda</string>
+    <string name="no_messages">Tidak ada pesan</string>
+    <string name="no_messages_desc">Mulai sebuah obrolan, pesan akan muncul disini</string>
 </resources>

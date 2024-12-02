@@ -1,7 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.dashboard
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
@@ -84,7 +83,6 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun calculateStreak() {
         viewModelScope.launch {
             noteRepository.getAllNotes().observeForever { result ->
@@ -102,8 +100,9 @@ class DashboardViewModel @Inject constructor(
                         val dates = sortedNotes.mapNotNull { note ->
                             try {
                                 val instant = Instant.parse(note.createdAt)
-                                LocalDate.ofInstant(instant, ZoneId.systemDefault())
+                                instant.atZone(ZoneId.systemDefault()).toLocalDate()
                             } catch (e: Exception) {
+                                Log.d("DashboardViewModel", "Error parsing date", e)
                                 null
                             }
                         }
@@ -122,7 +121,6 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun calculateDiaryStreak(dates: List<LocalDate>): StreakInfo {
         if (dates.isEmpty()) return StreakInfo()
 

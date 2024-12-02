@@ -1,8 +1,6 @@
 package com.c242_ps246.mentalq.ui.main
 
 import android.app.Application
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
@@ -24,7 +22,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.ui.main.chat.ChatRoomScreen
 import com.c242_ps246.mentalq.ui.main.chat.ChatScreen
 import com.c242_ps246.mentalq.ui.main.dashboard.DashboardScreen
@@ -34,7 +31,6 @@ import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
 import com.c242_ps246.mentalq.ui.main.psychologist.PsychologistScreen
 import com.c242_ps246.mentalq.ui.navigation.Routes
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,

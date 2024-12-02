@@ -2,15 +2,15 @@ package com.c242_ps246.mentalq.ui.main.note.detail
 
 import android.Manifest
 import android.app.Application
-import android.os.Build
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -38,19 +37,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
-import com.c242_ps246.mentalq.ui.component.VoiceToTextParser
-import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.ToastType
+import com.c242_ps246.mentalq.ui.component.VoiceToTextParser
+import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -236,13 +230,12 @@ fun DetailNoteScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun VoiceInputButton(
     viewModel: NoteDetailViewModel,
     voiceToTextParser: VoiceToTextParser
 ) {
-    val context = LocalContext.current
+    LocalContext.current
     val scope = rememberCoroutineScope()
 
     var currentLocale = remember { Locale.getDefault().language }

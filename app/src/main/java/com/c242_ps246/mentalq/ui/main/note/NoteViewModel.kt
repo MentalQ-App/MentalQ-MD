@@ -1,8 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.note
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
@@ -29,7 +27,6 @@ data class NoteScreenUiState(
     val canAddNewNote: Boolean? = true
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository
@@ -44,7 +41,6 @@ class NoteViewModel @Inject constructor(
     val navigateToNoteDetail: StateFlow<String?> = _navigateToNoteDetail.asStateFlow()
 
     private val _todayDate = MutableStateFlow<LocalDate?>(null)
-    val todayDate: StateFlow<LocalDate?> = _todayDate.asStateFlow()
 
     init {
         loadAllNotes()

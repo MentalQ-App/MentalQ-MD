@@ -5,11 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.exifinterface.media.ExifInterface
 import okhttp3.Call
 import okhttp3.Callback
@@ -28,7 +26,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import java.util.Locale
 
 object Utils {
@@ -37,12 +34,6 @@ object Utils {
     private val timeStamp: String =
         SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis())
 
-    fun getTodayDate(): String {
-        val date = Calendar.getInstance().time
-        return date.toString()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
     fun formatDate(dateString: String): String {
         return try {
             val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")
@@ -58,6 +49,7 @@ object Utils {
                 localDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
             }
         } catch (e: Exception) {
+            Log.d("Utils", "Error parsing date", e)
             dateString
         }
     }
@@ -142,7 +134,6 @@ object Utils {
             .build()
 
         client.newCall(request).enqueue(object : Callback {
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun onFailure(call: Call, e: IOException) {
                 Log.e("ServerTime", "Error fetching server time", e)
                 Handler(Looper.getMainLooper()).post {
@@ -151,7 +142,6 @@ object Utils {
                 }
             }
 
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun onResponse(call: Call, response: Response) {
                 try {
                     if (!response.isSuccessful) {

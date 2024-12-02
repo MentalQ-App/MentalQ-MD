@@ -1,7 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.dashboard
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -54,19 +52,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
-import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun DashboardScreen(
     onNavigateToNoteDetail: (String) -> Unit,
@@ -387,6 +382,7 @@ fun DashboardScreen(
                                     modifier = Modifier.padding(top = 8.dp),
                                     textAlign = TextAlign.Center
                                 )
+                                @Suppress("KotlinConstantConditions")
                                 Text(
                                     text = if (analysisSize < 28) {
                                         stringResource(R.string.not_sufficient_data_disclaimer)
@@ -405,7 +401,7 @@ fun DashboardScreen(
                         }
 
                         Button(
-                            onClick = {onNavigateToPsychologistList()},
+                            onClick = { onNavigateToPsychologistList() },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp)
                         ) {
@@ -449,7 +445,6 @@ fun DashboardScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
     Card(
@@ -557,7 +552,6 @@ fun SkeletonLoader(modifier: Modifier = Modifier, itemCount: Int = 3) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun getTodayDateFormatted(): Pair<String, String> {
     val today = LocalDate.now()
     val dayFormatter = DateTimeFormatter.ofPattern("d")
@@ -568,12 +562,3 @@ fun getTodayDateFormatted(): Pair<String, String> {
 
     return Pair(weekDay, day)
 }
-
-//@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-//@Preview
-//@Composable
-//fun DashboardScreenPreview() {
-//    MentalQTheme {
-//        DashboardScreen {}
-//    }
-//}

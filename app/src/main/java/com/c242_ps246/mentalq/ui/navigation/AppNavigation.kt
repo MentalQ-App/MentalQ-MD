@@ -1,7 +1,5 @@
 package com.c242_ps246.mentalq.ui.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +17,6 @@ import com.c242_ps246.mentalq.ui.auth.AuthScreen
 import com.c242_ps246.mentalq.ui.main.MainScreen
 import com.c242_ps246.mentalq.ui.main.PsychologistMainScreen
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,

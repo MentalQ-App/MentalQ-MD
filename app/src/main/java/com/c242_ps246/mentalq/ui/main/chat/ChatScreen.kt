@@ -1,26 +1,22 @@
 package com.c242_ps246.mentalq.ui.main.chat
 
+//import coil.compose.AsyncImage
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
-import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
-import com.c242_ps246.mentalq.ui.theme.MentalQTheme
-//import coil.compose.AsyncImage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,7 +36,7 @@ fun ChatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Messages") }
+                title = { Text(stringResource(id = R.string.your_messages)) }
             )
         }
     ) { padding ->
@@ -49,9 +45,9 @@ fun ChatScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Log.e("ChatScreen", "$chatRooms", )
+            Log.e("ChatScreen", "$chatRooms")
             if (chatRooms.isEmpty() && !uiState.isLoading) {
-                Log.e("ChatScreen", "ChatScreen: Its Empty!", )
+                Log.e("ChatScreen", "ChatScreen: Its Empty!")
                 EmptyState()
             } else {
                 LazyColumn(
@@ -147,11 +143,11 @@ private fun EmptyState() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No messages yet",
+            text = stringResource(id = R.string.no_messages),
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "When you start a conversation, it will appear here",
+            text = stringResource(id = R.string.no_messages_desc),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

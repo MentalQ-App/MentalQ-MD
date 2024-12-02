@@ -5,15 +5,14 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.c242_ps246.mentalq.MainActivity
 import com.c242_ps246.mentalq.R
 
-class NotificationHelper(private val context: Context) {
+class StreakNotificationHelper(private val context: Context) {
     companion object {
         private const val CHANNEL_ID = "streak_notification_channel"
-        private const val NOTIFICATION_ID = 1001
+        private const val NOTIFICATION_ID = 714926
         const val WORK_NAME = "DAILY_STREAK_NOTIFICATION_WORK"
     }
 
@@ -25,18 +24,16 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Streak Notifications",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "Daily streak reminder notifications"
-                enableLights(true)
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Streak Notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "Daily streak reminder notifications"
+            enableLights(true)
+            enableVibration(true)
         }
+        notificationManager.createNotificationChannel(channel)
     }
 
     fun showStreakNotification(streakCount: Int) {

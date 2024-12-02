@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.c242_ps246.mentalq.ui.main.profile
 
 import android.Manifest
@@ -8,11 +6,9 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -47,7 +43,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -61,8 +56,8 @@ import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.ui.component.CustomDialog
 import com.c242_ps246.mentalq.ui.component.TermsWebView
-import com.c242_ps246.mentalq.ui.notification.NotificationHelper
-import com.c242_ps246.mentalq.ui.theme.MentalQTheme
+import com.c242_ps246.mentalq.ui.notification.DailyReminderNotificationHelper
+import com.c242_ps246.mentalq.ui.notification.StreakNotificationHelper
 import com.c242_ps246.mentalq.ui.utils.Utils.compressImageSize
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 import com.c242_ps246.mentalq.ui.utils.Utils.uriToFile
@@ -74,7 +69,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(onLogout: () -> Unit) {
     val viewModel: ProfileViewModel = hiltViewModel()
@@ -88,60 +83,70 @@ fun ProfileScreen(onLogout: () -> Unit) {
         viewModel.getUserData()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Surface(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.your_profile)) }
+            )
+        }
+    ) { padding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .padding(padding)
         ) {
-            LazyColumn(
+            Surface(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
             ) {
-                item {
-                    ProfileHeader()
-                }
-
-                item {
-                    ProfileInfo(
-                        userData = userData, onLogout = {
-                            if (!uiState.isLoading) {
-                                viewModel.logout()
-                                onLogout()
-                            }
-                        },
-                        viewModel = viewModel
-                    )
-                }
-
-                item {
-                    PreferencesSection(
-                        notificationsEnabled = notificationsEnabled,
-                        onNotificationChange = { isEnabled ->
-                            val notificationHelper = NotificationHelper(context)
-                            notificationHelper.createNotificationChannel()
-                            viewModel.setNotificationsEnabled(isEnabled, context)
-                        },
-                        onShowLogoutDialog = { showConfirmDialog = true },
-                        viewModel = viewModel
-                    )
-                }
-
-                item {
-                    if (showConfirmDialog) {
-                        LogoutDialog(
-                            onConfirm = {
-                                viewModel.logout()
-                                onLogout()
-                                showConfirmDialog = false
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
+                        ProfileInfo(
+                            userData = userData,
+                            onLogout = {
+                                if (!uiState.isLoading) {
+                                    viewModel.logout()
+                                    onLogout()
+                                }
                             },
-                            onDismiss = { showConfirmDialog = false }
+                            viewModel = viewModel
                         )
+                    }
+
+                    item {
+                        PreferencesSection(
+                            notificationsEnabled = notificationsEnabled,
+                            onNotificationChange = { isEnabled ->
+                                val streakNotificationHelper = StreakNotificationHelper(context)
+                                streakNotificationHelper.createNotificationChannel()
+                                viewModel.setNotificationsEnabled(isEnabled, context)
+                            },
+                            onShowLogoutDialog = { showConfirmDialog = true },
+                            viewModel = viewModel
+                        )
+                    }
+
+                    item {
+                        if (showConfirmDialog) {
+                            LogoutDialog(
+                                onConfirm = {
+                                    viewModel.logout()
+                                    onLogout()
+                                    showConfirmDialog = false
+                                },
+                                onDismiss = { showConfirmDialog = false }
+                            )
+                        }
                     }
                 }
             }
+
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier
@@ -154,19 +159,7 @@ fun ProfileScreen(onLogout: () -> Unit) {
                 }
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))
     }
-}
-
-@Composable
-private fun ProfileHeader() {
-    Text(
-        text = stringResource(id = R.string.your_profile),
-        style = TextStyle(
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp
-        )
-    )
 }
 
 @Composable
@@ -199,7 +192,7 @@ fun ProfileImage(
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@Suppress("DEPRECATION")
 @Composable
 private fun ProfileInfo(
     userData: UserData?,
@@ -238,7 +231,6 @@ private fun ProfileInfo(
                 userData = userData,
                 onDismiss = { showEditDialog = false },
                 onSave = { name, email, birthday, imageUri ->
-                    Log.e("ProfileScreen", "Name: $name, Email: $email, Birthday: $birthday")
                     val nameRequestBody = RequestBody.create("text/plain".toMediaTypeOrNull(), name)
                     val emailRequestBody =
                         RequestBody.create("text/plain".toMediaTypeOrNull(), email)
@@ -251,7 +243,6 @@ private fun ProfileInfo(
                             RequestBody.create("image/jpeg".toMediaTypeOrNull(), fileCompressed)
                         MultipartBody.Part.createFormData("profileImage", file.name, requestFile)
                     }
-                    Log.e("ProfileScreen", "Profile Image: $profileImagePart")
                     viewModel.updateProfile(
                         nameRequestBody,
                         emailRequestBody,
@@ -267,7 +258,6 @@ private fun ProfileInfo(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileDialog(
@@ -564,7 +554,6 @@ fun EditProfileDialog(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun UserDetailInfo(userData: UserData?) {
     Column(
@@ -599,7 +588,6 @@ private fun UserDetailInfo(userData: UserData?) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PreferencesSection(
     notificationsEnabled: Boolean,
@@ -608,13 +596,15 @@ fun PreferencesSection(
     viewModel: ProfileViewModel
 ) {
     val context = LocalContext.current
+    val streakNotificationHelper = StreakNotificationHelper(context)
+    val dailyReminderNotificationHelper = DailyReminderNotificationHelper(context)
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
                 onNotificationChange(true)
-                val notificationHelper = NotificationHelper(context)
-                notificationHelper.createNotificationChannel()
+                streakNotificationHelper.createNotificationChannel()
+                dailyReminderNotificationHelper.createNotificationChannel()
                 viewModel.setNotificationsEnabled(true, context)
             } else {
                 onNotificationChange(false)
@@ -664,8 +654,8 @@ fun PreferencesSection(
                             )) {
                                 PackageManager.PERMISSION_GRANTED -> {
                                     onNotificationChange(true)
-                                    val notificationHelper = NotificationHelper(context)
-                                    notificationHelper.createNotificationChannel()
+                                    streakNotificationHelper.createNotificationChannel()
+                                    dailyReminderNotificationHelper.createNotificationChannel()
                                     viewModel.setNotificationsEnabled(true, context)
                                 }
 
@@ -675,6 +665,8 @@ fun PreferencesSection(
                             }
                         } else {
                             onNotificationChange(true)
+                            streakNotificationHelper.createNotificationChannel()
+                            dailyReminderNotificationHelper.createNotificationChannel()
                             viewModel.setNotificationsEnabled(true, context)
                         }
                     } else {
@@ -717,6 +709,7 @@ fun PreferencesSection(
     }
 }
 
+@Suppress("DEPRECATION")
 @Composable
 private fun PreferenceItem(
     title: String,
@@ -744,7 +737,40 @@ private fun PreferenceItem(
                 if (onCheckedChange != null) {
                     Switch(
                         checked = isChecked,
-                        onCheckedChange = onCheckedChange
+                        onCheckedChange = onCheckedChange,
+                        colors = SwitchColors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.surface,
+                            checkedBorderColor = MaterialTheme.colorScheme.primary,
+                            checkedIconColor = MaterialTheme.colorScheme.onPrimary,
+
+                            uncheckedThumbColor = MaterialTheme.colorScheme.tertiary,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surface,
+                            uncheckedBorderColor = MaterialTheme.colorScheme.tertiary,
+                            uncheckedIconColor = MaterialTheme.colorScheme.onPrimary,
+
+                            disabledCheckedThumbColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            disabledCheckedTrackColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                            disabledCheckedBorderColor = MaterialTheme.colorScheme.primary.copy(
+                                alpha = 0.6f
+                            ),
+                            disabledCheckedIconColor = MaterialTheme.colorScheme.onPrimary.copy(
+                                alpha = 0.6f
+                            ),
+
+                            disabledUncheckedThumbColor = MaterialTheme.colorScheme.tertiary.copy(
+                                alpha = 0.6f
+                            ),
+                            disabledUncheckedTrackColor = MaterialTheme.colorScheme.surface.copy(
+                                alpha = 0.6f
+                            ),
+                            disabledUncheckedBorderColor = MaterialTheme.colorScheme.tertiary.copy(
+                                alpha = 0.6f
+                            ),
+                            disabledUncheckedIconColor = MaterialTheme.colorScheme.onPrimary.copy(
+                                alpha = 0.6f
+                            )
+                        )
                     )
                 } else {
                     Icon(
@@ -796,13 +822,4 @@ private fun LogoutDialog(
         onConfirm = onConfirm,
         onDismiss = onDismiss
     )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview
-@Composable
-fun ProfileScreenPreview() {
-    MentalQTheme {
-        ProfileScreen(onLogout = {})
-    }
 }

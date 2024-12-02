@@ -138,4 +138,11 @@
 
     <string name="voice_stop_recording">Stop Recording</string>
     <string name="voice_start_input">Start Voice Input</string>
+
+    <string name="daily_reminder_title">Daily Notes Reminder</string>
+    <string name="daily_reminder_content">Time to reflect and write your daily notes!</string>
+
+    <string name="your_messages">Your Messages</string>
+    <string name="no_messages">No messages yet</string>
+    <string name="no_messages_desc">When you start a conversation, it will appear here</string>
 </resources>
