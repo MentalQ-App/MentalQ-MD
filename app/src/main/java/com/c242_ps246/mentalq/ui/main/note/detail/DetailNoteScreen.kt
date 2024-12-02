@@ -3,6 +3,7 @@ package com.c242_ps246.mentalq.ui.main.note.detail
 import android.Manifest
 import android.app.Application
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,6 +48,7 @@ import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.ToastType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("DEPRECATION")
@@ -243,6 +245,7 @@ fun VoiceInputButton(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    var currentLocale = remember { Locale.getDefault().language }
     val voiceState by voiceToTextParser.state.collectAsStateWithLifecycle()
 
     var showToast by remember { mutableStateOf(false) }
@@ -270,6 +273,7 @@ fun VoiceInputButton(
 
     LaunchedEffect(Unit) {
         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        currentLocale = Locale.getDefault().toLanguageTag()
     }
 
     LaunchedEffect(voiceState.spokenText) {
@@ -323,8 +327,8 @@ fun VoiceInputButton(
                         if (voiceState.isSpeaking) {
                             voiceToTextParser.stopListening()
                         } else {
-                            val locale = context.resources.configuration.locales.get(0).language
-                            voiceToTextParser.startListening(locale)
+                            currentLocale = Locale.getDefault().toLanguageTag()
+                            voiceToTextParser.startListening(currentLocale)
                         }
                     } else {
                         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
