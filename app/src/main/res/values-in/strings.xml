@@ -129,4 +129,13 @@
     <string name="error_terms_not_accepted">Harap terima Syarat Layanan untuk melanjutkan</string>
     <string name="cannot_add_note">Anda sudah menambahkan catatan untuk hari ini, datang lagi besok!</string>
     <string name="back">Kembali</string>
+
+    <string name="voice_error_no_input">Silakan bicara sekarang. Pastikan mikrofon Anda tidak dalam keadaan bisu</string>
+    <string name="voice_error_cant_hear">Tidak dapat mendengar Anda. Silakan bicara lebih keras</string>
+    <string name="voice_error_generic">Maaf, terjadi kesalahan. Silakan coba lagi</string>
+    <string name="voice_error_timeout">Perekaman dihentikan. Silakan coba lagi</string>
+    <string name="voice_error_permission">Kesalahan perekaman. Silakan coba lagi</string>
+
+    <string name="voice_stop_recording">Hentikan Perekaman</string>
+    <string name="voice_start_input">Mulai Input Suara</string>
 </resources>

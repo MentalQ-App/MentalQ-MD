@@ -459,10 +459,12 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
             .clip(RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
         )
     ) {
         Column(

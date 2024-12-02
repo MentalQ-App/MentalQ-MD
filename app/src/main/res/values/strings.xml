@@ -129,4 +129,13 @@
     <string name="error_terms_not_accepted">Please accept the Terms of Service to continue</string>
     <string name="cannot_add_note">You have already added a note for today, come back again tomorrow!</string>
     <string name="back">Back</string>
+
+    <string name="voice_error_no_input">Please speak now. Make sure your microphone isn\'t muted</string>
+    <string name="voice_error_cant_hear">Can\'t hear you. Please speak louder</string>
+    <string name="voice_error_generic">Sorry, something went wrong. Please try again</string>
+    <string name="voice_error_timeout">Recording stopped. Please try again</string>
+    <string name="voice_error_permission">Recording error. Please try again</string>
+
+    <string name="voice_stop_recording">Stop Recording</string>
+    <string name="voice_start_input">Start Voice Input</string>
 </resources>

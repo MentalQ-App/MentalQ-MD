@@ -208,8 +208,8 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     var birthdayError by remember { mutableStateOf<Int?>(null) }
     var termsError by remember { mutableStateOf<Int?>(null) }
 
-    fun validateTerms(isLogin: Boolean, isRegister: Boolean, acceptedTerms: Boolean): Boolean {
-        return if (isRegister || isLogin && !acceptedTerms) {
+    fun validateTerms(acceptedTerms: Boolean): Boolean {
+        return if (!acceptedTerms) {
             termsError = R.string.error_terms_not_accepted
             false
         } else {
@@ -285,7 +285,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
         val isPasswordValid = validatePassword(password, isRegister)
         val isNameValid = if (!isLogin) validateName(name) else true
         val isBirthdayValid = if (!isLogin) validateBirthday(birthday) else true
-        val isTermsValid = validateTerms(isRegister, isLogin, acceptedTerms)
+        val isTermsValid = validateTerms(acceptedTerms)
         return isEmailValid && isPasswordValid && isNameValid && isBirthdayValid && isTermsValid
     }
 
@@ -573,7 +573,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                if (validateTerms(isLogin, isRegister, acceptedTerms)) {
+                                if (validateTerms(acceptedTerms)) {
                                     try {
                                         val gso =
                                             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -632,64 +632,58 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                         )
                     }
 
-                    AnimatedVisibility(
-                        visible = isRegister || isLogin,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
+                    var showTermsDialog by remember { mutableStateOf(false) }
+                    val termsUrl = "https://mentalq-backend.vercel.app/api/terms-of-service"
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        var showTermsDialog by remember { mutableStateOf(false) }
-                        val termsUrl = "https://mentalq-backend.vercel.app/api/terms-of-service"
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = acceptedTerms,
-                                onCheckedChange = {
-                                    acceptedTerms = it
-                                    if (it) termsError = null
-                                },
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = MaterialTheme.colorScheme.primary
-                                )
+                        Checkbox(
+                            checked = acceptedTerms,
+                            onCheckedChange = {
+                                acceptedTerms = it
+                                if (it) termsError = null
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.primary
                             )
-                            Column {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(start = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                        )
+                        Column {
+                            Row(
+                                modifier = Modifier
+                                    .padding(start = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.agree_to_terms_prefix),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                TextButton(
+                                    onClick = { showTermsDialog = true },
+                                    contentPadding = PaddingValues(horizontal = 4.dp)
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.agree_to_terms_prefix),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    TextButton(
-                                        onClick = { showTermsDialog = true },
-                                        contentPadding = PaddingValues(horizontal = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.terms_of_service),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                                termsError?.let {
-                                    Text(
-                                        text = stringResource(it),
-                                        color = MaterialTheme.colorScheme.error,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                                        text = stringResource(R.string.terms_of_service),
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
-                            if (showTermsDialog) {
-                                TermsWebView(
-                                    url = termsUrl,
-                                    onDismiss = { showTermsDialog = false }
+                            termsError?.let {
+                                Text(
+                                    text = stringResource(it),
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 4.dp, top = 4.dp)
                                 )
                             }
+                        }
+                        if (showTermsDialog) {
+                            TermsWebView(
+                                url = termsUrl,
+                                onDismiss = { showTermsDialog = false }
+                            )
                         }
                     }
 

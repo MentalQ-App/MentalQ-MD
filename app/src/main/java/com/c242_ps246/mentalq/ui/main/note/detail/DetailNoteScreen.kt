@@ -1,34 +1,54 @@
 package com.c242_ps246.mentalq.ui.main.note.detail
 
+import android.Manifest
+import android.app.Application
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.component.VoiceToTextParser
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import com.c242_ps246.mentalq.ui.component.CustomToast
+import com.c242_ps246.mentalq.ui.component.ToastType
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("DEPRECATION")
@@ -36,7 +56,8 @@ import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 @Composable
 fun DetailNoteScreen(
     noteId: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    application: Application
 ) {
     val viewModel: NoteDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -44,6 +65,7 @@ fun DetailNoteScreen(
     val content: String? by viewModel.content.collectAsStateWithLifecycle()
     val date: String? by viewModel.date.collectAsStateWithLifecycle()
     val selectedEmotion: String? by viewModel.emotion.collectAsStateWithLifecycle()
+    val voiceToTextParser = remember { VoiceToTextParser(application) }
 
     BackHandler {
         viewModel.saveNoteImmediately()
@@ -144,30 +166,42 @@ fun DetailNoteScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
 
-                BasicTextField(
-                    value = content!!,
-                    onValueChange = { viewModel.updateContent(it) },
-                    textStyle = TextStyle(
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onBackground
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-                    decorationBox = { innerTextField ->
-                        if (content.isNullOrEmpty()) {
-                            Text(
-                                text = stringResource(id = R.string.content_placeholder),
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BasicTextField(
+                        value = content!!,
+                        onValueChange = { viewModel.updateContent(it) },
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                        decorationBox = { innerTextField ->
+                            if (content.isNullOrEmpty()) {
+                                Text(
+                                    text = stringResource(id = R.string.content_placeholder),
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                    )
                                 )
-                            )
+                            }
+                            innerTextField()
                         }
-                        innerTextField()
-                    }
-                )
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    VoiceInputButton(
+                        viewModel = viewModel,
+                        voiceToTextParser = voiceToTextParser
+                    )
+                }
+
 
                 Text(
                     text = stringResource(id = R.string.how_do_you_feel),
@@ -202,6 +236,155 @@ fun DetailNoteScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.N)
+@Composable
+fun VoiceInputButton(
+    viewModel: NoteDetailViewModel,
+    voiceToTextParser: VoiceToTextParser
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var currentLocale = remember { Locale.getDefault().language }
+    val voiceState by voiceToTextParser.state.collectAsStateWithLifecycle()
+
+    var showToast by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf("") }
+    var toastType by remember { mutableStateOf(ToastType.INFO) }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "ripple")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+
+    var hasPermission by remember { mutableStateOf(false) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            hasPermission = isGranted
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        currentLocale = Locale.getDefault().toLanguageTag()
+    }
+
+    LaunchedEffect(voiceState.spokenText) {
+        voiceState.spokenText?.let { spokenText ->
+            if (spokenText.isNotBlank()) {
+                val currentContent = viewModel.content.value
+                viewModel.updateContent(
+                    "$currentContent ${spokenText.trim()} "
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(voiceState.isSpeaking) {
+        if (voiceState.isSpeaking) {
+            scope.launch {
+                delay(3000)
+                if (!voiceState.hasStartedSpeaking) {
+                    voiceToTextParser.stopListening()
+                }
+            }
+        }
+    }
+
+    Column {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                )
+        ) {
+            if (voiceState.isSpeaking) {
+                val rippleColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                Canvas(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .scale(scale)
+                ) {
+                    drawCircle(
+                        color = rippleColor,
+                        radius = size.minDimension / 2
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = {
+                    if (hasPermission) {
+                        if (voiceState.isSpeaking) {
+                            voiceToTextParser.stopListening()
+                        } else {
+                            currentLocale = Locale.getDefault().toLanguageTag()
+                            voiceToTextParser.startListening(currentLocale)
+                        }
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    imageVector = if (voiceState.isSpeaking)
+                        Icons.Default.Stop
+                    else
+                        Icons.Default.Mic,
+                    contentDescription = stringResource(
+                        if (voiceState.isSpeaking)
+                            R.string.voice_stop_recording
+                        else
+                            R.string.voice_start_input
+                    ),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    }
+
+    val errorMessage = when {
+        voiceState.error?.contains("Error: 7") == true -> stringResource(R.string.voice_error_cant_hear)
+        voiceState.error?.contains("Error: 5") == true -> stringResource(R.string.voice_error_generic)
+        voiceState.error?.contains("Error: 6") == true -> stringResource(R.string.voice_error_generic)
+        voiceState.error?.contains("Error: 8") == true -> stringResource(R.string.voice_error_timeout)
+        voiceState.error?.contains("Error: 9") == true -> stringResource(R.string.voice_error_permission)
+        voiceState.error != null -> stringResource(R.string.voice_error_generic)
+        else -> ""
+    }
+
+    LaunchedEffect(voiceState.error) {
+        if (voiceState.error != null) {
+            toastMessage = errorMessage
+            toastType = ToastType.ERROR
+            showToast = true
+        }
+    }
+
+    if (showToast) {
+        CustomToast(
+            message = toastMessage,
+            type = toastType,
+            duration = 2000L,
+            onDismiss = { showToast = false },
+            placement = Alignment.BottomCenter
+        )
+    }
+}
 
 @Composable
 private fun EmotionButton(
@@ -212,7 +395,7 @@ private fun EmotionButton(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = if (selectedEmotion == emotion) MaterialTheme.colorScheme.primary else Color.LightGray
+            containerColor = if (selectedEmotion == emotion) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
@@ -240,19 +423,8 @@ private fun EmotionButton(
                 text = emotion,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = if (selectedEmotion == emotion) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface
             )
         }
     }
 }
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview
-@Composable
-fun PreviewDetailNoteScreen() {
-    DetailNoteScreen(
-        noteId = "1",
-        onBackClick = {}
-    )
-}
-

@@ -284,9 +284,6 @@ private fun ResponsiveNoteItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
     ) {
         Box(
             modifier = Modifier

@@ -634,7 +634,7 @@ fun PreferencesSection(
             color = MaterialTheme.colorScheme.tertiary
         )
     )
-
+    Spacer(modifier = Modifier.height(8.dp))
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
