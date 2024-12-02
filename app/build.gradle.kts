@@ -109,4 +109,6 @@ dependencies {
 
     implementation(libs.firebase.database)
     implementation(platform(libs.firebase.bom))
+    
+    implementation(libs.material.icons.extended)
 }

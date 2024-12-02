@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.ui.main
 
+import android.app.Application
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -107,7 +109,8 @@ fun MainScreen(
                                 inclusive = true
                             }
                         }
-                    }
+                    },
+                    application = LocalContext.current.applicationContext as Application
                 )
             }
             composable(

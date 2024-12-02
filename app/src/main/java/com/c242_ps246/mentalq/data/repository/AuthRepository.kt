@@ -55,8 +55,6 @@ class AuthRepository(
                 response.user.let { userDao.insertUser(it) }
 
                 emit(Result.Success(response))
-            } else {
-                emit(Result.Error(response.message.toString()))
             }
         } catch (e: Exception) {
             emit(Result.Error("An error occurred: ${e.message}"))

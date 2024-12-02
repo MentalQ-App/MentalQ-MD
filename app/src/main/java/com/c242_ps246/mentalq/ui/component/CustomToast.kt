@@ -31,10 +31,11 @@ fun CustomToast(
     message: String,
     type: ToastType = ToastType.INFO,
     duration: Long = 2000L,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    placement: Alignment = Alignment.TopCenter
 ) {
     var isVisible by remember { mutableStateOf(true) }
-    
+
     val backgroundColor = when (type) {
         ToastType.SUCCESS -> Color(0xFF4CAF50)
         ToastType.ERROR -> Color(0xFFE53935)
@@ -55,7 +56,7 @@ fun CustomToast(
 
     if (isVisible) {
         Popup(
-            alignment = Alignment.TopCenter
+            alignment = placement
         ) {
             AnimatedVisibility(
                 visible = isVisible,
