@@ -1,0 +1,59 @@
+package com.c242_ps246.mentalq.ui.main.psychologist
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.c242_ps246.mentalq.data.remote.response.PsychologistItem
+import com.c242_ps246.mentalq.data.repository.PsychologistRepository
+import com.c242_ps246.mentalq.data.repository.Result
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+
+data class PsychologistScreenUiState(
+    val isLoading: Boolean = true,
+    val success: Boolean = false,
+    val error: String? = null,
+)
+
+@HiltViewModel
+class PsychologistViewModel @Inject constructor(
+    private val psychologistRepository: PsychologistRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(PsychologistScreenUiState())
+    val uiState = _uiState.asStateFlow()
+
+    private val _psychologists = MutableStateFlow<List<PsychologistItem>?>(emptyList())
+    val psychologists = _psychologists.asStateFlow()
+
+    init {
+        loadPsychologists()
+    }
+
+    private fun loadPsychologists() {
+        viewModelScope.launch {
+            psychologistRepository.getPsychologists().observeForever { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        _uiState.value = _uiState.value.copy(isLoading = true)
+                    }
+
+                    is Result.Success -> {
+                        _psychologists.value = result.data
+                        _uiState.value = _uiState.value.copy(isLoading = false, success = true)
+                    }
+
+                    is Result.Error -> {
+                        _uiState.value =
+                            _uiState.value.copy(isLoading = false, error = result.error)
+                    }
+                }
+            }
+        }
+    }
+
+
+}

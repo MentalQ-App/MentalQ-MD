@@ -31,6 +31,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -67,7 +68,10 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
+fun DashboardScreen(
+    onNavigateToNoteDetail: (String) -> Unit,
+    onNavigateToPsychologistList: () -> Unit
+) {
     val viewModel: DashboardViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val listNote by viewModel.listNote.collectAsState()
@@ -400,6 +404,17 @@ fun DashboardScreen(onNavigateToNoteDetail: (String) -> Unit) {
                             }
                         }
 
+                        Button(
+                            onClick = {onNavigateToPsychologistList()},
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = "Chat with Psychologist",
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+
                         Text(
                             text = stringResource(R.string.latest_diary),
                             fontSize = 20.sp,
@@ -552,11 +567,11 @@ fun getTodayDateFormatted(): Pair<String, String> {
     return Pair(weekDay, day)
 }
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-@Preview
-@Composable
-fun DashboardScreenPreview() {
-    MentalQTheme {
-        DashboardScreen {}
-    }
-}
+//@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+//@Preview
+//@Composable
+//fun DashboardScreenPreview() {
+//    MentalQTheme {
+//        DashboardScreen {}
+//    }
+//}

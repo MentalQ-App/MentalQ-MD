@@ -29,6 +29,7 @@ import com.c242_ps246.mentalq.ui.main.dashboard.DashboardScreen
 import com.c242_ps246.mentalq.ui.main.note.NoteScreen
 import com.c242_ps246.mentalq.ui.main.note.detail.DetailNoteScreen
 import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
+import com.c242_ps246.mentalq.ui.main.psychologist.PsychologistScreen
 import com.c242_ps246.mentalq.ui.navigation.Routes
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -80,9 +81,19 @@ fun MainScreen(
                 DashboardScreen(
                     onNavigateToNoteDetail = { noteId ->
                         navController.navigate("${Routes.NOTE_DETAIL}/$noteId")
+                    },
+                    onNavigateToPsychologistList = {
+                        navController.navigate(Routes.PSYCHOLOGIST_LIST)
                     }
                 )
             }
+
+            composable(
+                route = Routes.PSYCHOLOGIST_LIST
+            ) {
+                PsychologistScreen()
+            }
+
             composable(
                 route = Routes.NOTE
             ) {

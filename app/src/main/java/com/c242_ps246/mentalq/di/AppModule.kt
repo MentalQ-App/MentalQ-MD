@@ -15,11 +15,13 @@ import com.c242_ps246.mentalq.data.remote.retrofit.AnalysisApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.ChatApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
+import com.c242_ps246.mentalq.data.remote.retrofit.PsychologistApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.UserApiService
 import com.c242_ps246.mentalq.data.repository.AnalysisRepository
 import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.ChatRepository
 import com.c242_ps246.mentalq.data.repository.NoteRepository
+import com.c242_ps246.mentalq.data.repository.PsychologistRepository
 import com.c242_ps246.mentalq.data.repository.UserRepository
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -206,6 +208,25 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun providePsychologistApiService(): PsychologistApiService {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(PsychologistApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideChatApiService(preferencesManager: MentalQAppPreferences): ChatApiService {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -320,8 +341,17 @@ object AppModule {
     fun provideChatRepository(
         userDao: UserDao,
         chatDao: ChatDao,
+        chatApiService: ChatApiService
     ): ChatRepository {
-        return ChatRepository(userDao, chatDao)
+        return ChatRepository(userDao, chatDao, chatApiService)
+    }
+
+    @Provides
+    @Singleton
+    fun providePsychologistRepository(
+        psychologistApiService: PsychologistApiService
+    ): PsychologistRepository {
+        return PsychologistRepository(psychologistApiService)
     }
 
 //    @Provides

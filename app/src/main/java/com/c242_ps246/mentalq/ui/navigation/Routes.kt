@@ -11,4 +11,5 @@ object Routes {
     const val CHAT = "chat"
     const val CHAT_ROOM = "chat_room"
     const val PSYCHOLOGIST_MAIN_SCREEN = "psychologist_main_screen"
+    const val PSYCHOLOGIST_LIST = "psychologist_list"
 }

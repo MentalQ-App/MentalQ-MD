@@ -34,7 +34,7 @@ class ChatViewModel @Inject constructor(
     private fun loadChatRooms() {
         _uiState.value = _uiState.value.copy(isLoading = true)
 
-        firebaseDatabase.getReference("chatroom").get().addOnSuccessListener {
+        firebaseDatabase.getReference("userChats").get().addOnSuccessListener {
             val chatRooms = mutableListOf<ChatRoomItem>()
             it.children.forEach { data ->
                 val chatRoom = ChatRoomItem(
