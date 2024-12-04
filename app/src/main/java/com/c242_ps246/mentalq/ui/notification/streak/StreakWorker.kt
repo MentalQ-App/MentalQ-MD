@@ -1,4 +1,4 @@
-package com.c242_ps246.mentalq.ui.notification
+package com.c242_ps246.mentalq.ui.notification.streak
 
 import android.content.Context
 import androidx.work.Constraints
@@ -79,7 +79,7 @@ class StreakWorker(
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(
                     StreakNotificationHelper.WORK_NAME,
-                    ExistingWorkPolicy.REPLACE,
+                    ExistingWorkPolicy.KEEP,
                     dailyWorkRequest
                 )
         }

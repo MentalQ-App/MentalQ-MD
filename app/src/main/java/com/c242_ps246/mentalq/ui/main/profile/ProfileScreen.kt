@@ -52,12 +52,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
+import com.c242_ps246.mentalq.BuildConfig
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.ui.component.CustomDialog
 import com.c242_ps246.mentalq.ui.component.TermsWebView
-import com.c242_ps246.mentalq.ui.notification.DailyReminderNotificationHelper
-import com.c242_ps246.mentalq.ui.notification.StreakNotificationHelper
+import com.c242_ps246.mentalq.ui.notification.dailyreminder.DailyReminderNotificationHelper
+import com.c242_ps246.mentalq.ui.notification.streak.StreakNotificationHelper
 import com.c242_ps246.mentalq.ui.utils.Utils.compressImageSize
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 import com.c242_ps246.mentalq.ui.utils.Utils.uriToFile
@@ -614,8 +615,9 @@ fun PreferencesSection(
     )
     var showTermsDialog by remember { mutableStateOf(false) }
     var showPrivacyAndPolicyDialog by remember { mutableStateOf(false) }
-    val termsUrl = "https://mentalq-backend.vercel.app/api/terms-of-service"
-    val privacyPolicyUrl = "https://mentalq-backend.vercel.app/api/privacy-policy"
+    val baseUrl = BuildConfig.BASE_URL
+    val termsUrl = "$baseUrl/terms-of-service"
+    val privacyPolicyUrl = "$baseUrl/privacy-policy"
     Text(
         text = stringResource(id = R.string.preferences),
         style = TextStyle(

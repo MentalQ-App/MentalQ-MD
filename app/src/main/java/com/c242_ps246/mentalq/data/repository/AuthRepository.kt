@@ -15,6 +15,7 @@ import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 class AuthRepository(
     private val authApiService: AuthApiService,
@@ -30,31 +31,40 @@ class AuthRepository(
         emit(Result.Loading)
         try {
             val response = authApiService.login(email, password)
-            if (response.error == false) {
-                val role = response.user?.role
-                if (role.isNullOrEmpty()) {
-                    emit(Result.Error("No user role found"))
-                    return@liveData
-                }
 
-                withContext(Dispatchers.IO) {
-                    response.token?.let { token ->
-                        preferencesManager.saveToken(token)
-                        val savedToken = preferencesManager.getToken().first()
-                        if (savedToken.isEmpty()) {
-                            throw Exception("Token failed to save")
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null && body.error == false) {
+                    val role = body.user?.role
+                    if (role.isNullOrEmpty()) {
+                        emit(Result.Error("No user role found"))
+                        return@liveData
+                    }
+
+                    withContext(Dispatchers.IO) {
+                        body.token?.let { token ->
+                            preferencesManager.saveToken(token)
+                            val savedToken = preferencesManager.getToken().first()
+                            if (savedToken.isEmpty()) throw Exception("Token failed to save")
                         }
+                        preferencesManager.saveUserRole(role)
+                        val savedRole = preferencesManager.getUserRole().first()
+                        if (savedRole.isEmpty()) throw Exception("User role failed to save")
                     }
-                    preferencesManager.saveUserRole(role)
-                    val savedRole = preferencesManager.getUserRole().first()
-                    if (savedRole.isEmpty()) {
-                        throw Exception("User role failed to save")
-                    }
+                    userDao.clearUserData()
+                    userDao.insertUser(body.user)
+                    emit(Result.Success(body))
+                } else {
+                    emit(Result.Error(body?.message ?: "Unknown error occurred"))
                 }
-                userDao.clearUserData()
-                response.user.let { userDao.insertUser(it) }
-
-                emit(Result.Success(response))
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = if (errorBody != null) {
+                    JSONObject(errorBody).getString("message")
+                } else {
+                    "Unknown error occurred"
+                }
+                emit(Result.Error(errorMessage))
             }
         } catch (e: Exception) {
             emit(Result.Error("An error occurred: ${e.message}"))
@@ -69,15 +79,16 @@ class AuthRepository(
         try {
             Log.e("GoogleLogin", "Trying to login")
             val response = authApiService.googleLogin(firebaseToken)
-            if (response.error == false) {
-                val role = response.user?.role
+            if (response.isSuccessful) {
+                val body = response.body()
+                val role = body?.user?.role
                 if (role.isNullOrEmpty()) {
                     emit(Result.Error("No user role found"))
                     return@liveData
                 }
 
                 withContext(Dispatchers.IO) {
-                    response.token?.let { token ->
+                    body.token?.let { token ->
                         preferencesManager.saveToken(token)
                         val savedToken = preferencesManager.getToken().first()
                         if (savedToken.isEmpty()) {
@@ -91,11 +102,17 @@ class AuthRepository(
                     }
                 }
                 userDao.clearUserData()
-                response.user.let { userDao.insertUser(it) }
+                body.user.let { userDao.insertUser(it) }
 
-                emit(Result.Success(response))
+                emit(Result.Success(body))
             } else {
-                emit(Result.Error(response.message.toString()))
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = if (errorBody != null) {
+                    JSONObject(errorBody).getString("message")
+                } else {
+                    "Unknown error occurred"
+                }
+                emit(Result.Error(errorMessage))
             }
         } catch (e: Exception) {
             emit(Result.Error("An error occurred: ${e.message}"))
@@ -111,10 +128,21 @@ class AuthRepository(
         emit(Result.Loading)
         try {
             val response = authApiService.register(name, email, password, birthday)
-            if (response.error == false) {
-                emit(Result.Success(response))
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null && body.error == false) {
+                    emit(Result.Success(body))
+                } else {
+                    emit(Result.Error(body?.message ?: "Unknown error occurred"))
+                }
             } else {
-                emit(Result.Error(response.message.toString()))
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = if (errorBody != null) {
+                    JSONObject(errorBody).getString("message")
+                } else {
+                    "Unknown error occurred"
+                }
+                emit(Result.Error(errorMessage))
             }
         } catch (e: Exception) {
             emit(Result.Error("An error occurred: ${e.message}"))
@@ -157,10 +185,10 @@ class AuthRepository(
         emit(Result.Loading)
         try {
             val response = authApiService.requestResetPassword(email)
-            if (response.error == false) {
+            if (response.isSuccessful) {
                 emit(Result.Success(Unit))
             } else {
-                emit(Result.Error(response.message.toString()))
+                emit(Result.Error(response.body()?.message.toString()))
             }
         } catch (e: Exception) {
             emit(Result.Error("An error occurred: ${e.message}"))
@@ -171,10 +199,10 @@ class AuthRepository(
         emit(Result.Loading)
         try {
             val response = authApiService.verifyOTP(email, otp)
-            if (response.error == false) {
+            if (response.isSuccessful) {
                 emit(Result.Success(Unit))
             } else {
-                emit(Result.Error(response.message.toString()))
+                emit(Result.Error(response.body()?.message.toString()))
             }
         } catch (e: Exception) {
             emit(Result.Error("An error occurred: ${e.message}"))
@@ -186,10 +214,10 @@ class AuthRepository(
             emit(Result.Loading)
             try {
                 val response = authApiService.resetPassword(email, otp, password)
-                if (response.error == false) {
+                if (response.isSuccessful) {
                     emit(Result.Success(Unit))
                 } else {
-                    emit(Result.Error(response.message.toString()))
+                    emit(Result.Error(response.body()?.message.toString()))
                 }
             } catch (e: Exception) {
                 emit(Result.Error("An error occurred: ${e.message}"))

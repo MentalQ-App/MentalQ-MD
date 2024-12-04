@@ -145,4 +145,7 @@
     <string name="your_messages">Pesan Anda</string>
     <string name="no_messages">Tidak ada pesan</string>
     <string name="no_messages_desc">Mulai sebuah obrolan, pesan akan muncul disini</string>
+
+    <string name="offline_title">Tidak Ada Koneksi Internet</string>
+    <string name="offline_message">Anda sedang offline. Beberapa fitur mungkin tidak tersedia.</string>
 </resources>

@@ -19,12 +19,13 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.ui.navigation.AppNavigation
-import com.c242_ps246.mentalq.ui.notification.DailyReminderWorker
-import com.c242_ps246.mentalq.ui.notification.StreakWorker
+import com.c242_ps246.mentalq.ui.notification.dailyreminder.DailyReminderWorker
+import com.c242_ps246.mentalq.ui.notification.streak.StreakWorker
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingViewModel
 import com.c242_ps246.mentalq.ui.splash.SplashScreen
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
+import com.c242_ps246.mentalq.ui.utils.NetworkAwareContent
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -73,21 +74,24 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppContent(viewModel: OnboardingViewModel, preferencesManager: MentalQAppPreferences) {
     val shouldShowOnboarding by viewModel.shouldShowOnboarding.collectAsState()
-    if (shouldShowOnboarding) {
-        MentalQTheme {
-            OnboardingScreen(
-                onFinished = {
-                    viewModel.onOnboardingCompleted()
-                }
-            )
-        }
-    } else {
-        MentalQTheme {
-            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                AppNavigation(
-                    modifier = Modifier.padding(innerPadding),
-                    preferencesManager = preferencesManager
+
+    NetworkAwareContent {
+        if (shouldShowOnboarding) {
+            MentalQTheme {
+                OnboardingScreen(
+                    onFinished = {
+                        viewModel.onOnboardingCompleted()
+                    }
                 )
+            }
+        } else {
+            MentalQTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    AppNavigation(
+                        modifier = Modifier.padding(innerPadding),
+                        preferencesManager = preferencesManager
+                    )
+                }
             }
         }
     }

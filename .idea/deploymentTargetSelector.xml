@@ -2,12 +2,12 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="app">
+      <SelectionState runConfigName="MentalQ.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-12-02T16:51:02.536114800Z">
+        <DropdownSelection timestamp="2024-12-04T06:48:54.027731400Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="Default" identifier="serial=127.0.0.1:21503;connection=efaf8701" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=76df46bd" />
             </handle>
           </Target>
         </DropdownSelection>

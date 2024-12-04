@@ -1,4 +1,4 @@
-package com.c242_ps246.mentalq.ui.notification
+package com.c242_ps246.mentalq.ui.notification.dailyreminder
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

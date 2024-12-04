@@ -13,10 +13,10 @@ import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.Result
 import com.c242_ps246.mentalq.data.repository.UserRepository
 import com.c242_ps246.mentalq.ui.auth.AuthScreenUIState
-import com.c242_ps246.mentalq.ui.notification.DailyReminderNotificationHelper.Companion.DAILY_REMINDER_WORK_NAME
-import com.c242_ps246.mentalq.ui.notification.DailyReminderWorker
-import com.c242_ps246.mentalq.ui.notification.StreakNotificationHelper
-import com.c242_ps246.mentalq.ui.notification.StreakWorker
+import com.c242_ps246.mentalq.ui.notification.dailyreminder.DailyReminderNotificationHelper.Companion.DAILY_REMINDER_WORK_NAME
+import com.c242_ps246.mentalq.ui.notification.dailyreminder.DailyReminderWorker
+import com.c242_ps246.mentalq.ui.notification.streak.StreakNotificationHelper
+import com.c242_ps246.mentalq.ui.notification.streak.StreakWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -120,7 +120,7 @@ class ProfileViewModel @Inject constructor(
             .build()
         workManager.enqueueUniquePeriodicWork(
             DAILY_REMINDER_WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             reminderRequest
         )
     }
