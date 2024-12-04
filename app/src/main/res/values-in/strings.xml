@@ -84,7 +84,10 @@
     <string name="update_email_confirmation_message_2">" Yakin ingin melanjutkan?"</string>
     <string name="creating_note">Membuat catatan baru…</string>
     <string name="updating_note">Memperbarui catatan…</string>
+
     <string name="no_notes">Tidak ada catatan</string>
+    <string name="no_notes_desc">Ketika Anda menambahkan catatan baru, catatan tersebut akan muncul di sini</string>
+
     <string name="forgot_password">Lupa kata sandi?</string>
     <string name="error_password_match">Kata sandi tidak cocok</string>
     <string name="update_password_success">Kata sandi berhasil diperbarui!</string>

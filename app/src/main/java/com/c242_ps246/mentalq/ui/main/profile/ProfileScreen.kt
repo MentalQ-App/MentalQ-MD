@@ -511,14 +511,11 @@ fun EditProfileDialog(
                             val selectedDate = Instant.ofEpochMilli(millis)
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
-
                             if (selectedDate.isAfter(minDate) && !selectedDate.isAfter(today)) {
                                 birthday =
                                     selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                                showDatePicker = false
-                            } else {
-                                // do nothing brok
                             }
+                            showDatePicker = false
                         }
                     }
                 ) {

@@ -450,8 +450,8 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onItemClick(note.id) })
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = { onItemClick(note.id) }),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -463,7 +463,8 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(12.dp)
         ) {
             Text(
                 text = note.title ?: "",
@@ -472,18 +473,18 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
                 maxLines = 1,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = note.content ?: "",
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.tertiary,
                 maxLines = 2,
-                modifier = Modifier.padding(top = 4.dp)
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = formatDate(note.createdAt.toString()),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }

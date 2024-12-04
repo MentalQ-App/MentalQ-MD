@@ -36,9 +36,9 @@ data class RequestResetPasswordResponse(
 
 @Entity(tableName = "user_data")
 data class UserData(
-    @PrimaryKey(autoGenerate = true)
-    @field:SerializedName("id")
-    val id: Int,
+    @PrimaryKey
+    @field:SerializedName("user_id")
+    val id: String,
 
     @field:SerializedName("name")
     val name: String,
