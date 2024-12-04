@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.component.CustomToast
+import com.c242_ps246.mentalq.ui.component.EmptyState
 import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
@@ -156,7 +157,10 @@ fun NoteScreen(
                             }
 
                             listNote.isNullOrEmpty() -> {
-                                EmptyState()
+                                EmptyState(
+                                    title = stringResource(R.string.no_notes),
+                                    subtitle = stringResource(R.string.no_notes_desc)
+                                )
                             }
 
                             else -> {
@@ -189,55 +193,6 @@ fun NoteScreen(
         }
     }
 }
-
-//@Composable
-//private fun ResponsiveHeader(
-//    onAddNote: () -> Unit,
-//    isEnabled: Boolean,
-//    screenWidth: Dp
-//) {
-//    val buttonSize = if (screenWidth < 600.dp) 36.dp else 42.dp
-//    val titleSize = when {
-//        screenWidth < 600.dp -> 24.sp
-//        screenWidth < 840.dp -> 28.sp
-//        else -> 32.sp
-//    }
-//
-//    Row(
-//        modifier = Modifier.fillMaxWidth(),
-//        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.SpaceBetween
-//    ) {
-//        Text(
-//            text = stringResource(id = R.string.your_note),
-//            style = TextStyle(
-//                fontWeight = FontWeight.Bold,
-//                fontSize = titleSize
-//            ),
-//        )
-//        Button(
-//            modifier = Modifier
-//                .wrapContentWidth()
-//                .height(buttonSize),
-//            shape = RoundedCornerShape(12.dp),
-//            contentPadding = PaddingValues(horizontal = 12.dp),
-//            onClick = onAddNote,
-//            enabled = isEnabled
-//        ) {
-//            Icon(
-//                modifier = Modifier.size(20.dp),
-//                imageVector = Icons.Default.PostAdd,
-//                tint = MaterialTheme.colorScheme.onPrimary,
-//                contentDescription = "Add",
-//            )
-//            Spacer(Modifier.padding(horizontal = 3.dp))
-//            Text(
-//                text = stringResource(id = R.string.add_note),
-//                color = MaterialTheme.colorScheme.onPrimary
-//            )
-//        }
-//    }
-//}
 
 @Composable
 private fun ResponsiveNoteList(
@@ -446,22 +401,6 @@ private fun ResponsiveToast(
         duration = 2000L,
         onDismiss = onDismiss,
     )
-}
-
-@Composable
-fun EmptyState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(id = R.string.no_notes),
-            style = TextStyle(
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        )
-    }
 }
 
 @Composable

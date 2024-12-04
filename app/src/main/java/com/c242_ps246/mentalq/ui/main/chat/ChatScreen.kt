@@ -11,12 +11,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
+import com.c242_ps246.mentalq.ui.component.EmptyState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,7 +48,10 @@ fun ChatScreen(
             Log.e("ChatScreen", "$chatRooms")
             if (chatRooms.isEmpty() && !uiState.isLoading) {
                 Log.e("ChatScreen", "ChatScreen: Its Empty!")
-                EmptyState()
+                EmptyState(
+                    title = stringResource(R.string.no_messages),
+                    subtitle = stringResource(R.string.no_messages_desc)
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -129,29 +132,6 @@ private fun ChatPreviewItem(
                 }
             }
         }
-    }
-}
-
-//
-@Composable
-private fun EmptyState() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(id = R.string.no_messages),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = stringResource(id = R.string.no_messages_desc),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
     }
 }
 
