@@ -2,18 +2,18 @@ package com.c242_ps246.mentalq.ui.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import com.c242_ps246.mentalq.R
 
 @Composable
@@ -21,7 +21,8 @@ fun CustomDialog(
     dialogTitle: String,
     dialogMessage: String,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    showCancelButton: Boolean = true
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -61,11 +62,13 @@ fun CustomDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(stringResource(id = R.string.cancel))
+                    if (showCancelButton) {
+                        OutlinedButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(stringResource(id = R.string.cancel))
+                        }
                     }
 
                     Button(

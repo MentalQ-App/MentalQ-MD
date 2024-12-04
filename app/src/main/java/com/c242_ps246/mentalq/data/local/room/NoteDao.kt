@@ -29,4 +29,7 @@ interface NoteDao {
 
     @Query("DELETE FROM note WHERE id = :id")
     suspend fun deleteNoteById(id: String)
+
+    @Query("SELECT * FROM note ORDER BY createdAt DESC LIMIT 1")
+    suspend fun getLastNote(): ListNoteItem?
 }

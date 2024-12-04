@@ -1,4 +1,4 @@
-package com.c242_ps246.mentalq.ui.notification
+package com.c242_ps246.mentalq.ui.notification.dailyreminder
 
 import android.content.BroadcastReceiver
 import android.content.Context

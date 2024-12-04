@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.work)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -109,6 +110,6 @@ dependencies {
 
     implementation(libs.firebase.database)
     implementation(platform(libs.firebase.bom))
-    
+
     implementation(libs.material.icons.extended)
 }

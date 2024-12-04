@@ -14,7 +14,6 @@ class NoteRepository(
     private val noteApiService: NoteApiService
 ) {
     fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData {
-        Log.d("NoteRepository", "getAllNotes called")
         emit(Result.Loading)
         try {
             val localData = noteDao.getAllNotes()
@@ -23,7 +22,6 @@ class NoteRepository(
             try {
                 val response = noteApiService.getNotes()
                 val remoteNotes = response.listNote
-                Log.d("NoteRepository", "remoteNotes: $remoteNotes")
 
                 if (remoteNotes != null) {
                     val noteList = remoteNotes.map { note ->
@@ -44,7 +42,8 @@ class NoteRepository(
                 }
             } catch (e: Exception) {
                 if (localData.isEmpty()) {
-                    emit(Result.Error("Failed to fetch remote data: ${e.message}"))
+                    Log.d("NoteRepository", "Failed to fetch remote data: ${e.message}")
+                    emit(Result.Error("Failed to fetch remote data, check your internet connection and try again."))
                 }
             }
         } catch (e: Exception) {
@@ -56,6 +55,7 @@ class NoteRepository(
         try {
             noteDao.getNoteById(noteId)
         } catch (e: Exception) {
+            Log.d("NoteRepository", "Database error: ${e.message}")
             null
         }
     }
@@ -119,6 +119,17 @@ class NoteRepository(
             }
         } catch (e: Exception) {
             emit(Result.Error("Network error: ${e.message}"))
+        }
+    }
+
+    suspend fun getLastNote(): ListNoteItem? {
+        return withContext(Dispatchers.IO) {
+            try {
+                noteDao.getLastNote()
+            } catch (e: Exception) {
+                Log.d("NoteRepository", "Database error: ${e.message}")
+                null
+            }
         }
     }
 }

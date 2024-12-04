@@ -80,6 +80,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.c242_ps246.mentalq.BuildConfig
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.TermsWebView
@@ -163,6 +164,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     }
 
     var isLogin by remember { mutableStateOf(true) }
+    var loginButtonLoadingState by remember { mutableStateOf(false) }
     var isRegister by remember { mutableStateOf(false) }
     var showPassword by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
@@ -182,6 +184,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                 showToast = true
                 toastMessage = uiState.error ?: loginFailed
                 toastType = ToastType.ERROR
+                loginButtonLoadingState = false
                 viewModel.clearError()
             }
 
@@ -190,6 +193,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                 toastMessage =
                     if (isLogin) loginSuccess else if (isRegister) registerSuccess else updatePasswordSuccess
                 toastType = ToastType.SUCCESS
+                loginButtonLoadingState = false
                 viewModel.clearSuccess()
                 if (isLogin) {
                     viewModel.getUserRole()
@@ -533,6 +537,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
 
                     Button(
                         onClick = {
+                            loginButtonLoadingState = true
                             if (validateForm()) {
                                 if (isLogin) {
                                     viewModel.login(email, password)
@@ -549,7 +554,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                         ),
                         enabled = !uiState.isLoading
                     ) {
-                        if (uiState.isLoading) {
+                        if (uiState.isLoading && loginButtonLoadingState) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 color = MaterialTheme.colorScheme.onPrimary
@@ -573,6 +578,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
+                                loginButtonLoadingState = false
                                 if (validateTerms(acceptedTerms)) {
                                     try {
                                         val gso =
@@ -604,7 +610,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                             ),
                             enabled = !uiState.isLoading
                         ) {
-                            if (uiState.isLoading) {
+                            if (uiState.isLoading && !loginButtonLoadingState) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(24.dp),
                                     color = MaterialTheme.colorScheme.onPrimary
@@ -633,7 +639,8 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                     }
 
                     var showTermsDialog by remember { mutableStateOf(false) }
-                    val termsUrl = "https://mentalq-backend.vercel.app/api/terms-of-service"
+                    val baseUrl = BuildConfig.BASE_URL
+                    val termsUrl = "$baseUrl/terms-of-service"
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
