@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.data.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
@@ -75,36 +74,39 @@ class AuthRepository(
         firebaseToken: String
     ): LiveData<Result<AuthResponse>> = liveData {
         emit(Result.Loading)
-        Log.e("GoogleLogin", "Firebase token: $firebaseToken")
         try {
-            Log.e("GoogleLogin", "Trying to login")
             val response = authApiService.googleLogin(firebaseToken)
+
             if (response.isSuccessful) {
                 val body = response.body()
-                val role = body?.user?.role
-                if (role.isNullOrEmpty()) {
-                    emit(Result.Error("No user role found"))
-                    return@liveData
-                }
+                if (body != null && body.error == false) {
+                    val role = body.user?.role
+                    if (role.isNullOrEmpty()) {
+                        emit(Result.Error("No user role found"))
+                        return@liveData
+                    }
 
-                withContext(Dispatchers.IO) {
-                    body.token?.let { token ->
-                        preferencesManager.saveToken(token)
-                        val savedToken = preferencesManager.getToken().first()
-                        if (savedToken.isEmpty()) {
-                            throw Exception("Token failed to save")
+                    withContext(Dispatchers.IO) {
+                        body.token?.let { token ->
+                            preferencesManager.saveToken(token)
+                            val savedToken = preferencesManager.getToken().first()
+                            if (savedToken.isEmpty()) {
+                                throw Exception("Token failed to save")
+                            }
+                        }
+                        preferencesManager.saveUserRole(role)
+                        val savedRole = preferencesManager.getUserRole().first()
+                        if (savedRole.isEmpty()) {
+                            throw Exception("User role failed to save")
                         }
                     }
-                    preferencesManager.saveUserRole(role)
-                    val savedRole = preferencesManager.getUserRole().first()
-                    if (savedRole.isEmpty()) {
-                        throw Exception("User role failed to save")
-                    }
-                }
-                userDao.clearUserData()
-                body.user.let { userDao.insertUser(it) }
+                    userDao.clearUserData()
+                    body.user.let { userDao.insertUser(it) }
 
-                emit(Result.Success(body))
+                    emit(Result.Success(body))
+                } else {
+                    emit(Result.Error(body?.message ?: "Unknown error occurred"))
+                }
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMessage = if (errorBody != null) {
