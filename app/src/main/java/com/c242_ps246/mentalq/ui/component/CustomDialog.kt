@@ -21,7 +21,9 @@ fun CustomDialog(
     dialogTitle: String,
     dialogMessage: String,
     onConfirm: () -> Unit,
+    confirmButtonText: String = stringResource(id = R.string.ok),
     onDismiss: () -> Unit,
+    dismissButtonText: String = stringResource(id = R.string.cancel),
     showCancelButton: Boolean = true
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -67,7 +69,7 @@ fun CustomDialog(
                             onClick = onDismiss,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(stringResource(id = R.string.cancel))
+                            Text(dismissButtonText)
                         }
                     }
 
@@ -78,7 +80,7 @@ fun CustomDialog(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text(stringResource(id = R.string.ok))
+                        Text(confirmButtonText)
                     }
                 }
             }
