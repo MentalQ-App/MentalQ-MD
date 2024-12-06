@@ -83,7 +83,7 @@ fun PsychologistMainScreen(
             ) { backStackEntry ->
                 val chatId = backStackEntry.arguments?.getString("chatId") ?: return@composable
                 ChatRoomScreen(
-                    chatId = chatId,
+                    chatRoomId = chatId,
                     onBackClick = {
                         navController.navigate(Routes.CHAT) {
                             popUpTo(Routes.CHAT_ROOM) {

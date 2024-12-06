@@ -24,6 +24,7 @@ class MentalQAppPreferences @Inject constructor(
         private val LAST_ENTRY_DATE = stringPreferencesKey("last_entry_date")
         private val STREAK_COUNT = stringPreferencesKey("streak_count")
         private val ROLE = stringPreferencesKey("role")
+        private val USER_ID = stringPreferencesKey("user_id")
     }
 
     val shouldShowOnboarding: Flow<Boolean> = context.dataStore.data
@@ -88,6 +89,18 @@ class MentalQAppPreferences @Inject constructor(
     fun getUserRole(): Flow<String> {
         return context.dataStore.data.map { preferences ->
             preferences[ROLE] ?: ""
+        }
+    }
+
+    suspend fun saveUserId(userId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[USER_ID] = userId
+        }
+    }
+
+    fun getUserId(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[USER_ID] ?: ""
         }
     }
 }

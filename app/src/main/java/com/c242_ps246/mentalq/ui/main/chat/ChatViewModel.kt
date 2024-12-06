@@ -4,6 +4,7 @@ package com.c242_ps246.mentalq.ui.main.chat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
+import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.ChatRepository
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val chatRepository: ChatRepository
+    private val chatRepository: ChatRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatListUiState())
     val uiState = _uiState.asStateFlow()
@@ -22,37 +24,95 @@ class ChatViewModel @Inject constructor(
     private val _chatRooms = MutableStateFlow<List<ChatRoomItem>>(emptyList())
     val chatRooms = _chatRooms.asStateFlow()
 
-    private val firebaseDatabase = Firebase.database
+    private val _userId = MutableStateFlow<String?>(null)
+    val userId = _userId.asStateFlow()
+
+    private val firebase = Firebase.database
 
     init {
         loadChatRooms()
+        getUserId()
+    }
+
+    private fun getUserId() {
+        authRepository.getUserId().observeForever {
+            _userId.value = it
+
+            authRepository.getUserId().removeObserver { this }
+        }
     }
 
     private fun loadChatRooms() {
-        _uiState.value = _uiState.value.copy(isLoading = true)
-        try {
-            firebaseDatabase.getReference("userChats").get().addOnSuccessListener {
-                val chatRooms = mutableListOf<ChatRoomItem>()
-                it.children.forEach { data ->
-                    val chatRoom = ChatRoomItem(
-                        id = data.child("id").value.toString(),
-                        userId = data.child("user_id").value.toString(),
-                        lastMessage = data.child("last_message").value.toString(),
-                        psychologistId = data.child("psychologist_id").value.toString(),
-                        createdAt = data.child("created_at").value.toString()
-                    )
-                    chatRooms.add(chatRoom)
-                }
-                _chatRooms.value = chatRooms
-                _uiState.value = _uiState.value.copy(isLoading = false)
+        authRepository.getUserId().observeForever { userId ->
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                firebase.getReference("userChats").child(userId).get()
+                    .addOnSuccessListener {
+
+                        if (it.exists()) {
+
+
+                            val chatRooms = mutableListOf<ChatRoomItem>()
+                            var remainingRequests = it.childrenCount.toInt()
+
+                            it.children.forEach { chatRoomSnapshot ->
+
+                                Log.e("ChatViewModel", "loadChatRooms: ${chatRoomSnapshot.value}")
+
+                                val chatRoomId = chatRoomSnapshot.value.toString()
+
+                                firebase.getReference("chatroom").child(chatRoomId).get()
+                                    .addOnSuccessListener { chatRoomData ->
+                                        if (chatRoomData.exists()) {
+                                            Log.e(
+                                                "ChatViewModel",
+                                                "loadChatRooms: ${chatRoomData.value}"
+                                            )
+
+                                            val chatRoom = ChatRoomItem(
+                                                id = chatRoomData.key.toString(),
+                                                userId = chatRoomData.child("members")
+                                                    .child("0").value.toString(),
+                                                lastMessage = chatRoomData.child("lastMessage").value.toString(),
+                                                psychologistId = chatRoomData.child("psychologistId").value.toString(),
+                                                createdAt = chatRoomData.child("createdAt").value.toString()
+                                            )
+                                            chatRooms.add(chatRoom)
+                                        } else {
+                                            _uiState.value = _uiState.value.copy(isLoading = false)
+                                            Log.e(
+                                                "ChatRoom",
+                                                "loadChatRooms: Chat room doesn't exist"
+                                            )
+                                        }
+
+                                        remainingRequests--
+
+                                        if (remainingRequests == 0) {
+                                            _chatRooms.value = chatRooms
+                                            _uiState.value = _uiState.value.copy(isLoading = false)
+                                        }
+                                    }
+                            }
+
+
+                        } else {
+                            _uiState.value = _uiState.value.copy(isLoading = false)
+                            Log.e("ChatRoom", "loadChatRooms: Chat room doesn't exist")
+                        }
+
+
+                    }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = e.message,
+                    isLoading = false
+                )
+                Log.e("ChatViewModel", "loadChatRooms: ${e.message}")
             }
-        } catch (e: Exception) {
-            _uiState.value = _uiState.value.copy(
-                error = e.message,
-                isLoading = false
-            )
-            Log.e("ChatViewModel", "loadChatRooms: ${e.message}")
         }
+
+
     }
 
 //    private fun loadChatRooms() {

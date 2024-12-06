@@ -89,8 +89,13 @@ fun MainScreen(
             composable(
                 route = Routes.PSYCHOLOGIST_LIST
             ) {
-                PsychologistScreen()
+                PsychologistScreen(
+                    onNavigateToChatRoom = { chatId ->
+                        navController.navigate("${Routes.CHAT_ROOM}/$chatId")
+                    }
+                )
             }
+
 
             composable(
                 route = Routes.NOTE
@@ -138,7 +143,7 @@ fun MainScreen(
             ) { backStackEntry ->
                 val chatId = backStackEntry.arguments?.getString("chatId") ?: return@composable
                 ChatRoomScreen(
-                    chatId = chatId,
+                    chatRoomId = chatId,
                     onBackClick = {
                         navController.navigate(Routes.CHAT) {
                             popUpTo(Routes.CHAT_ROOM) {

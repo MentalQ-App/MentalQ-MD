@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.data.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
@@ -35,8 +36,15 @@ class AuthRepository(
                 val body = response.body()
                 if (body != null && body.error == false) {
                     val role = body.user?.role
+                    val userId = body.user?.id
+
                     if (role.isNullOrEmpty()) {
                         emit(Result.Error("No user role found"))
+                        return@liveData
+                    }
+
+                    if (userId.isNullOrEmpty()) {
+                        emit(Result.Error("No user id found"))
                         return@liveData
                     }
 
@@ -49,6 +57,10 @@ class AuthRepository(
                         preferencesManager.saveUserRole(role)
                         val savedRole = preferencesManager.getUserRole().first()
                         if (savedRole.isEmpty()) throw Exception("User role failed to save")
+
+                        preferencesManager.saveUserId(userId)
+                        val savedUserId = preferencesManager.getUserId().first()
+                        if (savedUserId.isEmpty()) throw Exception("User id failed to save")
                     }
                     userDao.clearUserData()
                     userDao.insertUser(body.user)
@@ -81,8 +93,14 @@ class AuthRepository(
                 val body = response.body()
                 if (body != null && body.error == false) {
                     val role = body.user?.role
+                    val userId = body.user?.id
                     if (role.isNullOrEmpty()) {
                         emit(Result.Error("No user role found"))
+                        return@liveData
+                    }
+
+                    if (userId.isNullOrEmpty()) {
+                        emit(Result.Error("No user id found"))
                         return@liveData
                     }
 
@@ -99,6 +117,11 @@ class AuthRepository(
                         if (savedRole.isEmpty()) {
                             throw Exception("User role failed to save")
                         }
+
+                        preferencesManager.saveUserId(userId)
+                        Log.e("AuthRepo", "googleLogin: $userId")
+                        val savedUserId = preferencesManager.getUserId().first()
+                        if (savedUserId.isEmpty()) throw Exception("User id failed to save")
                     }
                     userDao.clearUserData()
                     body.user.let { userDao.insertUser(it) }
@@ -167,6 +190,10 @@ class AuthRepository(
 
     fun getToken(): LiveData<String> {
         return preferencesManager.getToken().asLiveData()
+    }
+
+    fun getUserId(): LiveData<String> {
+        return preferencesManager.getUserId().asLiveData()
     }
 
     fun getUser(): LiveData<Result<UserData>> = liveData {

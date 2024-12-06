@@ -57,20 +57,17 @@ data class ChatMessageResponse(
 data class ChatMessageItem(
     @PrimaryKey
     @field:SerializedName("id")
-    val id: String,
+    val id: String = "",
 
     @field:SerializedName("chat_room_id")
-    val chatRoomId: String,
+    val chatRoomId: String = "",
 
     @field:SerializedName("sender_id")
-    val senderId: String,
+    val senderId: String = "",
 
     @field:SerializedName("message")
-    val content: String,
-
-    @field:SerializedName("updatedAt")
-    val updatedAt: String? = null,
+    val content: String = "",
 
     @field:SerializedName("createdAt")
-    val createdAt: String? = null
+    val createdAt: String? = ""
 )
