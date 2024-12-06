@@ -151,4 +151,12 @@
 
     <string name="offline_title">No Internet Connection</string>
     <string name="offline_message">You are currently offline. Some features may not be available.</string>
+
+    <string name="permission_required">Permission Required</string>
+    <string name="audio_permission_rationale">Audio recording permission is needed for this feature to work properly. Please grant the permission request.</string>
+    <string name="audio_permission_settings">MentalQ needs microphone access to convert your voice to text. Please grant permission in settings.</string>
+    <string name="notification_permission_rationale">Notification permission is needed for this feature to work properly. Please grant the permission request.</string>
+    <string name="notification_permission_settings">MentalQ needs notification access to send you reminder notifications. Please grant permission in settings.</string>
+    <string name="try_again">Try Again</string>
+    <string name="open_settings">Open</string>
 </resources>

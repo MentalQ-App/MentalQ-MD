@@ -1,7 +1,11 @@
 package com.c242_ps246.mentalq.ui.main.note.detail
 
 import android.Manifest
+import android.app.Activity
 import android.app.Application
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,9 +38,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.component.CustomDialog
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.ToastType
 import com.c242_ps246.mentalq.ui.component.VoiceToTextParser
@@ -235,7 +241,8 @@ fun VoiceInputButton(
     viewModel: NoteDetailViewModel,
     voiceToTextParser: VoiceToTextParser
 ) {
-    LocalContext.current
+    val context = LocalContext.current
+    val activity = context as? Activity
     val scope = rememberCoroutineScope()
 
     var currentLocale = remember { Locale.getDefault().language }
@@ -257,12 +264,59 @@ fun VoiceInputButton(
     )
 
     var hasPermission by remember { mutableStateOf(false) }
+    var showRationaleDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
-            hasPermission = isGranted
+            if (isGranted) {
+                hasPermission = true
+            } else {
+                if (activity != null && ActivityCompat.shouldShowRequestPermissionRationale(
+                        activity, Manifest.permission.RECORD_AUDIO
+                    )
+                ) {
+                    showRationaleDialog = true
+                } else {
+                    showSettingsDialog = true
+                }
+            }
         }
     )
+
+    if (showRationaleDialog) {
+        CustomDialog(
+            dialogTitle = stringResource(id = R.string.permission_required),
+            dialogMessage = stringResource(id = R.string.audio_permission_rationale),
+            onConfirm = {
+                showRationaleDialog = false
+                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            },
+            confirmButtonText = stringResource(id = R.string.try_again),
+            onDismiss = {
+                showRationaleDialog = false
+            }
+        )
+    }
+
+    if (showSettingsDialog) {
+        CustomDialog(
+            dialogTitle = stringResource(id = R.string.permission_required),
+            dialogMessage = stringResource(id = R.string.audio_permission_settings),
+            onConfirm = {
+                showSettingsDialog = false
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri: Uri = Uri.fromParts("package", context.packageName, null)
+                intent.data = uri
+                context.startActivity(intent)
+            },
+            confirmButtonText = stringResource(id = R.string.open_settings),
+            onDismiss = {
+                showSettingsDialog = false
+            }
+        )
+    }
 
     LaunchedEffect(Unit) {
         permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
