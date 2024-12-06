@@ -10,9 +10,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.c242_ps246.mentalq" />
-                  <option name="mobileSdkAppId" value="1:1056734232546:android:5af85f8a4f7e61394803bb" />
-                  <option name="projectId" value="mentalq-app" />
-                  <option name="projectNumber" value="1056734232546" />
+                  <option name="mobileSdkAppId" value="1:130948402050:android:2c33f3d0475709ce745d9b" />
+                  <option name="projectId" value="mentalq-cloud" />
+                  <option name="projectNumber" value="130948402050" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

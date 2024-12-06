@@ -1,6 +1,7 @@
 package com.c242_ps246.mentalq.ui.main.profile
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -586,6 +588,7 @@ private fun UserDetailInfo(userData: UserData?) {
     }
 }
 
+
 @Composable
 fun PreferencesSection(
     notificationsEnabled: Boolean,
@@ -594,8 +597,13 @@ fun PreferencesSection(
     viewModel: ProfileViewModel
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val streakNotificationHelper = StreakNotificationHelper(context)
     val dailyReminderNotificationHelper = DailyReminderNotificationHelper(context)
+
+    var showRationaleDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
@@ -605,11 +613,51 @@ fun PreferencesSection(
                 dailyReminderNotificationHelper.createNotificationChannel()
                 viewModel.setNotificationsEnabled(true, context)
             } else {
+                if (activity != null && ActivityCompat.shouldShowRequestPermissionRationale(
+                        activity, Manifest.permission.POST_NOTIFICATIONS
+                    )
+                ) {
+                    showRationaleDialog = true
+                } else {
+                    showSettingsDialog = true
+                }
                 onNotificationChange(false)
                 viewModel.setNotificationsEnabled(false, context)
             }
         }
     )
+
+    if (showRationaleDialog) {
+        CustomDialog(
+            dialogTitle = stringResource(id = R.string.permission_required),
+            dialogMessage = stringResource(id = R.string.notification_permission_rationale),
+            onConfirm = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                showRationaleDialog = false
+            },
+            onDismiss = { showRationaleDialog = false }
+        )
+    }
+
+    if (showSettingsDialog) {
+        CustomDialog(
+            dialogTitle = stringResource(id = R.string.permission_required),
+            dialogMessage = stringResource(id = R.string.notification_permission_settings),
+            onConfirm = {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", context.packageName, null)
+                intent.data = uri
+                context.startActivity(intent)
+                showSettingsDialog = false
+            },
+            confirmButtonText = stringResource(id = R.string.open_settings),
+            onDismiss = { showSettingsDialog = false }
+        )
+    }
+
+
     var showTermsDialog by remember { mutableStateOf(false) }
     var showPrivacyAndPolicyDialog by remember { mutableStateOf(false) }
     val baseUrl = BuildConfig.BASE_URL
