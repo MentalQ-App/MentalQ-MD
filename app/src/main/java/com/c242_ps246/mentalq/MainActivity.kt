@@ -15,19 +15,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.ui.navigation.AppNavigation
-import com.c242_ps246.mentalq.ui.notification.dailyreminder.DailyReminderWorker
-import com.c242_ps246.mentalq.ui.notification.streak.StreakWorker
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingScreen
 import com.c242_ps246.mentalq.ui.onboarding.OnboardingViewModel
 import com.c242_ps246.mentalq.ui.splash.SplashScreen
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.c242_ps246.mentalq.ui.utils.NetworkAwareContent
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.getValue
 
@@ -40,8 +35,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        scheduleDailyReminder()
-        scheduleStreakNotification()
         enableEdgeToEdge()
         setContent {
             var showSplashScreen by remember { mutableStateOf(true) }
@@ -56,18 +49,6 @@ class MainActivity : ComponentActivity() {
                 AppContent(onboardingViewModel, preferencesManager)
             }
         }
-    }
-
-    private fun scheduleDailyReminder() {
-        val workRequest = PeriodicWorkRequestBuilder<DailyReminderWorker>(1, TimeUnit.DAYS)
-            .build()
-        WorkManager.getInstance(this).enqueue(workRequest)
-    }
-
-    private fun scheduleStreakNotification() {
-        val workRequest = PeriodicWorkRequestBuilder<StreakWorker>(23, TimeUnit.HOURS)
-            .build()
-        WorkManager.getInstance(this).enqueue(workRequest)
     }
 }
 
