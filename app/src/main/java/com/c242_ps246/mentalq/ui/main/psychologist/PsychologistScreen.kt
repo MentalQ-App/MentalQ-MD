@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,18 +30,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.size.Scale
+import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.PsychologistItem
 import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.ui.component.EmptyState
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,22 +56,21 @@ fun PsychologistScreen(
     viewModel: PsychologistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-//    val psychologistList by viewModel.psychologists.collectAsState()
+    val psychologistList by viewModel.psychologists.collectAsState()
     val userId by viewModel.userId.collectAsStateWithLifecycle()
 
 
-    Log.e("userId", "PsychologistScreen: $userId")
+    Log.e("userId", "PsychologistScreen: $psychologistList")
 
-    val psychologistList: List<PsychologistItem> = listOf(
-        PsychologistItem(
-            id = 888,
-            name = "Dr. John Doe",
-            email = "alice.smith@example.com",
-            birthday = "1980-05-12",
-            profilePhotoUrl = "https://randomuser.me/api/portraits/men/75.jpg",
-            role = "psychologist"
-        )
-    )
+//    val psychologistList: List<PsychologistItem> = listOf(
+//        PsychologistItem(
+//            id = 888,
+//            name = "Dr. John Doe",
+//            prefixTitle = "Dr.",
+//            suffixTitle = "",
+//            profilePhotoUrl = "https://randomuser.me/api/portraits/men/75.jpg",
+//        )
+//    )
 
     Scaffold(
         topBar = {
@@ -83,21 +89,31 @@ fun PsychologistScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp, horizontal = 8.dp)
-                ) {
-                    items(
-                        items = psychologistList,
-                        key = { it.id }
-                    ) { psychologist ->
-                        PsychologistCard(
-                            psychologist = psychologist,
-                            onItemClick = onNavigateToChatRoom,
-                            userId = userId!!
-                        )
+
+                if (psychologistList.isNullOrEmpty()) {
+                    EmptyState(
+                        title = "No Psychologist Found.",
+                        subtitle = "Please try again later.",
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp, horizontal = 8.dp)
+                    ) {
+                        items(
+                            items = psychologistList!!,
+                            key = { it.id }
+                        ) { psychologist ->
+                            PsychologistCard(
+                                psychologist = psychologist,
+                                onItemClick = onNavigateToChatRoom,
+                                userId = userId!!
+                            )
+                        }
                     }
                 }
+
+
             }
 
 
@@ -118,7 +134,7 @@ private fun PsychologistCard(
             .clickable(onClick = {
                 makeNewChatRoom(
                     userId,
-                    psychologist.id.toString(),
+                    psychologist.userId,
                     onItemClick
                 )
             }),
@@ -140,20 +156,45 @@ private fun PsychologistCard(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
+                    val imageModel =
+                        psychologist.users.profilePhotoUrl ?: R.drawable.default_profile
+
                     AsyncImage(
-                        model = psychologist.profilePhotoUrl,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageModel)
+                            .placeholder(R.drawable.default_profile)
+                            .crossfade(true)
+                            .size(64)
+                            .build(),
                         contentDescription = "Profile",
-                        modifier = Modifier.clip(
-                            CircleShape
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(
+                                CircleShape
+                            )
+                    )
+
+                    Spacer(modifier = Modifier.size(16.dp))
+
+                    val locale = Locale("id", "ID")
+                    val formatter = NumberFormat.getCurrencyInstance(locale)
+
+                    Column(
+                        modifier = Modifier.background(MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(
+                            text = "${psychologist.prefixTitle} ${psychologist.users.name} ${psychologist.suffixTitle}",
+                            style = MaterialTheme.typography.titleMedium
                         )
-                    )
-                    Text(
-                        text = psychologist.name,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+
+                        Text(
+                            text = formatter.format(psychologist.price),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
             }
 

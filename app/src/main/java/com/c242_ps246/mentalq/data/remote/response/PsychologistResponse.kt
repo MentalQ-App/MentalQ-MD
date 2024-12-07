@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 data class PsychologistResponse(
-    @field:SerializedName("listPsychologists")
+    @field:SerializedName("users")
     val listPsychologists: List<PsychologistItem>? = null,
 
     @field:SerializedName("error")
@@ -17,22 +17,39 @@ data class PsychologistResponse(
 
 @Entity(tableName = "psychologist")
 data class PsychologistItem(
-    @PrimaryKey(autoGenerate = true)
-    @field:SerializedName("id")
-    val id: Int,
 
+    @field:SerializedName("psychologist_id")
+    val id: String,
+
+    @field:SerializedName("prefix_title")
+    val prefixTitle: String,
+
+    @field:SerializedName("suffix_title")
+    val suffixTitle: String,
+
+    @field:SerializedName("isVerified")
+    val isVerified: Boolean,
+
+    @field:SerializedName("certificate")
+    val certificate: String,
+
+    @field:SerializedName("price")
+    val price: Int,
+
+    @field:SerializedName("user_id")
+    val userId: String,
+
+    @field:SerializedName("role")
+    val role: String,
+
+    @field:SerializedName("users")
+    val users: User
+)
+
+data class User(
     @field:SerializedName("name")
     val name: String,
 
-    @field:SerializedName("email")
-    val email: String,
-
-    @field:SerializedName("birthday")
-    val birthday: String? = null,
-
     @field:SerializedName("profile_photo_url")
-    val profilePhotoUrl: String? = null,
-
-    @field:SerializedName("role")
-    val role: String
+    val profilePhotoUrl: String? = null
 )

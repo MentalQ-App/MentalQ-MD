@@ -65,11 +65,13 @@ class PsychologistViewModel @Inject constructor(
                     }
 
                     is Result.Success -> {
+                        Log.e("PsyViewModel", "loadPsychologists: $result")
                         _psychologists.value = result.data
                         _uiState.value = _uiState.value.copy(isLoading = false, success = true)
                     }
 
                     is Result.Error -> {
+                        Log.e("PsyViewModel", "loadPsychologists: $result")
                         _uiState.value =
                             _uiState.value.copy(isLoading = false, error = result.error)
                     }

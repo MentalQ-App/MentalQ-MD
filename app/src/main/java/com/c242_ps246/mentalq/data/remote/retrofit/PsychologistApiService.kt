@@ -5,6 +5,6 @@ import retrofit2.http.GET
 
 interface PsychologistApiService {
 
-    @GET("psychologists")
+    @GET("psychologist")
     suspend fun getPsychologists(): PsychologistResponse
 }

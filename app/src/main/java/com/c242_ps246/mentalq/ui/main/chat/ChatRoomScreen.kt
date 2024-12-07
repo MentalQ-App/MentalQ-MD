@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.chat
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,11 +56,14 @@ fun ChatRoomScreen(
     val userId by viewModel.userId.collectAsState()
     val messages by viewModel.messages.collectAsState()
 
+
+    BackHandler {
+        onBackClick()
+    }
+
     LaunchedEffect(key1 = true) {
         viewModel.getMessages(chatRoomId)
     }
-
-
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -133,16 +137,25 @@ fun ChatMessages(
 
             Spacer(modifier = Modifier.size(8.dp))
 
+            val isClickable = messageText.value.isNotBlank()
+
             Box(
                 modifier = Modifier
                     .weight(0.2f)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable {
-                        onSendMessage(messageText.value)
-                        messageText.value = ""
-                    },
+                    .background(if (isClickable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background)
+                    .then(
+                        if (isClickable) {
+                            Modifier.clickable {
+                                onSendMessage(messageText.value)
+                                messageText.value = ""
+                            }
+                        } else {
+                            Modifier
+                        }
+                    )
+                    ,
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
