@@ -40,6 +40,11 @@ android {
                 "BASE_URL",
                 "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
             )
+            buildConfigField(
+                "String",
+                "MIDTRANS_BASE_URL",
+                "\"https://api.sandbox.midtrans.com\""
+            )
         }
     }
     compileOptions {
@@ -112,4 +117,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
 
     implementation(libs.material.icons.extended)
+
+    implementation(libs.uikit)
 }

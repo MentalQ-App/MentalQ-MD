@@ -159,4 +159,6 @@
     <string name="notification_permission_settings">MentalQ membutuhkan akses notifikasi untuk mengirimkan pengingat kepada Anda. Harap berikan izin di pengaturan.</string>
     <string name="try_again">Coba Lagi</string>
     <string name="open_settings">Buka</string>
+    <string name="transaction_failed">Transaksi Dibatalkan</string>
+    <string name="transaction_failed_desc">Transaksi telah berhasil dibatalkan</string>
 </resources>

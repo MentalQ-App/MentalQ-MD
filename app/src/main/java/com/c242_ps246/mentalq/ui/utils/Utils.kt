@@ -26,6 +26,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 
 object Utils {
@@ -171,5 +172,28 @@ object Utils {
                 }
             }
         })
+    }
+
+    fun formatTimestamp(timestamp: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - timestamp
+
+        return when {
+            diff < 24 * 60 * 60 * 1000 -> SimpleDateFormat("HH:mm", Locale.getDefault())
+            diff < 7 * 24 * 60 * 60 * 1000 -> SimpleDateFormat("EEE", Locale.getDefault())
+            else -> SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+        }.format(Date(timestamp))
+    }
+
+    fun Long.toFormattedDate(
+        format: String = "yyyy-MM-dd",
+        locale: Locale = Locale.getDefault()
+    ): String {
+        val date = Date(this) // Create a Date object from the timestamp
+        val formatter = SimpleDateFormat(
+            format,
+            locale
+        ) // Create a formatter with the desired format and locale
+        return formatter.format(date) // Format the date and return the result
     }
 }

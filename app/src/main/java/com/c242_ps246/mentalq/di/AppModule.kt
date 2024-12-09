@@ -14,12 +14,14 @@ import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.retrofit.AnalysisApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.ChatApiService
+import com.c242_ps246.mentalq.data.remote.retrofit.MidtransApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.PsychologistApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.UserApiService
 import com.c242_ps246.mentalq.data.repository.AnalysisRepository
 import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.ChatRepository
+import com.c242_ps246.mentalq.data.repository.MidtransRepository
 import com.c242_ps246.mentalq.data.repository.NoteRepository
 import com.c242_ps246.mentalq.data.repository.PsychologistRepository
 import com.c242_ps246.mentalq.data.repository.UserRepository
@@ -265,6 +267,25 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideMidtransApiService(): MidtransApiService {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MidtransApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideMentalQDatabase(application: Application): MentalQDatabase {
         return Room.databaseBuilder(
             application,
@@ -304,6 +325,14 @@ object AppModule {
         noteApiService: NoteApiService
     ): NoteRepository {
         return NoteRepository(noteDao, noteApiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMidtransRepository(
+        midtransApiService: MidtransApiService
+    ): MidtransRepository {
+        return MidtransRepository(midtransApiService)
     }
 
     @Provides

@@ -159,4 +159,6 @@
     <string name="notification_permission_settings">MentalQ needs notification access to send you reminder notifications. Please grant permission in settings.</string>
     <string name="try_again">Try Again</string>
     <string name="open_settings">Open</string>
+    <string name="transaction_failed">Transaction Canceled</string>
+    <string name="transaction_failed_desc">Transaction has been successfully canceled</string>
 </resources>
