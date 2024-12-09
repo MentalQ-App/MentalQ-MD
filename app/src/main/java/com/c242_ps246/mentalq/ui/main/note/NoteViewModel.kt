@@ -47,7 +47,7 @@ class NoteViewModel @Inject constructor(
         updateTodayFromServer()
     }
 
-    fun updateTodayFromServer() {
+    private fun updateTodayFromServer() {
         fetchServerTime(
             onTimeFetched = { serverTime ->
                 val today = serverTime.toLocalDate()
@@ -60,7 +60,7 @@ class NoteViewModel @Inject constructor(
         )
     }
 
-    fun isNoteTodayAlreadyAdded(): Boolean {
+    private fun isNoteTodayAlreadyAdded(): Boolean {
         val currentServerDate = _todayDate.value ?: return false
         val currentNoteList = _listNote.value ?: return false
 
@@ -84,7 +84,7 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-    fun loadAllNotes() {
+    private fun loadAllNotes() {
         viewModelScope.launch {
             noteRepository.getAllNotes().observeForever { result ->
                 when (result) {

@@ -34,6 +34,17 @@ data class DetailNoteResponse(
     val message: String? = null
 )
 
+data class NormalizeNoteResponse(
+    @field:SerializedName("content")
+    val content: String,
+
+    @field:SerializedName("error")
+    val error: Boolean? = null,
+
+    @field:SerializedName("message")
+    val message: String? = null
+)
+
 @Entity(tableName = "note")
 data class ListNoteItem(
     @PrimaryKey

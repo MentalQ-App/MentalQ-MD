@@ -70,12 +70,12 @@ class NoteRepository(
             )
             if (response.error == false && response.note != null) {
                 val newNote = ListNoteItem(
-                    response.note.id,
-                    response.note.title,
-                    response.note.content,
-                    response.note.emotion,
-                    response.note.updatedAt,
-                    response.note.createdAt
+                    id = response.note.id,
+                    title = response.note.title,
+                    content = response.note.content,
+                    emotion = response.note.emotion,
+                    updatedAt = response.note.updatedAt,
+                    createdAt = response.note.createdAt
                 )
                 noteDao.insertNote(newNote)
                 emit(Result.Success(newNote))

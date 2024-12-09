@@ -2,6 +2,7 @@ package com.c242_ps246.mentalq.data.remote.retrofit
 
 import com.c242_ps246.mentalq.data.remote.response.DeleteNoteResponse
 import com.c242_ps246.mentalq.data.remote.response.DetailNoteResponse
+import com.c242_ps246.mentalq.data.remote.response.NormalizeNoteResponse
 import com.c242_ps246.mentalq.data.remote.response.NoteResponse
 import retrofit2.Response
 import retrofit2.http.DELETE
@@ -24,6 +25,12 @@ interface NoteApiService {
         @Field("content") content: String,
         @Field("emotion") emotion: String
     ): DetailNoteResponse
+
+    @FormUrlEncoded
+    @POST("notes/normalize")
+    suspend fun normalizeNote(
+        @Field("content") content: String
+    ): NormalizeNoteResponse
 
     @FormUrlEncoded
     @PUT("notes/{id}")
