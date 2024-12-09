@@ -73,6 +73,7 @@ fun PsychologistMainScreen(
                     onNavigateToChatRoom = { chatId ->
                         navController.navigate("${Routes.CHAT_ROOM}/$chatId")
                     },
+                    onBackClick = {}
                 )
             }
             composable(

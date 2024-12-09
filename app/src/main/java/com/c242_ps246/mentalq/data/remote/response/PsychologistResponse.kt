@@ -15,6 +15,18 @@ data class PsychologistResponse(
     val message: String? = null
 )
 
+data class SinglePsychologistResponse(
+    @field:SerializedName("psychologist")
+    val psychologist: PsychologistItem? = null,
+
+    @field:SerializedName("error")
+    val error: Boolean? = null,
+
+    @field:SerializedName("message")
+    val message: String? = null
+)
+
+
 @Entity(tableName = "psychologist")
 data class PsychologistItem(
 

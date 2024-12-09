@@ -29,6 +29,8 @@ import com.c242_ps246.mentalq.ui.main.note.NoteScreen
 import com.c242_ps246.mentalq.ui.main.note.detail.DetailNoteScreen
 import com.c242_ps246.mentalq.ui.main.profile.ProfileScreen
 import com.c242_ps246.mentalq.ui.main.psychologist.PsychologistScreen
+import com.c242_ps246.mentalq.ui.main.psychologist.midtrans.MidtransScreen
+import com.c242_ps246.mentalq.ui.main.psychologist.midtrans.MidtransWebView
 import com.c242_ps246.mentalq.ui.navigation.Routes
 
 @Composable
@@ -90,8 +92,61 @@ fun MainScreen(
                 route = Routes.PSYCHOLOGIST_LIST
             ) {
                 PsychologistScreen(
-                    onNavigateToChatRoom = { chatId ->
+                    onNavigateToMidtransWebView = { userId, price, itemId ->
+                        navController.navigate("${Routes.MIDTRANS_WEBVIEW}/$userId/$price/$itemId")
+                    }
+                )
+            }
+
+            composable(
+                route = "${Routes.MIDTRANS_MAIN_SCREEN}/{orderId}/{userId}/{itemId}",
+                arguments = listOf(
+                    navArgument("orderId") { type = NavType.StringType },
+                    navArgument("userId") { type = NavType.StringType },
+                    navArgument("itemId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val orderId = backStackEntry.arguments?.getString("orderId") ?: return@composable
+                val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+                val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
+                MidtransScreen(
+                    orderId = orderId,
+                    userId = userId,
+                    itemId = itemId,
+                    onSuccess = { chatId ->
                         navController.navigate("${Routes.CHAT_ROOM}/$chatId")
+                    },
+                    onFailed = {
+                        navController.navigate(Routes.PSYCHOLOGIST_LIST) {
+                            popUpTo(Routes.MIDTRANS_MAIN_SCREEN) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "${Routes.MIDTRANS_WEBVIEW}/{userId}/{price}/{itemId}",
+                arguments = listOf(
+                    navArgument("userId") { type = NavType.StringType },
+                    navArgument("price") { type = NavType.IntType },
+                    navArgument("itemId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+                val price = backStackEntry.arguments?.getInt("price") ?: return@composable
+                val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
+                MidtransWebView(
+                    userId = userId,
+                    price = price,
+                    itemId = itemId,
+                    onBackClick = { orderId ->
+                        navController.navigate("${Routes.MIDTRANS_MAIN_SCREEN}/$orderId/$userId/$itemId") {
+                            popUpTo(Routes.MIDTRANS_WEBVIEW) {
+                                inclusive = true
+                            }
+                        }
                     }
                 )
             }
@@ -125,6 +180,8 @@ fun MainScreen(
                     application = LocalContext.current.applicationContext as Application
                 )
             }
+
+
             composable(
                 route = Routes.CHAT
             ) {
@@ -133,6 +190,13 @@ fun MainScreen(
                     onNavigateToChatRoom = { chatId ->
                         navController.navigate("${Routes.CHAT_ROOM}/$chatId")
                     },
+                    onBackClick = {
+                        navController.navigate(Routes.DASHBOARD) {
+                            popUpTo(Routes.CHAT) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 )
             }
             composable(

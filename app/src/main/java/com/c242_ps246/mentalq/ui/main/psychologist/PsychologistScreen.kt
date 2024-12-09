@@ -52,7 +52,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PsychologistScreen(
-    onNavigateToChatRoom: (String) -> Unit,
+    onNavigateToMidtransWebView: (String, Int, String) -> Unit,
     viewModel: PsychologistViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -106,8 +106,8 @@ fun PsychologistScreen(
                         ) { psychologist ->
                             PsychologistCard(
                                 psychologist = psychologist,
-                                onItemClick = onNavigateToChatRoom,
-                                userId = userId!!
+                                userId = userId!!,
+                                onNavigateToMidtransWebView = onNavigateToMidtransWebView
                             )
                         }
                     }
@@ -126,26 +126,26 @@ private fun PsychologistCard(
     psychologist: PsychologistItem,
     modifier: Modifier = Modifier,
     userId: String,
-    onItemClick: (String) -> Unit
+    onNavigateToMidtransWebView: (String, Int, String) -> Unit
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = {
-                makeNewChatRoom(
-                    userId,
-                    psychologist.userId,
-                    onItemClick
-                )
+                onNavigateToMidtransWebView(userId, psychologist.price, psychologist.userId)
+//                makeNewChatRoom(
+//                    userId,
+//                    psychologist.userId,
+//                    onItemClick
+//                )
             }),
-        color = MaterialTheme.colorScheme.primary,
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(16.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primary),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -183,7 +183,6 @@ private fun PsychologistCard(
                     val formatter = NumberFormat.getCurrencyInstance(locale)
 
                     Column(
-                        modifier = Modifier.background(MaterialTheme.colorScheme.error)
                     ) {
                         Text(
                             text = "${psychologist.prefixTitle} ${psychologist.users.name} ${psychologist.suffixTitle}",

@@ -26,4 +26,21 @@ class PsychologistRepository(
         }
     }
 
+    fun getPsychologistById(psychologistId: String): LiveData<Result<PsychologistItem>> = liveData {
+        emit(Result.Loading)
+
+        try {
+            val response = psychologistApiService.getPsychologistById(psychologistId)
+            val psychologist = response.psychologist
+
+            if (psychologist != null) {
+                emit(Result.Success(psychologist))
+            } else {
+                emit(Result.Error("Failed to fetch remote data"))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("Database error: ${e.message}"))
+        }
+    }
+
 }
