@@ -47,15 +47,15 @@ class ChatViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 firebase.getReference("userChats").child(userId).get()
-                    .addOnSuccessListener {
+                    .addOnSuccessListener { userChats ->
 
-                        if (it.exists()) {
+                        if (userChats.exists()) {
 
 
                             val chatRooms = mutableListOf<ChatRoomItem>()
-                            var remainingRequests = it.childrenCount.toInt()
+                            var remainingRequests = userChats.childrenCount.toInt()
 
-                            it.children.forEach { chatRoomSnapshot ->
+                            userChats.children.forEach { chatRoomSnapshot ->
 
                                 Log.e("ChatViewModel", "loadChatRooms: ${chatRoomSnapshot.value}")
 
@@ -69,13 +69,22 @@ class ChatViewModel @Inject constructor(
                                                 "loadChatRooms: ${chatRoomData.value}"
                                             )
 
+
                                             val chatRoom = ChatRoomItem(
                                                 id = chatRoomData.key.toString(),
                                                 userId = chatRoomData.child("members")
-                                                    .child("0").value.toString(),
+                                                    .child("user").child("id")
+                                                    .value.toString(),
+                                                psychologistName = chatRoomData.child("members")
+                                                    .child("psychologist").child("name")
+                                                    .value.toString(),
+                                                psychologistProfile = chatRoomData.child("members")
+                                                    .child("psychologist")
+                                                    .child("profile").value.toString(),
                                                 lastMessage = chatRoomData.child("lastMessage").value.toString(),
                                                 psychologistId = chatRoomData.child("psychologistId").value.toString(),
-                                                createdAt = chatRoomData.child("createdAt").value.toString()
+                                                createdAt = chatRoomData.child("createdAt").value.toString(),
+                                                updatedAt = chatRoomData.child("updatedAt").value.toString()
                                             )
                                             chatRooms.add(chatRoom)
                                         } else {
@@ -89,7 +98,8 @@ class ChatViewModel @Inject constructor(
                                         remainingRequests--
 
                                         if (remainingRequests == 0) {
-                                            _chatRooms.value = chatRooms
+                                            _chatRooms.value =
+                                                chatRooms.sortedByDescending { it.updatedAt }
                                             _uiState.value = _uiState.value.copy(isLoading = false)
                                         }
                                     }

@@ -57,6 +57,9 @@ class ChatRoomViewModel @Inject constructor(
 
             val chatMessageRef = firebase.getReference("messages").child(chatRoomId)
 
+
+            val chatRoomRef = firebase.getReference("chatroom").child(chatRoomId)
+
             val message = ChatMessageItem(
                 id = messageId,
                 senderId = userId,
@@ -68,6 +71,9 @@ class ChatRoomViewModel @Inject constructor(
             chatMessageRef.child(messageId).setValue(message).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     updateLastMessage(chatRoomId, messageId, message)
+
+                    chatRoomRef.child("updatedAt")
+                        .setValue(System.currentTimeMillis().toString())
                 }
             }
         }

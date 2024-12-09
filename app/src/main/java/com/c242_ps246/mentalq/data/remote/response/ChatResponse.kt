@@ -29,11 +29,17 @@ data class ChatRoomItem(
     @field:SerializedName("psychologist_id")
     val psychologistId: String,
 
+    @field:SerializedName("psychologist_name")
+    val psychologistName: String,
+
+    @field:SerializedName("psychologist_profile")
+    val psychologistProfile: String? = null,
+
     @field:SerializedName("last_message")
     val lastMessage: String? = null,
 
     @field:SerializedName("updated_at")
-    val updatedAt: String? = null,
+    val updatedAt: String = "",
 
     @field:SerializedName("created_at")
     val createdAt: String,
@@ -41,6 +47,18 @@ data class ChatRoomItem(
     @field:SerializedName("deleted_at")
     val deletedAt: String? = null
 )
+
+data class Psychologist(
+    @field:SerializedName("id")
+    val id: String,
+
+    @field:SerializedName("name")
+    val name: String,
+
+    @field:SerializedName("profile")
+    val profile: String?
+)
+
 
 data class ChatMessageResponse(
     @field:SerializedName("listMessages")
@@ -69,5 +87,5 @@ data class ChatMessageItem(
     val content: String = "",
 
     @field:SerializedName("createdAt")
-    val createdAt: String? = ""
+    val createdAt: String? = "",
 )

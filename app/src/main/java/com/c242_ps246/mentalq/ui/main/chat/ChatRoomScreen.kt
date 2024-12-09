@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,8 +28,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,10 +42,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.utils.Utils.formatTimestamp
 import com.c242_ps246.mentalq.data.remote.response.ChatMessageItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,22 +73,34 @@ fun ChatRoomScreen(
         viewModel.getMessages(chatRoomId)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        if (uiState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.your_messages)) }
             )
-        } else {
-            ChatMessages(
-                messages = messages,
-                currentUserId = userId!!,
-                onSendMessage = { message ->
-                    viewModel.sendMessage(
-                        chatRoomId = chatRoomId,
-                        messageText = message
-                    )
-                })
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                ChatMessages(
+                    messages = messages,
+                    currentUserId = userId!!,
+                    onSendMessage = { message ->
+                        viewModel.sendMessage(
+                            chatRoomId = chatRoomId,
+                            messageText = message
+                        )
+                    })
+            }
         }
     }
 
@@ -101,7 +121,9 @@ fun ChatMessages(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
             items(items = messages) {
                 ChatBubble(
                     message = it,
@@ -154,8 +176,7 @@ fun ChatMessages(
                         } else {
                             Modifier
                         }
-                    )
-                    ,
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -194,17 +215,30 @@ fun ChatBubble(
         },
         verticalAlignment = Alignment.Bottom
     ) {
-
         Box(
             modifier = Modifier
                 .padding(2.dp)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         ) {
-            Text(
-                text = message.content,
-                color = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp)
-            )
+            Column {
+                Text(
+                    text = message.content,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp)
+                )
+
+                Text(
+                    text = formatTimestamp(message.createdAt!!.toLong()),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .align(Alignment.End)
+                )
+
+
+            }
+
         }
 
     }

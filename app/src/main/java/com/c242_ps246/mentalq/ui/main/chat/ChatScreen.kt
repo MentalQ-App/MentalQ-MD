@@ -2,6 +2,8 @@ package com.c242_ps246.mentalq.ui.main.chat
 
 //import coil.compose.AsyncImage
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.utils.Utils.formatTimestamp
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
 import com.c242_ps246.mentalq.ui.component.EmptyState
 import java.text.SimpleDateFormat
@@ -27,13 +30,16 @@ import java.util.Locale
 @Composable
 fun ChatScreen(
     onNavigateToChatRoom: (String) -> Unit,
-    onChatSelected: (String) -> Unit
+    onChatSelected: (String) -> Unit,
+    onBackClick: () -> Unit
 ) {
 
     val viewModel: ChatViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chatRooms by viewModel.chatRooms.collectAsStateWithLifecycle()
 
+
+    BackHandler { onBackClick() }
 
     Scaffold(
         topBar = {
@@ -93,10 +99,11 @@ private fun ChatPreviewItem(
             .padding(8.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
-        tonalElevation = 4.dp
+        tonalElevation = 4.dp,
     ) {
         Row(
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -107,16 +114,17 @@ private fun ChatPreviewItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = chatRoom.psychologistId,
+                        text = chatRoom.psychologistName,
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = chatRoom.createdAt,
+                        text = formatTimestamp(chatRoom.updatedAt.toLong()),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -150,15 +158,3 @@ private fun ChatPreviewItem(
 //            onNavigateToChatRoom = {}, onNavigateToPsychologist = {})
 //    }
 //}
-
-
-private fun formatTimestamp(timestamp: Long): String {
-    val now = System.currentTimeMillis()
-    val diff = now - timestamp
-
-    return when {
-        diff < 24 * 60 * 60 * 1000 -> SimpleDateFormat("HH:mm", Locale.getDefault())
-        diff < 7 * 24 * 60 * 60 * 1000 -> SimpleDateFormat("EEE", Locale.getDefault())
-        else -> SimpleDateFormat("dd/MM/yy", Locale.getDefault())
-    }.format(Date(timestamp))
-}
