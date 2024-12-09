@@ -53,5 +53,5 @@ data class UserData(
     val profilePhotoUrl: String? = null,
 
     @field:SerializedName("role")
-    val role: String
+    val role: String? = null
 )

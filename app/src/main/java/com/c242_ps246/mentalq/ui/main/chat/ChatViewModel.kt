@@ -38,6 +38,11 @@ class ChatViewModel @Inject constructor(
         authRepository.getUserId().observeForever {
             _userId.value = it
 
+            if (it != null) {
+                _uiState.value =
+                    _uiState.value.copy(isLoading = false)
+            }
+
             authRepository.getUserId().removeObserver { this }
         }
     }
@@ -74,6 +79,12 @@ class ChatViewModel @Inject constructor(
                                                 id = chatRoomData.key.toString(),
                                                 userId = chatRoomData.child("members")
                                                     .child("user").child("id")
+                                                    .value.toString(),
+                                                userName = chatRoomData.child("members")
+                                                    .child("user").child("name")
+                                                    .value.toString(),
+                                                userProfile = chatRoomData.child("members")
+                                                    .child("user").child("profile")
                                                     .value.toString(),
                                                 psychologistName = chatRoomData.child("members")
                                                     .child("psychologist").child("name")

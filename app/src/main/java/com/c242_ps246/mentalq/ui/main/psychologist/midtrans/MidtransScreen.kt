@@ -50,12 +50,14 @@ fun MidtransScreen(
     LaunchedEffect(Unit) {
         viewModel.getTransactionStatus(orderId)
         viewModel.getPsychologistData(itemId)
+        viewModel.getUserDataById(userId)
     }
 
     val uiState by viewModel.uiState.collectAsState()
     val transactionStatus by viewModel.transactionStatus.collectAsState()
     val transactionMessage by viewModel.transactionMessage.collectAsState()
     val psychologistData by viewModel.psychologistData.collectAsState()
+    val userData by viewModel.userData.collectAsState()
 
     val isAlreadyCreated = remember { mutableStateOf(false) }
 
@@ -67,20 +69,29 @@ fun MidtransScreen(
             CircularProgressIndicator()
         } else {
 //            Log.e("MidtransScreen", "MidtransScreen: $transactionStatus, $transactionMessage")
-            if (transactionStatus == "settlement" && psychologistData != null) {
-                if (!isAlreadyCreated.value) {
-                    isAlreadyCreated.value = true
-                    Log.e("MidtransScreen", "MidtransScreen: AKU KEPANGGIL")
+            if (transactionStatus == "settlement") {
+
+                val isDataNotNull = psychologistData != null && userData != null
+
+                if (isDataNotNull) {
+                    if (!isAlreadyCreated.value) {
+                        isAlreadyCreated.value = true
+                        Log.e("MidtransScreen", "MidtransScreen: AKU KEPANGGIL")
 
 
-                    makeNewChatRoom(
-                        userId = userId,
-                        psychologistId = itemId,
-                        psychologistName = psychologistData!!.users.name,
-                        psychologistProfile = psychologistData!!.users.profilePhotoUrl,
-                        onSuccess = onSuccess
-                    )
+                        makeNewChatRoom(
+                            userId = userId,
+                            userName = userData!!.name,
+                            userProfile = userData!!.profilePhotoUrl,
+                            psychologistId = itemId,
+                            psychologistName = psychologistData!!.users.name,
+                            psychologistProfile = psychologistData!!.users.profilePhotoUrl,
+                            onSuccess = onSuccess
+                        )
+                    }
                 }
+
+
             } else {
                 Log.e("MidtransScreen", "MidtransScreen: $psychologistData")
                 Column(
@@ -110,6 +121,8 @@ fun MidtransScreen(
 
 private fun makeNewChatRoom(
     userId: String,
+    userName: String,
+    userProfile: String?,
     psychologistId: String,
     psychologistName: String,
     psychologistProfile: String?,
@@ -123,7 +136,9 @@ private fun makeNewChatRoom(
 
     val members = mapOf(
         "user" to mapOf(
-            "id" to userId
+            "id" to userId,
+            "name" to userName,
+            "profile" to userProfile
         ),
         "psychologist" to mapOf(
             "id" to psychologistId,

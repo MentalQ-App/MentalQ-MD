@@ -40,4 +40,25 @@ class UserRepository(
             emit(Result.Error("An error occurred: ${e.message}"))
         }
     }
+
+    fun getUserDataById(userId: String): LiveData<Result<UserData?>> = liveData {
+        emit(Result.Loading)
+        try {
+            val response = userApiService.getUserById(userId)
+            if (response.isSuccessful) {
+                val body = response.body()
+                emit(Result.Success(body?.user))
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val errorMessage = if (errorBody != null) {
+                    JSONObject(errorBody).getString("message")
+                } else {
+                    "Unknown error occurred"
+                }
+                emit(Result.Error(errorMessage))
+            }
+        } catch (e: Exception) {
+            emit(Result.Error("An error occurred: ${e.message}"))
+        }
+    }
 }

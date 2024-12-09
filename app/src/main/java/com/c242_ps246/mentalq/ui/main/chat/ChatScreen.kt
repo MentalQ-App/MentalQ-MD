@@ -37,6 +37,7 @@ fun ChatScreen(
     val viewModel: ChatViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chatRooms by viewModel.chatRooms.collectAsStateWithLifecycle()
+    val userId by viewModel.userId.collectAsStateWithLifecycle()
 
 
     BackHandler { onBackClick() }
@@ -71,6 +72,7 @@ fun ChatScreen(
                     ) { chatRoom ->
                         ChatPreviewItem(
                             chatRoom = chatRoom,
+                            currentUserId = userId!!,
                             onClick = { onNavigateToChatRoom(chatRoom.id) }
                         )
                     }
@@ -90,6 +92,7 @@ fun ChatScreen(
 @Composable
 private fun ChatPreviewItem(
     chatRoom: ChatRoomItem,
+    currentUserId: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -119,8 +122,15 @@ private fun ChatPreviewItem(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
+                    val title = if (currentUserId == chatRoom.userId) {
+                        chatRoom.psychologistName
+                    } else {
+                        chatRoom.userName
+                    }
+
                     Text(
-                        text = chatRoom.psychologistName,
+                        text = title,
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
