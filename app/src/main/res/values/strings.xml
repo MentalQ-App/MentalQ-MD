@@ -161,4 +161,7 @@
     <string name="open_settings">Open</string>
     <string name="transaction_failed">Transaction Canceled</string>
     <string name="transaction_failed_desc">Transaction has been successfully canceled</string>
+    <string name="you_chat">You</string>
+    <string name="end_session">End Session</string>
+    <string name="end_session_message">Are you sure you want to end this session?</string>
 </resources>

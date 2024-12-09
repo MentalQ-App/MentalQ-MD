@@ -92,6 +92,13 @@ fun MainScreen(
                 route = Routes.PSYCHOLOGIST_LIST
             ) {
                 PsychologistScreen(
+                    onBackClick = {
+                        navController.navigate(Routes.DASHBOARD) {
+                            popUpTo(Routes.PSYCHOLOGIST_LIST) {
+                                inclusive = true
+                            }
+                        }
+                    },
                     onNavigateToMidtransWebView = { userId, price, itemId ->
                         navController.navigate("${Routes.MIDTRANS_WEBVIEW}/$userId/$price/$itemId")
                     }
@@ -117,6 +124,13 @@ fun MainScreen(
                         navController.navigate("${Routes.CHAT_ROOM}/$chatId")
                     },
                     onFailed = {
+                        navController.navigate(Routes.PSYCHOLOGIST_LIST) {
+                            popUpTo(Routes.MIDTRANS_MAIN_SCREEN) {
+                                inclusive = true
+                            }
+                        }
+                    },
+                    onBackClick = {
                         navController.navigate(Routes.PSYCHOLOGIST_LIST) {
                             popUpTo(Routes.MIDTRANS_MAIN_SCREEN) {
                                 inclusive = true

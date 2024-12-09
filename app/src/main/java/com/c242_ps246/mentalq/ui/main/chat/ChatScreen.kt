@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.utils.Utils.formatTimestamp
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
@@ -112,6 +115,27 @@ private fun ChatPreviewItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            val profileImg = if (currentUserId == chatRoom.userId) {
+                chatRoom.psychologistProfile
+            } else {
+                chatRoom.userProfile
+            }
+
+            AsyncImage(
+                model = if (profileImg == "null" || profileImg == null) {
+                    Log.e("ChatScreen", "Null")
+                    R.drawable.default_profile
+                } else {
+                    Log.e("ChatScreen", "Ada")
+                    profileImg
+                },
+                contentDescription = "Profile Picture",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+            )
+
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -145,8 +169,19 @@ private fun ChatPreviewItem(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
+                    Log.e("ChatScreen", "ChatPreviewItem: ${chatRoom.lastMessageSenderId}")
+
+                    val lastMassage = if (currentUserId == chatRoom.lastMessageSenderId) {
+                        stringResource(R.string.you_chat) + ": ${chatRoom.lastMessage}"
+                    } else {
+                        chatRoom.lastMessage
+                    }
+
                     Text(
-                        text = chatRoom.lastMessage ?: "No messages yet",
+                        text = lastMassage ?: "No messages yet",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f)

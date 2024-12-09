@@ -40,7 +40,8 @@ fun MidtransScreen(
     itemId: String,
     userId: String,
     onSuccess: (String) -> Unit,
-    onFailed: () -> Unit
+    onFailed: () -> Unit,
+    onBackClick: () -> Unit
 ) {
 
     Log.e("MidtransScreen", "MidtransScreen: $orderId, $itemId, $userId")
@@ -60,6 +61,10 @@ fun MidtransScreen(
     val userData by viewModel.userData.collectAsState()
 
     val isAlreadyCreated = remember { mutableStateOf(false) }
+
+    BackHandler {
+        onBackClick()
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -149,11 +154,13 @@ private fun makeNewChatRoom(
 
 
     val initialData = hashMapOf(
+        "lastMessageSenderId" to "",
         "lastMessage" to "",
         "members" to members,
         "psychologistId" to psychologistId,
         "createdAt" to System.currentTimeMillis().toString(),
-        "updatedAt" to System.currentTimeMillis().toString()
+        "updatedAt" to System.currentTimeMillis().toString(),
+        "isEnded" to false
     )
 
     chatRef.setValue(initialData).addOnCompleteListener { task ->

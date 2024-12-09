@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.chat
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.c242_ps246.mentalq.data.remote.response.ChatMessageItem
 import com.c242_ps246.mentalq.data.repository.AuthRepository
@@ -31,10 +32,24 @@ class ChatRoomViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PsychologistScreenUiState())
     val uiState = _uiState.asStateFlow()
 
+    private val _profileUrl = MutableStateFlow<String?>(null)
+    val profileUrl = _profileUrl.asStateFlow()
+
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName = _userName.asStateFlow()
+
+    private val _userRole = MutableStateFlow<String?>(null)
+    val userRole = _userRole.asStateFlow()
+
+    private val _isEnded = MutableStateFlow(false)
+    val isEnded = _isEnded.asStateFlow()
+
     private val firebase = Firebase.database
 
     init {
+        _uiState.value = uiState.value.copy(isLoading = true)
         getUserId()
+        getUserRole()
     }
 
     private fun getUserId() {
@@ -50,13 +65,72 @@ class ChatRoomViewModel @Inject constructor(
         }
     }
 
+    private fun getUserRole() {
+        authRepository.getUserRole().observeForever {
+            _userRole.value = it
+
+            if (it != null) {
+                _uiState.value =
+                    _uiState.value.copy(isLoading = false)
+            }
+
+            authRepository.getUserRole().removeObserver { this }
+        }
+    }
+
+    fun endSession(chatRoomId: String) {
+        val chatRoomRef = firebase.getReference("chatroom").child(chatRoomId)
+        chatRoomRef.child("isEnded").setValue(true).addOnSuccessListener {
+            _isEnded.value = true
+        }
+    }
+
+    fun getSessionStatus(chatRoomId: String) {
+        val chatRoomRef = firebase.getReference("chatroom").child(chatRoomId)
+        chatRoomRef.child("isEnded").get().addOnSuccessListener {
+            _isEnded.value = it.value as Boolean
+        }
+    }
+
+    fun getProfileUrl(chatRoomId: String, userId: String) {
+
+
+        val membersRef = firebase.getReference("chatroom").child(chatRoomId).child("members")
+
+        membersRef.child("user").child("id").get().addOnSuccessListener { id ->
+            if (id.value.toString() == userId) {
+                Log.e("TestProfile", "getProfileUrl: Psycholog!")
+                membersRef.child("psychologist").child("profile").get()
+                    .addOnSuccessListener { profileUrl ->
+                        _profileUrl.value = profileUrl.value.toString()
+                    }
+                membersRef.child("psychologist").child("name").get()
+                    .addOnSuccessListener { name ->
+                        _userName.value = name.value.toString()
+                    }
+                _uiState.value = uiState.value.copy(isLoading = false)
+            } else {
+                Log.e("TestProfile", "getProfileUrl: User!!")
+                membersRef.child("user").child("profile").get()
+                    .addOnSuccessListener { profileUrl ->
+                        _profileUrl.value = profileUrl.value.toString()
+                    }
+                membersRef.child("user").child("name").get()
+                    .addOnSuccessListener { name ->
+                        _userName.value = name.value.toString()
+                    }
+                _uiState.value = uiState.value.copy(isLoading = false)
+            }
+        }
+
+    }
+
     fun sendMessage(chatRoomId: String, messageText: String) {
         authRepository.getUserId().observeForever { userId ->
 
             val messageId = firebase.reference.push().key ?: UUID.randomUUID().toString()
 
             val chatMessageRef = firebase.getReference("messages").child(chatRoomId)
-
 
             val chatRoomRef = firebase.getReference("chatroom").child(chatRoomId)
 
@@ -70,7 +144,7 @@ class ChatRoomViewModel @Inject constructor(
 
             chatMessageRef.child(messageId).setValue(message).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    updateLastMessage(chatRoomId, messageId, message)
+                    updateLastMessage(chatRoomId, messageId, message, userId)
 
                     chatRoomRef.child("updatedAt")
                         .setValue(System.currentTimeMillis().toString())
@@ -79,9 +153,16 @@ class ChatRoomViewModel @Inject constructor(
         }
     }
 
-    private fun updateLastMessage(chatRoomId: String, messageId: String, message: ChatMessageItem) {
+    private fun updateLastMessage(
+        chatRoomId: String,
+        messageId: String,
+        message: ChatMessageItem,
+        senderId: String
+    ) {
+
         val chatRoomRef = firebase.getReference("chatroom").child(chatRoomId)
         chatRoomRef.child("lastMessage").setValue(message.content)
+        chatRoomRef.child("lastMessageSenderId").setValue(senderId)
     }
 
 

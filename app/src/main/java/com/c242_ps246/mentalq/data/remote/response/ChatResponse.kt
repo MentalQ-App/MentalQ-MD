@@ -41,6 +41,9 @@ data class ChatRoomItem(
     @field:SerializedName("psychologist_profile")
     val psychologistProfile: String? = null,
 
+    @field:SerializedName("last_message_sender_id")
+    val lastMessageSenderId: String? = null,
+
     @field:SerializedName("last_message")
     val lastMessage: String? = null,
 
@@ -53,6 +56,7 @@ data class ChatRoomItem(
     @field:SerializedName("deleted_at")
     val deletedAt: String? = null
 )
+
 
 data class Psychologist(
     @field:SerializedName("id")

@@ -1,6 +1,7 @@
 package com.c242_ps246.mentalq.ui.main.psychologist
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +53,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PsychologistScreen(
+    onBackClick: () -> Unit,
     onNavigateToMidtransWebView: (String, Int, String) -> Unit,
     viewModel: PsychologistViewModel = hiltViewModel()
 ) {
@@ -59,6 +61,9 @@ fun PsychologistScreen(
     val psychologistList by viewModel.psychologists.collectAsState()
     val userId by viewModel.userId.collectAsStateWithLifecycle()
 
+    BackHandler {
+        onBackClick()
+    }
 
     Log.e("userId", "PsychologistScreen: $psychologistList")
 

@@ -93,6 +93,7 @@ class ChatViewModel @Inject constructor(
                                                     .child("psychologist")
                                                     .child("profile").value.toString(),
                                                 lastMessage = chatRoomData.child("lastMessage").value.toString(),
+                                                lastMessageSenderId = chatRoomData.child("lastMessageSenderId").value.toString(),
                                                 psychologistId = chatRoomData.child("psychologistId").value.toString(),
                                                 createdAt = chatRoomData.child("createdAt").value.toString(),
                                                 updatedAt = chatRoomData.child("updatedAt").value.toString()

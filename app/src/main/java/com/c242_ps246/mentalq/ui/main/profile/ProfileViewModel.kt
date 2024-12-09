@@ -69,6 +69,9 @@ class ProfileViewModel @Inject constructor(
 
     fun getUserData() {
         authRepository.getUser().observeForever { result ->
+
+            Log.e("ProfileViewModel", "getUserData: $result")
+
             when (result) {
                 Result.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)

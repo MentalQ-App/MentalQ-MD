@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,6 +24,8 @@ fun CustomDialog(
     onConfirm: () -> Unit,
     confirmButtonText: String = stringResource(id = R.string.ok),
     onDismiss: () -> Unit,
+    confirmColor: Color = MaterialTheme.colorScheme.primary,
+    confirmTextColor: Color = Color.Unspecified,
     dismissButtonText: String = stringResource(id = R.string.cancel),
     showCancelButton: Boolean = true
 ) {
@@ -80,7 +83,8 @@ fun CustomDialog(
                         onClick = onConfirm,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
+                            containerColor = confirmColor,
+                            contentColor = confirmTextColor
                         )
                     ) {
                         Text(confirmButtonText)

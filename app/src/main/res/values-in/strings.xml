@@ -161,4 +161,7 @@
     <string name="open_settings">Buka</string>
     <string name="transaction_failed">Transaksi Dibatalkan</string>
     <string name="transaction_failed_desc">Transaksi telah berhasil dibatalkan</string>
+    <string name="you_chat">Anda</string>
+    <string name="end_session">Akhiri Sesi</string>
+    <string name="end_session_message">Anda yakin akan mengakhiri sesi ini?</string>
 </resources>
