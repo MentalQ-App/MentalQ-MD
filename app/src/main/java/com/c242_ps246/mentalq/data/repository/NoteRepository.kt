@@ -5,17 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.c242_ps246.mentalq.BuildConfig
 import com.c242_ps246.mentalq.data.local.room.NoteDao
-import com.c242_ps246.mentalq.data.remote.response.GeminiContent
 import com.c242_ps246.mentalq.data.remote.response.GeminiPart
 import com.c242_ps246.mentalq.data.remote.response.GeminiRequest
 import com.c242_ps246.mentalq.data.remote.response.GeminiRequestContent
-import com.c242_ps246.mentalq.data.remote.response.GeminiResponse
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.data.remote.retrofit.GeminiApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.RequestBody
 
 class NoteRepository(
     private val noteDao: NoteDao,
@@ -41,6 +38,7 @@ class NoteRepository(
                             note.id,
                             note.title,
                             note.content,
+                            note.contentNormalized,
                             note.emotion,
                             note.updatedAt,
                             note.createdAt
@@ -85,6 +83,7 @@ class NoteRepository(
                     id = response.note.id,
                     title = response.note.title,
                     content = response.note.content,
+                    contentNormalized = response.note.contentNormalized,
                     emotion = response.note.emotion,
                     updatedAt = response.note.updatedAt,
                     createdAt = response.note.createdAt

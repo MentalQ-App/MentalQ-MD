@@ -33,6 +33,7 @@ class AnalysisRepository(
                             analysis.id,
                             analysis.noteId,
                             analysis.predictedStatus,
+                            analysis.confidenceScore,
                             analysis.updatedAt,
                             analysis.createdAt
                         )
