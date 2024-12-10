@@ -27,6 +27,9 @@ data class ListAnalysisItem(
     @field:SerializedName("predicted_status")
     val predictedStatus: String,
 
+    @field:SerializedName("confidence_score")
+    val confidenceScore: Float? = null,
+
     @field:SerializedName("updatedAt")
     val updatedAt: String? = null,
 
