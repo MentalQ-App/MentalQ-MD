@@ -38,7 +38,8 @@ interface NoteApiService {
         @Path("id") id: String,
         @Field("title") title: String,
         @Field("content") content: String,
-        @Field("emotion") emotion: String
+        @Field("emotion") emotion: String,
+        @Field("content_normalized") contentNormalized: String
     ): DetailNoteResponse
 
     @PUT("notes/delete/{id}")

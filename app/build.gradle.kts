@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -40,10 +42,23 @@ android {
                 "BASE_URL",
                 "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
             )
+
+            val localPropertiesFile = project.rootProject.file("local.properties")
+            val properties = Properties()
+            properties.load(localPropertiesFile.inputStream())
+
+            val apiKey = properties.getProperty("GEMINI_API_KEY")
+
             buildConfigField(
                 "String",
-                "MIDTRANS_BASE_URL",
-                "\"https://api.sandbox.midtrans.com\""
+                "GEMINI_API_KEY",
+                "\"$apiKey\""
+            )
+
+            buildConfigField(
+                "String",
+                "GEMINI_BASE_URL",
+                "\"https://generativelanguage.googleapis.com/\""
             )
         }
     }

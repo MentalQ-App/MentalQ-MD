@@ -57,6 +57,9 @@ data class ListNoteItem(
     @field:SerializedName("content")
     val content: String? = null,
 
+    @field:SerializedName("content_normalized")
+    val contentNormalized: String? = null,
+
     @field:SerializedName("emotion")
     val emotion: String? = null,
 

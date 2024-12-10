@@ -2,6 +2,7 @@ package com.c242_ps246.mentalq.di
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import androidx.work.WorkManager
 import com.c242_ps246.mentalq.BuildConfig
@@ -14,6 +15,7 @@ import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.retrofit.AnalysisApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.ChatApiService
+import com.c242_ps246.mentalq.data.remote.retrofit.GeminiApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.MidtransApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.PsychologistApiService
@@ -46,6 +48,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
     private const val BASE_URL = BuildConfig.BASE_URL
+    private const val GEMINI_BASE_URL = BuildConfig.GEMINI_BASE_URL
+
 
     @Provides
     @Singleton
@@ -286,6 +290,25 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideGeminiApiService(): GeminiApiService {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(GEMINI_BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(GeminiApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideMentalQDatabase(application: Application): MentalQDatabase {
         return Room.databaseBuilder(
             application,
@@ -322,9 +345,10 @@ object AppModule {
     @Singleton
     fun provideNoteRepository(
         noteDao: NoteDao,
-        noteApiService: NoteApiService
+        noteApiService: NoteApiService,
+        geminiApiService: GeminiApiService
     ): NoteRepository {
-        return NoteRepository(noteDao, noteApiService)
+        return NoteRepository(noteDao, noteApiService, geminiApiService)
     }
 
     @Provides

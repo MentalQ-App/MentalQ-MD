@@ -3,16 +3,28 @@ package com.c242_ps246.mentalq.data.repository
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.c242_ps246.mentalq.BuildConfig
 import com.c242_ps246.mentalq.data.local.room.NoteDao
+import com.c242_ps246.mentalq.data.remote.response.GeminiContent
+import com.c242_ps246.mentalq.data.remote.response.GeminiPart
+import com.c242_ps246.mentalq.data.remote.response.GeminiRequest
+import com.c242_ps246.mentalq.data.remote.response.GeminiRequestContent
+import com.c242_ps246.mentalq.data.remote.response.GeminiResponse
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
+import com.c242_ps246.mentalq.data.remote.retrofit.GeminiApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.RequestBody
 
 class NoteRepository(
     private val noteDao: NoteDao,
-    private val noteApiService: NoteApiService
+    private val noteApiService: NoteApiService,
+    private val geminiApiService: GeminiApiService
 ) {
+
+    private val GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY
+
     fun getAllNotes(): LiveData<Result<List<ListNoteItem>>> = liveData {
         emit(Result.Loading)
         try {
@@ -89,11 +101,43 @@ class NoteRepository(
 
     suspend fun updateNote(note: ListNoteItem): Result<ListNoteItem> = withContext(Dispatchers.IO) {
         try {
+
+            val geminiPrompt =
+                "You are an expert Translator. You are tasked to translate documents  to id.Please provide an accurate translation of this document and return translation text only: ${note.content}"
+
+
+            val normalizedText = try {
+                if (!note.content.isNullOrEmpty()) {
+                    val responseGemini = geminiApiService.normalizeText(
+                        apiKey = GEMINI_API_KEY,
+                        GeminiRequest(
+                            contents = GeminiRequestContent(
+                                parts = GeminiPart(
+                                    text = geminiPrompt
+                                )
+                            )
+                        )
+                    )
+
+                    Log.e("Gemini", "$responseGemini")
+
+                    responseGemini.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                        ?: note.content
+                } else {
+                    note.content
+                }
+            } catch (e: Exception) {
+                return@withContext Result.Error("Failed to normalize text: ${e.message}")
+            }
+
+            val updatedNote = note.copy(contentNormalized = normalizedText)
+
             val response = noteApiService.updateNote(
-                id = note.id,
-                title = note.title ?: "",
-                content = note.content ?: "",
-                emotion = note.emotion ?: ""
+                id = updatedNote.id,
+                title = updatedNote.title ?: "",
+                content = updatedNote.content ?: "",
+                emotion = updatedNote.emotion ?: "",
+                contentNormalized = updatedNote.contentNormalized ?: ""
             )
 
             if (response.error == false) {

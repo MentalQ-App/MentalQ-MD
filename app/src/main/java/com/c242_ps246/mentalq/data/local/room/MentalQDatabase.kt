@@ -10,7 +10,7 @@ import com.c242_ps246.mentalq.data.remote.response.UserData
 
 @Database(
     entities = [ListNoteItem::class, UserData::class, ListAnalysisItem::class, ChatRoomItem::class, ChatMessageItem::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class MentalQDatabase : RoomDatabase() {
