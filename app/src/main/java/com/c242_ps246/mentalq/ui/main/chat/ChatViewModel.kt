@@ -1,11 +1,9 @@
 package com.c242_ps246.mentalq.ui.main.chat
 
-//import com.c242_ps246.mentalq.data.remote.response.ChatPreview
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
 import com.c242_ps246.mentalq.data.repository.AuthRepository
-import com.c242_ps246.mentalq.data.repository.ChatRepository
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +13,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatListUiState())
@@ -55,7 +52,6 @@ class ChatViewModel @Inject constructor(
                     .addOnSuccessListener { userChats ->
 
                         if (userChats.exists()) {
-
 
                             val chatRooms = mutableListOf<ChatRoomItem>()
                             var remainingRequests = userChats.childrenCount.toInt()
@@ -133,26 +129,7 @@ class ChatViewModel @Inject constructor(
                 Log.e("ChatViewModel", "loadChatRooms: ${e.message}")
             }
         }
-
-
     }
-
-//    private fun loadChatRooms() {
-//        viewModelScope.launch {
-//            _uiState.update { it.copy(isLoading = true) }
-//            try {
-//                _chatPreviews.value = chatRepository.getChatPreviews()
-//                _uiState.update { it.copy(isLoading = false) }
-//            } catch (e: Exception) {
-//                _uiState.update {
-//                    it.copy(
-//                        error = e.message,
-//                        isLoading = false
-//                    )
-//                }
-//            }
-//        }
-//    }
 }
 
 data class ChatListUiState(

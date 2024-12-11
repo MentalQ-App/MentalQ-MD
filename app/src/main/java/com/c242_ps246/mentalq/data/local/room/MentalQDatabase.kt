@@ -17,5 +17,4 @@ abstract class MentalQDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
     abstract fun userDao(): UserDao
     abstract fun analysisDao(): AnalysisDao
-    abstract fun chatDao(): ChatDao
 }

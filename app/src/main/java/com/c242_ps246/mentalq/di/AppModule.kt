@@ -2,19 +2,16 @@ package com.c242_ps246.mentalq.di
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import androidx.work.WorkManager
 import com.c242_ps246.mentalq.BuildConfig
 import com.c242_ps246.mentalq.data.local.room.AnalysisDao
-import com.c242_ps246.mentalq.data.local.room.ChatDao
 import com.c242_ps246.mentalq.data.local.room.MentalQDatabase
 import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.local.room.UserDao
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.data.remote.retrofit.AnalysisApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.AuthApiService
-import com.c242_ps246.mentalq.data.remote.retrofit.ChatApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.GeminiApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.MidtransApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
@@ -22,7 +19,6 @@ import com.c242_ps246.mentalq.data.remote.retrofit.PsychologistApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.UserApiService
 import com.c242_ps246.mentalq.data.repository.AnalysisRepository
 import com.c242_ps246.mentalq.data.repository.AuthRepository
-import com.c242_ps246.mentalq.data.repository.ChatRepository
 import com.c242_ps246.mentalq.data.repository.MidtransRepository
 import com.c242_ps246.mentalq.data.repository.NoteRepository
 import com.c242_ps246.mentalq.data.repository.PsychologistRepository
@@ -233,44 +229,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideChatApiService(preferencesManager: MentalQAppPreferences): ChatApiService {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-        val authInterceptor = Interceptor { chain ->
-            val originalRequest = chain.request()
-            val newRequest = runBlocking {
-                withContext(Dispatchers.IO) {
-                    val token = preferencesManager.getToken().first()
-
-                    originalRequest.newBuilder()
-                        .apply {
-                            if (token.isNotEmpty()) {
-                                addHeader("Authorization", "Bearer $token")
-                            }
-                        }
-                        .build()
-                }
-            }
-
-            chain.proceed(newRequest)
-        }
-
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(
-                OkHttpClient.Builder()
-                    .addInterceptor(logging)
-                    .addInterceptor(authInterceptor)
-                    .build()
-            )
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ChatApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
     fun provideMidtransApiService(): MidtransApiService {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -337,12 +295,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideChatDao(mentalQDatabase: MentalQDatabase): ChatDao {
-        return mentalQDatabase.chatDao()
-    }
-
-    @Provides
-    @Singleton
     fun provideNoteRepository(
         noteDao: NoteDao,
         noteApiService: NoteApiService,
@@ -387,16 +339,6 @@ object AppModule {
         analysisDao: AnalysisDao
     ): AnalysisRepository {
         return AnalysisRepository(analysisApiService, analysisDao)
-    }
-
-    @Provides
-    @Singleton
-    fun provideChatRepository(
-        userDao: UserDao,
-        chatDao: ChatDao,
-        chatApiService: ChatApiService
-    ): ChatRepository {
-        return ChatRepository(userDao, chatDao, chatApiService)
     }
 
     @Provides

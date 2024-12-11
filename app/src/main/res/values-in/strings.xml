@@ -35,7 +35,7 @@
     <string name="hide_password">Sembunyikan kata sandi</string>
 
     <string name="hello_user">Hai, </string>
-    <string name="diary_streak">Streak Catatan</string>
+    <string name="diary_streak">Streak</string>
     <string name="day_wed">Rab</string>
     <string name="current_state">Kondisi Saat Ini</string>
     <string name="state_anxiety">Kecemasan</string>
@@ -164,4 +164,8 @@
     <string name="you_chat">Anda</string>
     <string name="end_session">Akhiri Sesi</string>
     <string name="end_session_message">Anda yakin akan mengakhiri sesi ini?</string>
+    <string name="psychologist_list">Psikolog</string>
+    <string name="no_psychologist_found">Tidak Ada Psikolog Ditemukan.</string>
+    <string name="no_psychologist_found_subtitle">Silakan coba lagi nanti.</string>
+    <string name="chat_with_psychologist">Chat dengan Psikolog</string>
 </resources>

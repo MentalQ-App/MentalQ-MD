@@ -197,7 +197,7 @@ fun DashboardScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = (stringResource(id = R.string.hello_user) + userData?.name + "!"),
+                                        text = (stringResource(id = R.string.hello_user) + "\n" + userData?.name + "!"),
                                         modifier = Modifier.padding(start = 8.dp, top = 16.dp),
                                         fontWeight = FontWeight.Medium,
                                         color = Color.White
@@ -406,7 +406,7 @@ fun DashboardScreen(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = "Chat with Psychologist",
+                                text = stringResource(id = R.string.chat_with_psychologist),
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
