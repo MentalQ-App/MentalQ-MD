@@ -6,10 +6,12 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -41,10 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
+import com.c242_ps246.mentalq.ui.utils.Utils.getColorBasedOnPercentage
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.EmptyState
 import com.c242_ps246.mentalq.ui.component.ToastType
+import com.c242_ps246.mentalq.ui.theme.Black
+import com.c242_ps246.mentalq.ui.theme.White
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -257,104 +262,147 @@ private fun ResponsiveNoteItem(
 
     val cardPadding = if (screenWidth < 600.dp) 12.dp else 16.dp
 
+    val predictedPercentage = data.confidenceScore?.times(100)?.toInt() ?: 0
+
+    val isSystemDarkMode = isSystemInDarkTheme()
+
+    val color = if (data.predictedStatus != "Normal") {
+        getColorBasedOnPercentage(isSystemDarkMode, predictedPercentage)
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(17.dp)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+            containerColor = color
+        )
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape = RoundedCornerShape(16.dp))
-                .combinedClickable(
-                    onClick = { onItemClick(data.id) },
-                    onLongClick = { showMenu = true }
-                )
-                .onGloballyPositioned { coordinates ->
-                    val positionInParent = coordinates.positionInParent()
-                    val size = coordinates.size
-
-                    menuOffset = Offset(
-                        positionInParent.x + size.width - 100,
-                        positionInParent.y + size.height + with(density) { 8.dp.toPx() }
-                    )
-                }
-
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
         ) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(cardPadding)
-            ) {
-                Text(
-                    text = data.title ?: "",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = data.content ?: "",
-                    style = TextStyle(fontSize = 14.sp),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = formatDate(data.createdAt.toString()),
-                    style = TextStyle(fontSize = 12.sp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
+                    .clip(shape = RoundedCornerShape(16.dp))
+                    .combinedClickable(
+                        onClick = { onItemClick(data.id) },
+                        onLongClick = { showMenu = true }
+                    )
+                    .onGloballyPositioned { coordinates ->
+                        val positionInParent = coordinates.positionInParent()
+                        val size = coordinates.size
 
-            if (showMenu) {
-                val dpOffset = with(density) {
-                    DpOffset(menuOffset.x.toDp(), menuOffset.y.toDp())
+                        menuOffset = Offset(
+                            positionInParent.x + size.width - 100,
+                            positionInParent.y + size.height + with(density) { 8.dp.toPx() }
+                        )
+                    }
+
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(cardPadding)
+                ) {
+                    Text(
+                        text = data.title ?: "",
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = data.content ?: "",
+                        style = TextStyle(fontSize = 14.sp),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = formatDate(data.createdAt.toString()),
+                        style = TextStyle(fontSize = 12.sp),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
 
-                DropdownMenu(
-                    modifier = Modifier.border(
-                        1.dp,
-                        MaterialTheme.colorScheme.outline,
-                        shape = RoundedCornerShape(10.dp)
-                    ),
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    offset = dpOffset,
-                    shape = RoundedCornerShape(10.dp),
-                    containerColor = MaterialTheme.colorScheme.background,
-                    tonalElevation = 4.dp
-                ) {
-                    DropdownMenuItem(
-                        onClick = {
-                            showMenu = false
-                            onItemDelete(data)
-                        },
-                        text = {
-                            Row {
-                                Icon(
-                                    modifier = Modifier.size(20.dp),
-                                    imageVector = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.error,
-                                    contentDescription = "Delete"
-                                )
-                                Spacer(Modifier.padding(horizontal = 4.dp))
-                                Text(
-                                    color = MaterialTheme.colorScheme.error,
-                                    text = stringResource(id = R.string.delete)
-                                )
+                if (showMenu) {
+                    val dpOffset = with(density) {
+                        DpOffset(menuOffset.x.toDp(), menuOffset.y.toDp())
+                    }
+
+                    DropdownMenu(
+                        modifier = Modifier.border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(10.dp)
+                        ),
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        offset = dpOffset,
+                        shape = RoundedCornerShape(10.dp),
+                        containerColor = MaterialTheme.colorScheme.background,
+                        tonalElevation = 4.dp
+                    ) {
+                        DropdownMenuItem(
+                            onClick = {
+                                showMenu = false
+                                onItemDelete(data)
+                            },
+                            text = {
+                                Row {
+                                    Icon(
+                                        modifier = Modifier.size(20.dp),
+                                        imageVector = Icons.Default.Delete,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        contentDescription = "Delete"
+                                    )
+                                    Spacer(Modifier.padding(horizontal = 4.dp))
+                                    Text(
+                                        color = MaterialTheme.colorScheme.error,
+                                        text = stringResource(id = R.string.delete)
+                                    )
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
+
+        if (data.predictedStatus != null) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 3.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "$predictedPercentage% ${data.predictedStatus}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSystemDarkMode) White else Black
+                )
+            }
+        }
+
+
     }
+
+
 }
 
 @Composable

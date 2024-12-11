@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.exifinterface.media.ExifInterface
 import okhttp3.Call
 import okhttp3.Callback
@@ -28,6 +29,23 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+
+
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import com.c242_ps246.mentalq.ui.theme.OrangeDark
+import com.c242_ps246.mentalq.ui.theme.OrangeLight
+import com.c242_ps246.mentalq.ui.theme.RedDark
+import com.c242_ps246.mentalq.ui.theme.RedLight
+import com.c242_ps246.mentalq.ui.theme.YellowDark
+import com.c242_ps246.mentalq.ui.theme.YellowLight
 
 object Utils {
     private const val MAXIMAL_SIZE = 500000
@@ -183,6 +201,24 @@ object Utils {
             diff < 7 * 24 * 60 * 60 * 1000 -> SimpleDateFormat("EEE", Locale.getDefault())
             else -> SimpleDateFormat("dd/MM/yy", Locale.getDefault())
         }.format(Date(timestamp))
+    }
+
+    fun getColorBasedOnPercentage(isSystemDarkMode: Boolean, percentage: Int): Color {
+        val clampedPercentage = percentage.coerceIn(0, 100)
+
+        return when (clampedPercentage) {
+            in 0..33 -> {
+                if (isSystemDarkMode) YellowDark else YellowLight
+            }
+
+            in 34..66 -> {
+                if (isSystemDarkMode) OrangeDark else OrangeLight
+            }
+
+            else -> {
+                if (isSystemDarkMode) RedDark else RedLight
+            }
+        }
     }
 
     fun Long.toFormattedDate(

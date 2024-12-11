@@ -35,13 +35,15 @@ class NoteRepository(
                 if (remoteNotes != null) {
                     val noteList = remoteNotes.map { note ->
                         ListNoteItem(
-                            note.id,
-                            note.title,
-                            note.content,
-                            note.contentNormalized,
-                            note.emotion,
-                            note.updatedAt,
-                            note.createdAt
+                            id = note.id,
+                            title = note.title,
+                            content = note.content,
+                            contentNormalized = note.contentNormalized,
+                            emotion = note.emotion,
+                            updatedAt = note.updatedAt,
+                            createdAt = note.createdAt,
+                            predictedStatus = note.predictedStatus,
+                            confidenceScore = note.confidenceScore
                         )
                     }
                     if (localData != noteList) {
@@ -99,6 +101,9 @@ class NoteRepository(
     }
 
     suspend fun updateNote(note: ListNoteItem): Result<ListNoteItem> = withContext(Dispatchers.IO) {
+
+        Log.e("UpdateNote", "updateNote: Im Updating")
+
         try {
 
             val geminiPrompt =
@@ -136,7 +141,7 @@ class NoteRepository(
                 title = updatedNote.title ?: "",
                 content = updatedNote.content ?: "",
                 emotion = updatedNote.emotion ?: "",
-                contentNormalized = updatedNote.contentNormalized ?: ""
+                contentNormalized = updatedNote.contentNormalized ?: "",
             )
 
             if (response.error == false) {

@@ -60,6 +60,12 @@ data class ListNoteItem(
     @field:SerializedName("content_normalized")
     val contentNormalized: String? = null,
 
+    @field:SerializedName("predicted_status")
+    val predictedStatus: String? = null,
+
+    @field:SerializedName("confidence_score")
+    val confidenceScore: Float? = null,
+
     @field:SerializedName("emotion")
     val emotion: String? = null,
 

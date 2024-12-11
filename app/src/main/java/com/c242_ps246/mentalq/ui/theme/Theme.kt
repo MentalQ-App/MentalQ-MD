@@ -21,7 +21,7 @@ private val DarkColorScheme = darkColorScheme(
     surface = LightBlack,
     onSurface = White,
     outline = LighterBlack,
-    outlineVariant = LighterBlack
+    outlineVariant = LighterBlack,
 )
 
 private val LightColorScheme = lightColorScheme(
