@@ -169,4 +169,9 @@
     <string name="no_psychologist_found_subtitle">Please try again later.</string>
     <string name="chat_with_psychologist">Chat with Psychologist</string>
     <string name="no_data_disclaimer">Please add note. If you already added it, tap to refresh.</string>
+    <string name="prediction_disclaimer_prediction">Predictions</string>
+    <string name="prediction_disclaimer_bold">may not be accurate</string>
+    <string name="prediction_disclaimer_or">or</string>
+    <string name="prediction_disclaimer_bold_2">reflect mental health</string>
+    <string name="prediction_disclaimer_consult">. Consult a professional for advice</string>
 </resources>

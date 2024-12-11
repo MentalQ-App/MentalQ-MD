@@ -84,7 +84,7 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-    private fun loadAllNotes() {
+    fun loadAllNotes() {
         viewModelScope.launch {
             noteRepository.getAllNotes().observeForever { result ->
                 when (result) {

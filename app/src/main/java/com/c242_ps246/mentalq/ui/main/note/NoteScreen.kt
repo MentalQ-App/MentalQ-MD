@@ -34,9 +34,13 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -48,6 +52,7 @@ import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.EmptyState
 import com.c242_ps246.mentalq.ui.component.ToastType
+import com.c242_ps246.mentalq.ui.main.dashboard.DashboardViewModel
 import com.c242_ps246.mentalq.ui.theme.Black
 import com.c242_ps246.mentalq.ui.theme.White
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
@@ -60,6 +65,10 @@ fun NoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listNote by viewModel.listNote.collectAsState()
+
+    val dashboardViewModel = hiltViewModel<DashboardViewModel>()
+
+    val analysisSize by dashboardViewModel.analysisSize.collectAsState()
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -78,6 +87,14 @@ fun NoteScreen(
 
     var cannotAddNoteMessage = stringResource(id = R.string.cannot_add_note)
 
+    LaunchedEffect(Unit) {
+        dashboardViewModel.getPredictedStatusMode()
+    }
+
+    LaunchedEffect(listNote) {
+        viewModel.loadAllNotes()
+    }
+
     LaunchedEffect(uiState) {
         when {
             uiState.error != null -> {
@@ -85,6 +102,10 @@ fun NoteScreen(
                 toastMessage = cannotAddNoteMessage
                 toastType = ToastType.INFO
                 viewModel.clearError()
+            }
+
+            uiState.error == null -> {
+                dashboardViewModel.getPredictedStatusMode()
             }
 
             uiState.canAddNewNote == false -> {
@@ -150,7 +171,7 @@ fun NoteScreen(
                         .padding(screenPadding)
                 ) {
                     Column {
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         when {
                             !uiState.error.isNullOrEmpty() -> {
@@ -169,6 +190,25 @@ fun NoteScreen(
                             }
 
                             else -> {
+                                Text(
+                                    text = buildAnnotatedString {
+                                        append(stringResource(id = R.string.prediction_disclaimer_prediction))
+                                        append(" ")
+                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                            append(stringResource(id = R.string.prediction_disclaimer_bold))
+                                            append(" ")
+                                        }
+                                        append(stringResource(id = R.string.prediction_disclaimer_or))
+                                        append(" ")
+                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                            append(stringResource(id = R.string.prediction_disclaimer_bold_2))
+                                        }
+                                        append(stringResource(id = R.string.prediction_disclaimer_consult))
+                                    },
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
                                 ResponsiveNoteList(
                                     notes = listNote ?: emptyList(),
                                     onItemClick = onNavigateToNoteDetail,
@@ -256,9 +296,11 @@ private fun ResponsiveNoteItem(
     onItemDelete: (ListNoteItem) -> Unit,
     screenWidth: Dp
 ) {
+    val viewModel = hiltViewModel<DashboardViewModel>()
     var showMenu by remember { mutableStateOf(false) }
     var menuOffset by remember { mutableStateOf(Offset.Zero) }
     val density = LocalDensity.current
+
 
     val cardPadding = if (screenWidth < 600.dp) 12.dp else 16.dp
 
@@ -272,14 +314,18 @@ private fun ResponsiveNoteItem(
         MaterialTheme.colorScheme.primary
     }
 
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(17.dp)),
+            .padding(4.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = color
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Card(
@@ -288,7 +334,7 @@ private fun ResponsiveNoteItem(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
-            ),
+            )
         ) {
             Box(
                 modifier = Modifier

@@ -248,7 +248,7 @@ fun ChatMessages(
 
     LaunchedEffect(messages) {
         if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size - 1)
+            listState.animateScrollToItem(messages.size)
         }
     }
 

@@ -83,6 +83,10 @@ fun DashboardScreen(
         viewModel.getPredictedStatusMode()
     }
 
+    LaunchedEffect(analysisSize) {
+        viewModel.getPredictedStatusMode()
+    }
+
     val scrollState = rememberScrollState()
     val toolbarHeight = 150.dp
     val minShrinkHeight = 0.dp
@@ -338,12 +342,7 @@ fun DashboardScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 16.dp)
-                                .clickable(
-                                    onClick = {
-                                        viewModel.getPredictedStatusMode()
-                                    },
-                                ),
+                                .padding(vertical = 16.dp),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
@@ -424,7 +423,7 @@ fun DashboardScreen(
                         ) {
                             Text(
                                 text = stringResource(id = R.string.chat_with_psychologist),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                         }
 
@@ -467,7 +466,6 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = { onItemClick(note.id) }),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -482,6 +480,7 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
         Column(
             modifier = Modifier
                 .padding(12.dp)
+                .clip(RoundedCornerShape(16.dp))
         ) {
             Text(
                 text = note.title ?: "",

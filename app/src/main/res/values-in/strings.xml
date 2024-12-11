@@ -169,4 +169,9 @@
     <string name="no_psychologist_found_subtitle">Silakan coba lagi nanti.</string>
     <string name="chat_with_psychologist">Chat dengan Psikolog</string>
     <string name="no_data_disclaimer">Silakan tambahkan catatan. Jika sudah ditambahkan, ketuk untuk memperbarui.</string>
+    <string name="prediction_disclaimer_prediction">Prediksi</string>
+    <string name="prediction_disclaimer_bold">mungkin tidak akurat</string>
+    <string name="prediction_disclaimer_or">atau</string>
+    <string name="prediction_disclaimer_bold_2">mencerminkan kondisi kesehatan mental</string>
+    <string name="prediction_disclaimer_consult">. Konsultasikan dengan profesional untuk saran.</string>
 </resources>
