@@ -242,9 +242,6 @@ fun MidtransWebView(
 
                             val isSimulator = urlHost == "simulator.sandbox.midtrans.com"
 
-                            Log.e("MidtransTest", "URL: $redirectUrl || $currentBaseUrl")
-                            Log.e("MidtransTest", "isSame: ${redirectUrl == currentBaseUrl}")
-
                             if (!isSimulator && !isExternalApp && currentBaseUrl != redirectUrl) {
                                 onBackClick(orderId)
                             }
