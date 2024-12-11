@@ -78,7 +78,6 @@ fun DetailNoteScreen(
 
     BackHandler {
         handleBack()
-        onBackClick()
     }
 
     LaunchedEffect(noteId) {
