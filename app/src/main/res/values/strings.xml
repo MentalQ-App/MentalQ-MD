@@ -168,4 +168,5 @@
     <string name="no_psychologist_found">No Psychologist Found.</string>
     <string name="no_psychologist_found_subtitle">Please try again later.</string>
     <string name="chat_with_psychologist">Chat with Psychologist</string>
+    <string name="no_data_disclaimer">Please add note. If you already added it, tap to refresh.</string>
 </resources>
