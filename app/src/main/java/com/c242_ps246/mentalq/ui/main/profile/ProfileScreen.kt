@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -44,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -210,7 +212,8 @@ private fun ProfileInfo(
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             ProfileImage(
                 imageUrl = userData?.profilePhotoUrl,
@@ -284,7 +287,7 @@ fun EditProfileDialog(
     }
 
     val today = LocalDate.now()
-    val minDate = today.minusYears(17)
+    today.minusYears(100)
 
     var emailError by remember { mutableStateOf<Int?>(null) }
     var nameError by remember { mutableStateOf<Int?>(null) }
@@ -448,14 +451,12 @@ fun EditProfileDialog(
                         ),
                     )
                     birthdayError?.let { error ->
-                        birthdayError?.let {
-                            Text(
-                                text = stringResource(it),
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                            )
-                        }
+                        Text(
+                            text = stringResource(error),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        )
                     }
                 }
 
@@ -516,7 +517,9 @@ fun EditProfileDialog(
                             val selectedDate = Instant.ofEpochMilli(millis)
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
-                            if (selectedDate.isAfter(minDate) && !selectedDate.isAfter(today)) {
+                            if (!selectedDate.isAfter(today) && selectedDate.plusYears(17)
+                                    .isBefore(today)
+                            ) {
                                 birthday =
                                     selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                             }
@@ -563,14 +566,16 @@ private fun UserDetailInfo(userData: UserData?) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = userData?.name ?: "",
             style = TextStyle(
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp
-            )
+            ),
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -578,7 +583,8 @@ private fun UserDetailInfo(userData: UserData?) {
             style = TextStyle(
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp
-            )
+            ),
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -586,7 +592,8 @@ private fun UserDetailInfo(userData: UserData?) {
             style = TextStyle(
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp
-            )
+            ),
+            textAlign = TextAlign.Center
         )
     }
 }
