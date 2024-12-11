@@ -5,7 +5,7 @@
 ## Table of Contents
 
 1. [Team](#C242-PS246---md)
-2. [What is Project?](#Project-Description)
+2. [What is MentalQ?](#Project-Description)
 3. [Technology](#Technology)
 4. [Feature](#Feature)
 5. [Screenshots](#Screenshots)
