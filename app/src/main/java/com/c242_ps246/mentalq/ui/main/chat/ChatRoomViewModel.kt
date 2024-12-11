@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.c242_ps246.mentalq.data.remote.response.ChatMessageItem
 import com.c242_ps246.mentalq.data.repository.AuthRepository
-import com.c242_ps246.mentalq.data.repository.ChatRepository
 import com.c242_ps246.mentalq.ui.main.psychologist.PsychologistScreenUiState
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
@@ -19,7 +18,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatRoomViewModel @Inject constructor(
-    private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 

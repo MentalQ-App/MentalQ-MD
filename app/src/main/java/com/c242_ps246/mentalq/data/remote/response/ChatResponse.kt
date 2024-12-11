@@ -4,19 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
-
-data class ChatResponse(
-    @field:SerializedName("listChatRooms")
-    val listChatRooms: List<ChatRoomItem>? = null,
-
-    @field:SerializedName("error")
-    val error: Boolean? = null,
-
-    @field:SerializedName("message")
-    val message: String? = null
-)
-
-
 @Entity(tableName = "chat_room")
 data class ChatRoomItem(
     @PrimaryKey
@@ -55,30 +42,6 @@ data class ChatRoomItem(
 
     @field:SerializedName("deleted_at")
     val deletedAt: String? = null
-)
-
-
-data class Psychologist(
-    @field:SerializedName("id")
-    val id: String,
-
-    @field:SerializedName("name")
-    val name: String,
-
-    @field:SerializedName("profile")
-    val profile: String?
-)
-
-
-data class ChatMessageResponse(
-    @field:SerializedName("listMessages")
-    val listMessages: List<ChatMessageItem>? = null,
-
-    @field:SerializedName("error")
-    val error: Boolean? = null,
-
-    @field:SerializedName("message")
-    val message: String? = null
 )
 
 @Entity(tableName = "chat_message")

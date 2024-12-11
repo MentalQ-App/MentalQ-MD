@@ -164,4 +164,8 @@
     <string name="you_chat">You</string>
     <string name="end_session">End Session</string>
     <string name="end_session_message">Are you sure you want to end this session?</string>
+    <string name="psychologist_list">Psychologist</string>
+    <string name="no_psychologist_found">No Psychologist Found.</string>
+    <string name="no_psychologist_found_subtitle">Please try again later.</string>
+    <string name="chat_with_psychologist">Chat with Psychologist</string>
 </resources>
