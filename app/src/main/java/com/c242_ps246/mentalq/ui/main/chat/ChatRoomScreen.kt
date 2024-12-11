@@ -72,6 +72,7 @@ import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.utils.Utils.formatTimestamp
 import com.c242_ps246.mentalq.data.remote.response.ChatMessageItem
 import com.c242_ps246.mentalq.ui.component.CustomDialog
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,8 +103,11 @@ fun ChatRoomScreen(
         }
     }
 
-    LaunchedEffect(isEnded) {
-        viewModel.getSessionStatus(chatRoomId)
+    LaunchedEffect(Unit) {
+        while (true) {
+            viewModel.getSessionStatus(chatRoomId)
+            delay(5000L)
+        }
     }
 
     if (uiState.isLoading) {
