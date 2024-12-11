@@ -48,7 +48,7 @@ MentalQ is a mobile application designed to detect a user's mental state by anal
 - Profile
 
 ## Screenshots
-![1](https://github.com/user-attachments/assets/db089747-3daf-4555-a873-5684c72d4979)
+![1](https://github.com/user-attachments/assets/ecbb3a6a-b163-43b9-8db9-7567cfd18159)
 ![2](https://github.com/user-attachments/assets/c8bf1fd7-f1ca-4e4b-b40b-b46efac6eff3)
 ![3](https://github.com/user-attachments/assets/4c34591f-1303-4a76-9c46-0f8266a7db97)
 ![4](https://github.com/user-attachments/assets/4319a783-cc98-42c0-9377-8f4b22ec47de)
