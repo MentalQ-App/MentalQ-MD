@@ -92,7 +92,6 @@ class ChatRoomViewModel @Inject constructor(
 
     fun getProfileUrl(chatRoomId: String, userId: String) {
 
-
         val membersRef = firebase.getReference("chatroom").child(chatRoomId).child("members")
 
         membersRef.child("user").child("id").get().addOnSuccessListener { id ->
@@ -124,8 +123,6 @@ class ChatRoomViewModel @Inject constructor(
     }
 
     fun sendMessage(userId: String, chatRoomId: String, messageText: String) {
-
-
         val messageId = firebase.reference.push().key ?: UUID.randomUUID().toString()
 
         val chatMessageRef = firebase.getReference("messages").child(chatRoomId)
