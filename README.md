@@ -1,6 +1,6 @@
 # MentalQ - C242-PS246
 
-![Project Cover](link_to_cover_image)
+![Project Cover](https://github.com/user-attachments/assets/7e0ea2a3-dced-4717-b3c4-8d4e65cacb41)
 
 ## Table of Contents
 
@@ -43,7 +43,7 @@ MentalQ is a mobile application designed to detect a user's mental state by anal
 - Chat
 - Profile
 
-## Psychologist
+### Psychologist
 - Chat
 - Profile
 
@@ -56,7 +56,7 @@ MentalQ is a mobile application designed to detect a user's mental state by anal
 [Video Demo Link](video_link)
 
 ## Download Our Apps
-[Download Link](download_link)
+[Download Link](https://drive.google.com/drive/folders/17OMxdNMiDujlPFGmDOYREAE1iCrxMXh8?usp=drive_link)
 
 If the application can't be installed with an error message "App not installed" , make sure that your device does not block installing application from unknown source, also make sure you downloaded it completely.
 
