@@ -77,8 +77,8 @@ fun NoteScreen(
         when {
             uiState.error != null -> {
                 showToast = true
-                toastMessage = uiState.error ?: "An Error Occurred"
-                toastType = ToastType.ERROR
+                toastMessage = cannotAddNoteMessage
+                toastType = ToastType.INFO
                 viewModel.clearError()
             }
 
@@ -113,7 +113,7 @@ fun NoteScreen(
                                 )
                             )
                         },
-                        enabled = !uiState.isCreatingNewNote,
+                        enabled = !uiState.isCreatingNewNote && uiState.error.isNullOrEmpty(),
                         colors = IconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -152,7 +152,7 @@ fun NoteScreen(
                                 ErrorState(error = uiState.error!!)
                             }
 
-                            uiState.isCreatingNewNote -> {
+                            uiState.isCreatingNewNote && !uiState.error.isNullOrEmpty() -> {
                                 CreatingNoteState()
                             }
 

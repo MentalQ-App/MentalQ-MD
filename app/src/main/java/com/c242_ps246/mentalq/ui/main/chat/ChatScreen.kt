@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.chat
 
-//import coil.compose.AsyncImage
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -22,18 +21,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.c242_ps246.mentalq.R
-import com.c242_ps246.mentalq.ui.utils.Utils.formatTimestamp
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
 import com.c242_ps246.mentalq.ui.component.EmptyState
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.c242_ps246.mentalq.ui.utils.Utils.formatTimestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     onNavigateToChatRoom: (String) -> Unit,
-    onChatSelected: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
 
@@ -41,7 +36,6 @@ fun ChatScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val chatRooms by viewModel.chatRooms.collectAsStateWithLifecycle()
     val userId by viewModel.userId.collectAsStateWithLifecycle()
-
 
     BackHandler { onBackClick() }
 
@@ -67,7 +61,7 @@ fun ChatScreen(
             } else {
 
                 Log.d("Lazy", "$chatRooms")
-                
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp)
@@ -94,7 +88,6 @@ fun ChatScreen(
     }
 }
 
-//
 @Composable
 private fun ChatPreviewItem(
     chatRoom: ChatRoomItem,
@@ -194,15 +187,3 @@ private fun ChatPreviewItem(
         }
     }
 }
-
-
-//@Preview()
-//@Composable
-//fun PreviewChatScreen() {
-//
-//    MentalQTheme {
-//        ChatScreen(
-//            onChatSelected = {},
-//            onNavigateToChatRoom = {}, onNavigateToPsychologist = {})
-//    }
-//}

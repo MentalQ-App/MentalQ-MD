@@ -65,10 +65,20 @@ fun DetailNoteScreen(
     val content: String? by viewModel.content.collectAsStateWithLifecycle()
     val date: String? by viewModel.date.collectAsStateWithLifecycle()
     val selectedEmotion: String? by viewModel.emotion.collectAsStateWithLifecycle()
+    var isSaveTriggered by remember { mutableStateOf(false) }
     val voiceToTextParser = remember { VoiceToTextParser(application) }
 
+    fun handleBack() {
+        if (!isSaveTriggered) {
+            isSaveTriggered = true
+            viewModel.saveNoteImmediately()
+
+        }
+    }
+
     BackHandler {
-        viewModel.saveNoteImmediately()
+        handleBack()
+        onBackClick()
     }
 
     LaunchedEffect(noteId) {
@@ -77,6 +87,7 @@ fun DetailNoteScreen(
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
+            isSaveTriggered = false
             onBackClick()
         }
     }
@@ -89,7 +100,9 @@ fun DetailNoteScreen(
         TopAppBar(
             navigationIcon = {
                 IconButton(
-                    onClick = { viewModel.saveNoteImmediately() },
+                    onClick = {
+                        handleBack()
+                    },
                     enabled = !uiState.isSaving
                 ) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")

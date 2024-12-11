@@ -69,7 +69,6 @@ fun PsychologistMainScreen(
                 route = Routes.CHAT
             ) {
                 ChatScreen(
-                    onChatSelected = {},
                     onNavigateToChatRoom = { chatId ->
                         navController.navigate("${Routes.CHAT_ROOM}/$chatId")
                     },
