@@ -137,6 +137,7 @@ fun ChatRoomScreen(
                         onSendMessage = { message ->
                             viewModel.sendMessage(
                                 chatRoomId = chatRoomId,
+                                userId = nonNullUserId,
                                 messageText = message
                             )
                         }

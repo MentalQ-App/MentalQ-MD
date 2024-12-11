@@ -168,6 +168,40 @@ class ChatViewModel @Inject constructor(
 
                                             })
 
+                                        chatRoomRef.child("lastMessageSenderId")
+                                            .addValueEventListener(object : ValueEventListener {
+                                                override fun onDataChange(
+                                                    lastMessageSenderIdSnapshot: DataSnapshot
+                                                ) {
+                                                    if (lastMessageSenderIdSnapshot.exists()) {
+                                                        val updatedLastMessageSenderId =
+                                                            lastMessageSenderIdSnapshot.value.toString()
+
+                                                        val updatedChatRoom =
+                                                            chatRoomsMap[chatRoom.id]?.copy(
+                                                                lastMessageSenderId = updatedLastMessageSenderId
+                                                            )
+
+                                                        if (updatedChatRoom != null) {
+                                                            chatRoomsMap[chatRoom.id] =
+                                                                updatedChatRoom
+                                                            chatRooms.clear()
+                                                            chatRooms.addAll(chatRoomsMap.values)
+                                                            _chatRooms.value =
+                                                                chatRooms.sortedByDescending { it.updatedAt }
+                                                        }
+                                                    }
+                                                }
+
+                                                override fun onCancelled(error: DatabaseError) {
+                                                    Log.e(
+                                                        "ChatViewModel",
+                                                        "loadChatRooms: ${error.message}"
+                                                    )
+                                                }
+
+                                            })
+
 
                                     } else {
                                         _uiState.value = _uiState.value.copy(isLoading = false)

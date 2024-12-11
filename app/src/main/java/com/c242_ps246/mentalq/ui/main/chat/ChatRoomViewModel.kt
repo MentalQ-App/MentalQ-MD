@@ -123,32 +123,32 @@ class ChatRoomViewModel @Inject constructor(
 
     }
 
-    fun sendMessage(chatRoomId: String, messageText: String) {
-        authRepository.getUserId().observeForever { userId ->
+    fun sendMessage(userId: String, chatRoomId: String, messageText: String) {
 
-            val messageId = firebase.reference.push().key ?: UUID.randomUUID().toString()
 
-            val chatMessageRef = firebase.getReference("messages").child(chatRoomId)
+        val messageId = firebase.reference.push().key ?: UUID.randomUUID().toString()
 
-            val chatRoomRef = firebase.getReference("chatroom").child(chatRoomId)
+        val chatMessageRef = firebase.getReference("messages").child(chatRoomId)
 
-            val message = ChatMessageItem(
-                id = messageId,
-                senderId = userId,
-                chatRoomId = chatRoomId,
-                content = messageText,
-                createdAt = System.currentTimeMillis().toString()
-            )
+        val chatRoomRef = firebase.getReference("chatroom").child(chatRoomId)
 
-            chatMessageRef.child(messageId).setValue(message).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    updateLastMessage(chatRoomId, messageId, message, userId)
+        val message = ChatMessageItem(
+            id = messageId,
+            senderId = userId,
+            chatRoomId = chatRoomId,
+            content = messageText,
+            createdAt = System.currentTimeMillis().toString()
+        )
 
-                    chatRoomRef.child("updatedAt")
-                        .setValue(System.currentTimeMillis().toString())
-                }
+        chatMessageRef.child(messageId).setValue(message).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                updateLastMessage(chatRoomId, messageId, message, userId)
+
+                chatRoomRef.child("updatedAt")
+                    .setValue(System.currentTimeMillis().toString())
             }
         }
+
     }
 
     private fun updateLastMessage(
