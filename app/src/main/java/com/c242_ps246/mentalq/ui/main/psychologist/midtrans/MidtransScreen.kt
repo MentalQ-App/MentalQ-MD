@@ -234,7 +234,18 @@ fun MidtransWebView(
                             request: WebResourceRequest?
                         ): Boolean {
                             val currentUrl = request?.url.toString()
-                            if (currentUrl != redirectUrl) {
+                            val currentBaseUrl = currentUrl.split("#").firstOrNull()
+
+                            val isExternalApp = request?.url?.scheme in listOf("dana", "gopay")
+
+                            val urlHost = request?.url?.host
+
+                            val isSimulator = urlHost == "simulator.sandbox.midtrans.com"
+
+                            Log.e("MidtransTest", "URL: $redirectUrl || $currentBaseUrl")
+                            Log.e("MidtransTest", "isSame: ${redirectUrl == currentBaseUrl}")
+
+                            if (!isSimulator && !isExternalApp && currentBaseUrl != redirectUrl) {
                                 onBackClick(orderId)
                             }
                             return super.shouldOverrideUrlLoading(view, request)
