@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -221,8 +224,19 @@ fun ChatMessages(
         mutableStateOf(false)
     }
 
+
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(messages) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.ime)
     ) {
         Column(
             modifier = Modifier
@@ -231,7 +245,8 @@ fun ChatMessages(
             LazyColumn(
                 modifier = Modifier
                     .padding(top = 16.dp)
-                    .weight(0.93f),
+                    .weight(1f),
+                state = listState
             ) {
                 items(items = messages) {
                     ChatBubble(
@@ -244,7 +259,6 @@ fun ChatMessages(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.07f)
                     .padding(horizontal = 8.dp)
                     .height(56.dp)
                     .background(MaterialTheme.colorScheme.background),
