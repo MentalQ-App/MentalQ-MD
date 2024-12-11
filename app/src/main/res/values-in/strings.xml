@@ -5,7 +5,7 @@
     <string name="onboarding_next">Lanjut</string>
     <string name="onboarding_get_started">Mulai</string>
     <string name="onboarding_page1_title">Lacak Suasana Hati</string>
-    <string name="onboarding_page1_description">Pantau kesehatan emosional harian Anda dengan mudah</string>
+    <string name="onboarding_page1_description">Pantau kesehatan mental Anda dengan mudah</string>
     <string name="onboarding_page2_title">Dapatkan Wawasan</string>
     <string name="onboarding_page2_description">Pahami pola dan terima rekomendasi pribadi</string>
     <string name="onboarding_page3_title">Bergabung Komunitas</string>
@@ -128,7 +128,7 @@
     <string name="title_placeholder">Masukkan judul</string>
     <string name="content_placeholder">Tulis catatan di sini…</string>
 
-    <string name="agree_to_terms_prefix">Saya setuju dengan</string>
+    <string name="agree_to_terms_prefix">Saya menyetujui</string>
     <string name="error_terms_not_accepted">Harap terima Syarat Layanan untuk melanjutkan</string>
     <string name="cannot_add_note">Anda sudah menambahkan catatan untuk hari ini, datang lagi besok!</string>
     <string name="back">Kembali</string>
