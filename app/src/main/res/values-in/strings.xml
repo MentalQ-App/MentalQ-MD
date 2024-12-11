@@ -109,14 +109,14 @@
     <string name="reset_password">Atur Ulang Kata Sandi</string>
 
     <string name="note_not_sufficient">Catatan kurang lengkap</string>
-    <string name="anxiety_message">Perasaan cemas Anda valid. Pertimbangkan konsultasi dengan ahli kesehatan mental.</string>
-    <string name="bipolar_message">Mengelola fluktuasi mood memang sulit. Konsultasikan dengan psikiater untuk rencana pengobatan.</string>
-    <string name="depression_message">Beban yang Anda rasakan nyata. Meminta bantuan adalah langkah menuju penyembuhan.</string>
-    <string name="normal_message">Meski terlihat biasa, konsultasi dengan profesional bisa memberi wawasan berharga.</string>
-    <string name="personality_disorder_message">Memahami diri adalah perjalanan. Terapis khusus dapat membantu Anda.</string>
-    <string name="stress_message">Tubuh dan pikiran Anda memberi sinyal penting. Profesional dapat mengajar teknik manajemen.</string>
-    <string name="suicidal_message">Hidup Anda berharga. Segera hubungi profesional kesehatan mental atau hotline krisis.</string>
-    <string name="unknown_condition_message">Perasaan Anda valid dan layak diperhatikan. Konsultasikan dengan profesional.</string>
+    <string name="anxiety_message">Perasaan cemas Anda masuk akal, dan sangat berani untuk mengakui apa yang sedang Anda alami. Pertimbangkan untuk menghubungi profesional kesehatan mental yang dapat memberikan strategi penanganan yang efektif.</string>
+    <string name="bipolar_message">Meskipun mengelola fluktuasi suasana hati bisa terasa berat, ingatlah bahwa Anda memiliki kekuatan untuk melewati tantangan ini. Pertimbangkan untuk berkonsultasi dengan psikiater yang dapat menyusun rencana perawatan yang sesuai untuk Anda.</string>
+    <string name="depression_message">Beban yang Anda rasakan itu nyata, dan mencari bantuan bukanlah tanda kelemahan, melainkan langkah menuju penyembuhan. Seorang profesional kesehatan mental dapat memberikan dukungan dan perawatan berbasis bukti.</string>
+    <string name="normal_message">Bahkan ketika hasil penilaian tampak normal, sangat wajar untuk mencari dukungan dalam meningkatkan kesejahteraan mental Anda. Berbicara dengan seorang profesional dapat memberikan wawasan yang berharga.</string>
+    <string name="personality_disorder_message">Memahami diri sendiri adalah sebuah perjalanan, dan Anda sedang mengambil langkah penting dengan mengenali pola Anda. Bekerja dengan terapis spesialis dapat membantu Anda mengembangkan strategi yang efektif.</string>
+    <string name="stress_message">Tubuh dan pikiran Anda sedang memberi tahu sesuatu yang penting, dan tidak apa-apa untuk mengatasi tekanan yang Anda rasakan. Seorang profesional kesehatan mental dapat mengajarkan teknik manajemen praktis.</string>
+    <string name="suicidal_message">Hidup Anda memiliki nilai dan makna, dan ada orang-orang yang ingin mendukung Anda - Anda tidak sendirian. Segera hubungi profesional kesehatan mental atau hotline krisis.</string>
+    <string name="unknown_condition_message">Apa pun yang Anda alami, perasaan Anda masuk akal dan layak mendapatkan perhatian. Pertimbangkan untuk berbicara dengan profesional kesehatan mental yang dapat memberikan panduan yang tepat.</string>
 
     <string name="add_more_note">Tambahkan lebih banyak informasi (minimal 7 catatan) untuk penilaian yang akurat.</string>
     <string name="sign_in_with_google">Masuk dengan Google</string>
