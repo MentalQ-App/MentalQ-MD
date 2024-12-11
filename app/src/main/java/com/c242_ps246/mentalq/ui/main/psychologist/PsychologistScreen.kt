@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,21 +33,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import coil.size.Scale
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.PsychologistItem
-import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.ui.component.EmptyState
-import com.c242_ps246.mentalq.ui.theme.MentalQTheme
-import com.google.firebase.Firebase
-import com.google.firebase.database.database
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -64,23 +59,11 @@ fun PsychologistScreen(
     BackHandler {
         onBackClick()
     }
-
     Log.e("userId", "PsychologistScreen: $psychologistList")
-
-//    val psychologistList: List<PsychologistItem> = listOf(
-//        PsychologistItem(
-//            id = 888,
-//            name = "Dr. John Doe",
-//            prefixTitle = "Dr.",
-//            suffixTitle = "",
-//            profilePhotoUrl = "https://randomuser.me/api/portraits/men/75.jpg",
-//        )
-//    )
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Psychologist") }
+                title = { Text(stringResource(id = R.string.psychologist_list)) }
             )
         }
     ) { padding ->
@@ -97,8 +80,8 @@ fun PsychologistScreen(
 
                 if (psychologistList.isNullOrEmpty()) {
                     EmptyState(
-                        title = "No Psychologist Found.",
-                        subtitle = "Please try again later.",
+                        title = stringResource(id = R.string.no_psychologist_found),
+                        subtitle = stringResource(id = R.string.no_psychologist_found_subtitle),
                     )
                 } else {
                     LazyColumn(
@@ -117,11 +100,7 @@ fun PsychologistScreen(
                         }
                     }
                 }
-
-
             }
-
-
         }
     }
 }
@@ -138,11 +117,6 @@ private fun PsychologistCard(
             .fillMaxWidth()
             .clickable(onClick = {
                 onNavigateToMidtransWebView(userId, psychologist.price, psychologist.userId)
-//                makeNewChatRoom(
-//                    userId,
-//                    psychologist.userId,
-//                    onItemClick
-//                )
             }),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -187,8 +161,7 @@ private fun PsychologistCard(
                     val locale = Locale("id", "ID")
                     val formatter = NumberFormat.getCurrencyInstance(locale)
 
-                    Column(
-                    ) {
+                    Column {
                         Text(
                             text = "${psychologist.prefixTitle} ${psychologist.users.name} ${psychologist.suffixTitle}",
                             style = MaterialTheme.typography.titleMedium
@@ -201,45 +174,7 @@ private fun PsychologistCard(
                     }
                 }
             }
-
         }
     }
+    Spacer(modifier = Modifier.height(8.dp))
 }
-
-private fun makeNewChatRoom(userId: String, psychologistId: String, onItemClick: (String) -> Unit) {
-    val firebase = Firebase.database
-    val chatRef = firebase.reference.child("chatroom").push()
-    val chatId = chatRef.key
-
-    val members = listOf(userId, psychologistId)
-
-
-    val initialData = hashMapOf(
-        "lastMessage" to "",
-        "members" to members,
-        "psychologistId" to psychologistId,
-        "createdAt" to System.currentTimeMillis().toString()
-    )
-
-    chatRef.setValue(initialData).addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            members.forEach { userId ->
-                val userChatsRef = firebase.reference.child("userChats").child(userId)
-                userChatsRef.push().setValue(chatId).addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        onItemClick(chatId!!)
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-//@Preview
-//@Composable
-//fun PreviewPsychologistScreen() {
-//    MentalQTheme {
-//        PsychologistScreen {}
-//    }
-//}

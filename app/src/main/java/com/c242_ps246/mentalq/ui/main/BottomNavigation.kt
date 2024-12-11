@@ -21,26 +21,19 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.c242_ps246.mentalq.R
-import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.ui.navigation.Routes
 import com.c242_ps246.mentalq.ui.theme.MentalQTheme
-import kotlinx.coroutines.flow.first
 
 @Composable
 fun CustomNavigationBar(
@@ -49,14 +42,9 @@ fun CustomNavigationBar(
     onItemSelected: (Int, String) -> Unit,
     userRole: String
 ) {
-    val coroutineScope = rememberCoroutineScope() // jangan dihapus ya
-//    var userRole by remember { mutableStateOf<String?>(null) }
-////    var userRole = "psychologist"
-//    LaunchedEffect(Unit) {
-//        userRole = preferencesManager.getUserRole().first()
-//    }
+    rememberCoroutineScope()
 
-    val items = if (userRole == "user"){
+    val items = if (userRole == "user") {
         listOf(
             BottomNavItem("Dashboard", R.drawable.ic_home, Routes.DASHBOARD),
             BottomNavItem("Note", R.drawable.ic_note, Routes.NOTE),
@@ -71,7 +59,6 @@ fun CustomNavigationBar(
     }
 
     val colorScheme = MaterialTheme.colorScheme
-
 
     Box(
         modifier = if (userRole == "user")

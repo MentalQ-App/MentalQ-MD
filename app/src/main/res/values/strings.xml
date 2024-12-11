@@ -5,7 +5,7 @@
     <string name="onboarding_next">Next</string>
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_page1_title">Track Your Mood</string>
-    <string name="onboarding_page1_description">Monitor your daily emotional well-being with our intuitive tracking system</string>
+    <string name="onboarding_page1_description">Monitor your daily mental health well-being with our intuitive tracking system</string>
     <string name="onboarding_page2_title">Get Insights</string>
     <string name="onboarding_page2_description">Understand your patterns and receive personalized recommendations</string>
     <string name="onboarding_page3_title">Join Community</string>
@@ -164,4 +164,9 @@
     <string name="you_chat">You</string>
     <string name="end_session">End Session</string>
     <string name="end_session_message">Are you sure you want to end this session?</string>
+    <string name="psychologist_list">Psychologist</string>
+    <string name="no_psychologist_found">No Psychologist Found.</string>
+    <string name="no_psychologist_found_subtitle">Please try again later.</string>
+    <string name="chat_with_psychologist">Chat with Psychologist</string>
+    <string name="no_data_disclaimer">Please add note. If you already added it, tap to refresh.</string>
 </resources>

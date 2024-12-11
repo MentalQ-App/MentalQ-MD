@@ -197,7 +197,7 @@ fun DashboardScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = (stringResource(id = R.string.hello_user) + userData?.name + "!"),
+                                        text = (stringResource(id = R.string.hello_user) + "\n" + userData?.name + "!"),
                                         modifier = Modifier.padding(start = 8.dp, top = 16.dp),
                                         fontWeight = FontWeight.Medium,
                                         color = Color.White
@@ -338,7 +338,12 @@ fun DashboardScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 16.dp),
+                                .padding(vertical = 16.dp)
+                                .clickable(
+                                    onClick = {
+                                        viewModel.getPredictedStatusMode()
+                                    },
+                                ),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
@@ -349,54 +354,66 @@ fun DashboardScreen(
                                 modifier = Modifier.padding(16.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(
-                                    text = stringResource(R.string.current_state),
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = predictedStatusMode
-                                        ?: stringResource(id = R.string.note_not_sufficient),
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                                Text(
-                                    text = if (predictedStatusMode != null) {
-                                        when (predictedStatusMode) {
-                                            "Anxiety" -> stringResource(R.string.anxiety_message)
-                                            "Bipolar" -> stringResource(R.string.bipolar_message)
-                                            "Depression" -> stringResource(R.string.depression_message)
-                                            "Normal" -> stringResource(R.string.normal_message)
-                                            "Personality Disorder" -> stringResource(R.string.personality_disorder_message)
-                                            "Stress" -> stringResource(R.string.stress_message)
-                                            "Suicidal" -> stringResource(R.string.suicidal_message)
-                                            else -> stringResource(R.string.unknown_condition_message)
-                                        }
-                                    } else {
-                                        stringResource(R.string.add_more_note)
-                                    },
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    textAlign = TextAlign.Center
-                                )
-                                @Suppress("KotlinConstantConditions")
-                                Text(
-                                    text = if (analysisSize < 28) {
-                                        stringResource(R.string.not_sufficient_data_disclaimer)
-                                    } else if (analysisSize >= 28) {
-                                        stringResource(R.string.sufficient_data_disclaimer)
-                                    } else {
-                                        ""
-                                    },
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    textAlign = TextAlign.Center
-                                )
+                                if (uiState.isLoading) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(24.dp),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                } else {
+                                    Text(
+                                        text = stringResource(R.string.current_state),
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = predictedStatusMode
+                                            ?: stringResource(id = R.string.note_not_sufficient),
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                    Text(
+                                        text = if (predictedStatusMode != null) {
+                                            when (predictedStatusMode) {
+                                                "Anxiety" -> stringResource(R.string.anxiety_message)
+                                                "Bipolar" -> stringResource(R.string.bipolar_message)
+                                                "Depression" -> stringResource(R.string.depression_message)
+                                                "Normal" -> stringResource(R.string.normal_message)
+                                                "Personality Disorder" -> stringResource(R.string.personality_disorder_message)
+                                                "Stress" -> stringResource(R.string.stress_message)
+                                                "Suicidal" -> stringResource(R.string.suicidal_message)
+                                                else -> stringResource(R.string.unknown_condition_message)
+                                            }
+                                        } else {
+                                            stringResource(R.string.add_more_note)
+                                        },
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                        modifier = Modifier.padding(top = 8.dp),
+                                        textAlign = TextAlign.Center
+                                    )
+                                    @Suppress("KotlinConstantConditions")
+                                    Text(
+                                        text = if (analysisSize < 28 && analysisSize > 0) {
+                                            stringResource(R.string.not_sufficient_data_disclaimer)
+                                        } else if (analysisSize >= 28) {
+                                            stringResource(R.string.sufficient_data_disclaimer)
+                                        } else {
+                                            stringResource(R.string.no_data_disclaimer)
+                                        },
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                        modifier = Modifier.padding(top = 8.dp),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
 
@@ -406,7 +423,7 @@ fun DashboardScreen(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = "Chat with Psychologist",
+                                text = stringResource(id = R.string.chat_with_psychologist),
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         }

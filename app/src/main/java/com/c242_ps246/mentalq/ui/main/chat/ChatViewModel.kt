@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
 import com.c242_ps246.mentalq.data.repository.AuthRepository
-import com.c242_ps246.mentalq.data.repository.ChatRepository
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,7 +17,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val chatRepository: ChatRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatListUiState())
