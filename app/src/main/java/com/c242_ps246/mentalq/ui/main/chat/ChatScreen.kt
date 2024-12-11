@@ -65,6 +65,9 @@ fun ChatScreen(
                     subtitle = stringResource(R.string.no_messages_desc)
                 )
             } else {
+
+                Log.d("Lazy", "$chatRooms")
+                
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp)
