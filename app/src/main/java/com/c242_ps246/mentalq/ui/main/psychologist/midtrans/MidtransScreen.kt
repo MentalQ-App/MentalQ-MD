@@ -90,6 +90,8 @@ fun MidtransScreen(
                             userProfile = userData!!.profilePhotoUrl,
                             psychologistId = itemId,
                             psychologistName = psychologistData!!.users.name,
+                            psychologistPrefix = psychologistData!!.prefixTitle,
+                            psychologistSuffix = psychologistData!!.suffixTitle,
                             psychologistProfile = psychologistData!!.users.profilePhotoUrl,
                             onSuccess = onSuccess
                         )
@@ -131,6 +133,8 @@ private fun makeNewChatRoom(
     psychologistId: String,
     psychologistName: String,
     psychologistProfile: String?,
+    psychologistPrefix: String?,
+    psychologistSuffix: String?,
     onSuccess: (String) -> Unit
 ) {
     val firebase = Firebase.database
@@ -148,7 +152,9 @@ private fun makeNewChatRoom(
         "psychologist" to mapOf(
             "id" to psychologistId,
             "name" to psychologistName,
-            "profile" to psychologistProfile
+            "profile" to psychologistProfile,
+            "prefix" to psychologistPrefix,
+            "suffix" to psychologistSuffix
         )
     )
 

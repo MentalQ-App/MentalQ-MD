@@ -144,7 +144,13 @@ private fun ChatPreviewItem(
                 ) {
 
                     val title = if (currentUserId == chatRoom.userId) {
-                        chatRoom.psychologistName
+                        val prefix = chatRoom.psychologistPrefix
+                        val suffix = chatRoom.psychologistSuffix
+
+                        val prefixTitle = if (prefix != "null") "$prefix " else ""
+                        val suffixTitle = if (suffix != "null") " $suffix" else ""
+
+                        "$prefixTitle${chatRoom.psychologistName}$suffixTitle"
                     } else {
                         chatRoom.userName
                     }

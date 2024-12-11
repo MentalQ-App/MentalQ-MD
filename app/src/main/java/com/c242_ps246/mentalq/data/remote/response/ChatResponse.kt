@@ -22,6 +22,12 @@ data class ChatRoomItem(
     @field:SerializedName("psychologist_id")
     val psychologistId: String,
 
+    @field:SerializedName("psychologist_prefix")
+    val psychologistPrefix: String? = null,
+
+    @field:SerializedName("psychologist_suffix")
+    val psychologistSuffix: String? = null,
+
     @field:SerializedName("psychologist_name")
     val psychologistName: String,
 

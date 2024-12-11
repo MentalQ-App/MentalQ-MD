@@ -87,6 +87,8 @@ fun ChatRoomScreen(
     val messages by viewModel.messages.collectAsState()
     val profileUrl by viewModel.profileUrl.collectAsState()
     val userName by viewModel.userName.collectAsState()
+    val psychologistPrefix by viewModel.psychologistPrefix.collectAsState()
+    val psychologistSuffix by viewModel.psychologistSuffix.collectAsState()
     val userRole by viewModel.userRole.collectAsState()
     val isEnded by viewModel.isEnded.collectAsState()
 
@@ -116,9 +118,21 @@ fun ChatRoomScreen(
         userId?.let { nonNullUserId ->
             Scaffold(
                 topBar = {
+
+                    val name = if (userRole != "psychologist") {
+                        val prefixTitle =
+                            if (psychologistPrefix != "null") "$psychologistPrefix " else ""
+                        val suffixTitle =
+                            if (psychologistSuffix != "null") " $psychologistSuffix" else ""
+
+                        "$prefixTitle${userName.orEmpty()}$suffixTitle"
+                    } else {
+                        userName.orEmpty()
+                    }
+
                     ChatTopBar(
                         profileUrl = profileUrl,
-                        userName = userName.orEmpty(),
+                        userName = name,
                         onBackClick = onBackClick
                     )
                 }

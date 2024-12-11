@@ -36,6 +36,12 @@ class ChatRoomViewModel @Inject constructor(
     private val _userName = MutableStateFlow<String?>(null)
     val userName = _userName.asStateFlow()
 
+    private val _psychologistPrefix = MutableStateFlow<String?>(null)
+    val psychologistPrefix = _psychologistPrefix.asStateFlow()
+
+    private val _psychologistSuffix = MutableStateFlow<String?>(null)
+    val psychologistSuffix = _psychologistSuffix.asStateFlow()
+
     private val _userRole = MutableStateFlow<String?>(null)
     val userRole = _userRole.asStateFlow()
 
@@ -97,25 +103,25 @@ class ChatRoomViewModel @Inject constructor(
         membersRef.child("user").child("id").get().addOnSuccessListener { id ->
             if (id.value.toString() == userId) {
                 Log.e("TestProfile", "getProfileUrl: Psycholog!")
-                membersRef.child("psychologist").child("profile").get()
-                    .addOnSuccessListener { profileUrl ->
-                        _profileUrl.value = profileUrl.value.toString()
-                    }
-                membersRef.child("psychologist").child("name").get()
-                    .addOnSuccessListener { name ->
-                        _userName.value = name.value.toString()
-                    }
+
+                val psychologistRef = membersRef.child("psychologist")
+
+                psychologistRef.get().addOnSuccessListener { snapshot ->
+                    _psychologistPrefix.value = snapshot.child("prefix").value.toString()
+                    _psychologistSuffix.value = snapshot.child("suffix").value.toString()
+                    _profileUrl.value = snapshot.child("profile").value.toString()
+                    _userName.value = snapshot.child("name").value.toString()
+                }
                 _uiState.value = uiState.value.copy(isLoading = false)
             } else {
                 Log.e("TestProfile", "getProfileUrl: User!!")
-                membersRef.child("user").child("profile").get()
-                    .addOnSuccessListener { profileUrl ->
-                        _profileUrl.value = profileUrl.value.toString()
-                    }
-                membersRef.child("user").child("name").get()
-                    .addOnSuccessListener { name ->
-                        _userName.value = name.value.toString()
-                    }
+
+                val userRef = membersRef.child("user")
+
+                userRef.get().addOnSuccessListener { snapshot ->
+                    _profileUrl.value = snapshot.child("profile").value.toString()
+                    _userName.value = snapshot.child("name").value.toString()
+                }
                 _uiState.value = uiState.value.copy(isLoading = false)
             }
         }

@@ -89,6 +89,12 @@ class ChatViewModel @Inject constructor(
                                             psychologistName = chatRoomData.child("members")
                                                 .child("psychologist").child("name")
                                                 .value.toString(),
+                                            psychologistPrefix = chatRoomData.child("members")
+                                                .child("psychologist").child("prefix")
+                                                .value.toString(),
+                                            psychologistSuffix = chatRoomData.child("members")
+                                                .child("psychologist")
+                                                .child("suffix").value.toString(),
                                             psychologistProfile = chatRoomData.child("members")
                                                 .child("psychologist")
                                                 .child("profile").value.toString(),
