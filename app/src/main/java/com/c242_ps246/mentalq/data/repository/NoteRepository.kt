@@ -8,6 +8,7 @@ import com.c242_ps246.mentalq.data.local.room.NoteDao
 import com.c242_ps246.mentalq.data.remote.response.GeminiPart
 import com.c242_ps246.mentalq.data.remote.response.GeminiRequest
 import com.c242_ps246.mentalq.data.remote.response.GeminiRequestContent
+import com.c242_ps246.mentalq.data.remote.response.GeminiSafetySettings
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.data.remote.retrofit.GeminiApiService
 import com.c242_ps246.mentalq.data.remote.retrofit.NoteApiService
@@ -109,6 +110,25 @@ class NoteRepository(
             val geminiPrompt =
                 "You are an expert Translator. You are tasked to translate documents  to id.Please provide an accurate translation of this document and return translation text only: ${note.content}"
 
+            val geminiSafetySettings = listOf(
+                GeminiSafetySettings(
+                    category = "HARM_CATEGORY_HATE_SPEECH",
+                    threshold = "BLOCK_NONE"
+                ),
+                GeminiSafetySettings(
+                    category = "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold = "BLOCK_NONE"
+                ),
+                GeminiSafetySettings(
+                    category = "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold = "BLOCK_NONE"
+                ),
+                GeminiSafetySettings(
+                    category = "HARM_CATEGORY_HARASSMENT",
+                    threshold = "BLOCK_NONE"
+                )
+            )
+
 
             val normalizedText = try {
                 if (!note.content.isNullOrEmpty()) {
@@ -119,7 +139,8 @@ class NoteRepository(
                                 parts = GeminiPart(
                                     text = geminiPrompt
                                 )
-                            )
+                            ),
+                            safetySettings = geminiSafetySettings
                         )
                     )
 

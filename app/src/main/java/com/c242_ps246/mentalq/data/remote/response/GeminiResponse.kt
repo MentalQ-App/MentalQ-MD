@@ -5,11 +5,17 @@ data class GeminiResponse(
 )
 
 data class GeminiRequest(
-    val contents: GeminiRequestContent
+    val contents: GeminiRequestContent,
+    val safetySettings: List<GeminiSafetySettings>
 )
 
 data class GeminiRequestContent(
     val parts: GeminiPart
+)
+
+data class GeminiSafetySettings(
+    val category: String,
+    val threshold: String,
 )
 
 data class GeminiCandidate(
