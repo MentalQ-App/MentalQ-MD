@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.psychologist.midtrans
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.c242_ps246.mentalq.data.remote.response.PsychologistItem
 import com.c242_ps246.mentalq.data.remote.response.UserData
@@ -8,7 +7,6 @@ import com.c242_ps246.mentalq.data.repository.MidtransRepository
 import com.c242_ps246.mentalq.data.repository.PsychologistRepository
 import com.c242_ps246.mentalq.data.repository.Result
 import com.c242_ps246.mentalq.data.repository.UserRepository
-import com.c242_ps246.mentalq.ui.main.psychologist.PsychologistViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,7 +49,6 @@ class MidtransViewModel @Inject constructor(
 
 
     fun getPsychologistData(psychologistId: String) {
-        Log.e("MidtransViewModel", "getPsychologistData: $psychologistId")
         psychologistRepository.getPsychologistById(psychologistId).observeForever { result ->
             when (result) {
                 is Result.Loading -> {
@@ -64,7 +61,6 @@ class MidtransViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    Log.e("MidtransViewModel", "fetchPsychologistData: ${result.error} ")
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }
@@ -84,7 +80,6 @@ class MidtransViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    Log.e("MidtransViewModel", "getUserDataById: ${result.error} ")
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }
@@ -106,7 +101,6 @@ class MidtransViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    Log.e("MidtransViewModel", "createTransaction: ${result.error} ")
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }
@@ -130,7 +124,6 @@ class MidtransViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    Log.e("MidtransViewModel", "createTransaction: ${result.error} ")
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }
@@ -151,7 +144,6 @@ class MidtransViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    Log.e("MidtransViewModel", "createTransaction: ${result.error} ")
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }

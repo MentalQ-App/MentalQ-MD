@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.dashboard
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
@@ -44,6 +43,13 @@ class DashboardViewModel @Inject constructor(
 
     private val _analysisSize = MutableStateFlow<Int>(0)
     val analysisSize = _analysisSize.asStateFlow()
+
+    init {
+        loadLatestNotes()
+        getUserData()
+        calculateStreak()
+        getPredictedStatusMode()
+    }
 
     fun loadLatestNotes() {
         noteRepository.getAllNotes().observeForever { result ->
@@ -102,7 +108,6 @@ class DashboardViewModel @Inject constructor(
                                 val instant = Instant.parse(note.createdAt)
                                 instant.atZone(ZoneId.systemDefault()).toLocalDate()
                             } catch (e: Exception) {
-                                Log.d("DashboardViewModel", "Error parsing date", e)
                                 null
                             }
                         }

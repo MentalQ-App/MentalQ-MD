@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.psychologist
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,7 +58,6 @@ fun PsychologistScreen(
     BackHandler {
         onBackClick()
     }
-    Log.e("userId", "PsychologistScreen: $psychologistList")
     Scaffold(
         topBar = {
             TopAppBar(

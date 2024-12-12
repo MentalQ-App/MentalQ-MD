@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.data.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.c242_ps246.mentalq.BuildConfig
@@ -55,7 +54,6 @@ class NoteRepository(
                 }
             } catch (e: Exception) {
                 if (localData.isEmpty()) {
-                    Log.d("NoteRepository", "Failed to fetch remote data: ${e.message}")
                     emit(Result.Error("Failed to fetch remote data, check your internet connection and try again."))
                 }
             }
@@ -68,7 +66,6 @@ class NoteRepository(
         try {
             noteDao.getNoteById(noteId)
         } catch (e: Exception) {
-            Log.d("NoteRepository", "Database error: ${e.message}")
             null
         }
     }
@@ -102,8 +99,6 @@ class NoteRepository(
     }
 
     suspend fun updateNote(note: ListNoteItem): Result<ListNoteItem> = withContext(Dispatchers.IO) {
-
-        Log.e("UpdateNote", "updateNote: Im Updating")
 
         try {
 
@@ -143,8 +138,6 @@ class NoteRepository(
                             safetySettings = geminiSafetySettings
                         )
                     )
-
-                    Log.e("Gemini", "$responseGemini")
 
                     responseGemini.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
                         ?: note.content
@@ -196,7 +189,6 @@ class NoteRepository(
             try {
                 noteDao.getLastNote()
             } catch (e: Exception) {
-                Log.d("NoteRepository", "Database error: ${e.message}")
                 null
             }
         }

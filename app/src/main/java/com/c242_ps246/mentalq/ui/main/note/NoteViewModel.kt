@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.note
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
@@ -52,10 +51,8 @@ class NoteViewModel @Inject constructor(
             onTimeFetched = { serverTime ->
                 val today = serverTime.toLocalDate()
                 _todayDate.value = today
-                Log.d("ServerDate", "Successfully updated today's date: $today")
             },
             onError = { error ->
-                Log.e("ServerDate", "Failed to fetch server time: $error")
             }
         )
     }
@@ -70,14 +67,8 @@ class NoteViewModel @Inject constructor(
                     val instant = Instant.parse(createdAt)
                     val createdAtDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDate()
 
-                    Log.d(
-                        "NoteScreen",
-                        "Detailed Check - Server Today: $currentServerDate, Note Date: $createdAtDateTime, Match: ${createdAtDateTime == currentServerDate}"
-                    )
-
                     createdAtDateTime == currentServerDate
                 } catch (e: DateTimeParseException) {
-                    Log.e("NoteScreen", "Date parsing error: ${e.message}")
                     false
                 }
             } == true
@@ -89,12 +80,10 @@ class NoteViewModel @Inject constructor(
             noteRepository.getAllNotes().observeForever { result ->
                 when (result) {
                     Result.Loading -> {
-                        Log.d("NoteViewModel", "loadAllNotes: Loading")
                         _uiState.value = _uiState.value.copy(isLoading = true)
                     }
 
                     is Result.Success -> {
-                        Log.d("NoteViewModel", "loadAllNotes: ${result.data}")
                         val notes = result.data
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,

@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.chat
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,17 +50,12 @@ fun ChatScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Log.e("ChatScreen", "$chatRooms")
             if (chatRooms.isEmpty() && !uiState.isLoading) {
-                Log.e("ChatScreen", "ChatScreen: Its Empty!")
                 EmptyState(
                     title = stringResource(R.string.no_messages),
                     subtitle = stringResource(R.string.no_messages_desc)
                 )
             } else {
-
-                Log.d("Lazy", "$chatRooms")
-
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp)
@@ -120,10 +114,8 @@ private fun ChatPreviewItem(
 
             AsyncImage(
                 model = if (profileImg == "null" || profileImg == null) {
-                    Log.e("ChatScreen", "Null")
                     R.drawable.default_profile
                 } else {
-                    Log.e("ChatScreen", "Ada")
                     profileImg
                 },
                 contentDescription = "Profile Picture",
@@ -171,9 +163,6 @@ private fun ChatPreviewItem(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    Log.e("ChatScreen", "ChatPreviewItem: ${chatRoom.lastMessageSenderId}")
-
                     val lastMassage = if (currentUserId == chatRoom.lastMessageSenderId) {
                         stringResource(R.string.you_chat) + ": ${chatRoom.lastMessage}"
                     } else {

@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.main.chat
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.c242_ps246.mentalq.data.remote.response.ChatMessageItem
 import com.c242_ps246.mentalq.data.repository.AuthRepository
@@ -102,7 +101,6 @@ class ChatRoomViewModel @Inject constructor(
 
         membersRef.child("user").child("id").get().addOnSuccessListener { id ->
             if (id.value.toString() == userId) {
-                Log.e("TestProfile", "getProfileUrl: Psycholog!")
 
                 val psychologistRef = membersRef.child("psychologist")
 
@@ -114,8 +112,6 @@ class ChatRoomViewModel @Inject constructor(
                 }
                 _uiState.value = uiState.value.copy(isLoading = false)
             } else {
-                Log.e("TestProfile", "getProfileUrl: User!!")
-
                 val userRef = membersRef.child("user")
 
                 userRef.get().addOnSuccessListener { snapshot ->

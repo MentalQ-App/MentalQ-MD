@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.ui.utils
 
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -7,9 +8,14 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.exifinterface.media.ExifInterface
+import com.c242_ps246.mentalq.ui.theme.OrangeDark
+import com.c242_ps246.mentalq.ui.theme.OrangeLight
+import com.c242_ps246.mentalq.ui.theme.RedDark
+import com.c242_ps246.mentalq.ui.theme.RedLight
+import com.c242_ps246.mentalq.ui.theme.YellowDark
+import com.c242_ps246.mentalq.ui.theme.YellowLight
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -29,23 +35,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
-
-
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import com.c242_ps246.mentalq.ui.theme.OrangeDark
-import com.c242_ps246.mentalq.ui.theme.OrangeLight
-import com.c242_ps246.mentalq.ui.theme.RedDark
-import com.c242_ps246.mentalq.ui.theme.RedLight
-import com.c242_ps246.mentalq.ui.theme.YellowDark
-import com.c242_ps246.mentalq.ui.theme.YellowLight
 
 object Utils {
     private const val MAXIMAL_SIZE = 500000
@@ -68,7 +57,6 @@ object Utils {
                 localDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
             }
         } catch (e: Exception) {
-            Log.d("Utils", "Error parsing date", e)
             dateString
         }
     }
@@ -154,7 +142,6 @@ object Utils {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e("ServerTime", "Error fetching server time", e)
                 Handler(Looper.getMainLooper()).post {
                     onError?.invoke(e.message ?: "Unknown error")
                     onTimeFetched(LocalDateTime.now())
@@ -164,7 +151,6 @@ object Utils {
             override fun onResponse(call: Call, response: Response) {
                 try {
                     if (!response.isSuccessful) {
-                        Log.e("ServerTime", "Unsuccessful response: ${response.code}")
                         Handler(Looper.getMainLooper()).post {
                             onError?.invoke("Unsuccessful response")
                             onTimeFetched(LocalDateTime.now())
@@ -182,7 +168,6 @@ object Utils {
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("ServerTime", "Error parsing server time", e)
                     Handler(Looper.getMainLooper()).post {
                         onError?.invoke(e.message ?: "Parsing error")
                         onTimeFetched(LocalDateTime.now())
