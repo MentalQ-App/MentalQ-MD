@@ -44,10 +44,10 @@ jobs:
           echo GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} > local.properties
           cat local.properties
 
-      - name: Create google service
-        env:
-          DATA: ${{ secrets.GS_CREDENTIALS }}
-        run: echo $DATA > ./app/google-services.json
+      - name: Create google-services.json
+        run: |
+          echo "${{ secrets.GS_CREDENTIALS }}" | base64 -d > ./app/google-services.json
+
 
       - name: Build with gradle
         run: ./gradlew build
