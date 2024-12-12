@@ -397,7 +397,6 @@ fun DashboardScreen(
                                         modifier = Modifier.padding(top = 8.dp),
                                         textAlign = TextAlign.Center
                                     )
-                                    @Suppress("KotlinConstantConditions")
                                     Text(
                                         text = if (analysisSize < 28 && analysisSize > 0) {
                                             stringResource(R.string.not_sufficient_data_disclaimer)
@@ -465,8 +464,7 @@ fun DashboardScreen(
 fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = { onItemClick(note.id) }),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -477,31 +475,35 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
             pressedElevation = 8.dp
         )
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .padding(12.dp)
+                .fillMaxWidth()
+                .clickable(onClick = { onItemClick(note.id) })
                 .clip(RoundedCornerShape(16.dp))
-        ) {
-            Text(
-                text = note.title ?: "",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = note.content ?: "",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.tertiary,
-                maxLines = 2,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = formatDate(note.createdAt.toString()),
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.tertiary,
-            )
+        )
+        {
+            Column(
+                modifier = Modifier.padding(16.dp),
+            ) {
+                Text(
+                    text = note.title ?: "",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = note.content ?: "",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    maxLines = 2,
+                )
+                Text(
+                    text = formatDate(note.createdAt.toString()),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
         }
     }
 }

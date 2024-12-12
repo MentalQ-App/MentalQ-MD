@@ -47,15 +47,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.c242_ps246.mentalq.R
-import com.c242_ps246.mentalq.ui.utils.Utils.getColorBasedOnPercentage
 import com.c242_ps246.mentalq.data.remote.response.ListNoteItem
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.EmptyState
 import com.c242_ps246.mentalq.ui.component.ToastType
-import com.c242_ps246.mentalq.ui.main.dashboard.DashboardViewModel
 import com.c242_ps246.mentalq.ui.theme.Black
 import com.c242_ps246.mentalq.ui.theme.White
 import com.c242_ps246.mentalq.ui.utils.Utils.formatDate
+import com.c242_ps246.mentalq.ui.utils.Utils.getColorBasedOnPercentage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,10 +64,6 @@ fun NoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listNote by viewModel.listNote.collectAsState()
-
-    val dashboardViewModel = hiltViewModel<DashboardViewModel>()
-
-    val analysisSize by dashboardViewModel.analysisSize.collectAsState()
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -87,10 +82,6 @@ fun NoteScreen(
 
     var cannotAddNoteMessage = stringResource(id = R.string.cannot_add_note)
 
-    LaunchedEffect(Unit) {
-        dashboardViewModel.getPredictedStatusMode()
-    }
-
     LaunchedEffect(listNote) {
         viewModel.loadAllNotes()
     }
@@ -102,10 +93,6 @@ fun NoteScreen(
                 toastMessage = cannotAddNoteMessage
                 toastType = ToastType.INFO
                 viewModel.clearError()
-            }
-
-            uiState.error == null -> {
-                dashboardViewModel.getPredictedStatusMode()
             }
 
             uiState.canAddNewNote == false -> {
@@ -296,11 +283,9 @@ private fun ResponsiveNoteItem(
     onItemDelete: (ListNoteItem) -> Unit,
     screenWidth: Dp
 ) {
-    val viewModel = hiltViewModel<DashboardViewModel>()
     var showMenu by remember { mutableStateOf(false) }
+    LocalDensity.current
     var menuOffset by remember { mutableStateOf(Offset.Zero) }
-    val density = LocalDensity.current
-
 
     val cardPadding = if (screenWidth < 600.dp) 12.dp else 16.dp
 
@@ -313,7 +298,6 @@ private fun ResponsiveNoteItem(
     } else {
         MaterialTheme.colorScheme.primary
     }
-
 
     Card(
         modifier = Modifier
@@ -342,18 +326,19 @@ private fun ResponsiveNoteItem(
                     .clip(shape = RoundedCornerShape(16.dp))
                     .combinedClickable(
                         onClick = { onItemClick(data.id) },
-                        onLongClick = { showMenu = true }
+                        onLongClick = {
+                            showMenu = true
+                        }
                     )
                     .onGloballyPositioned { coordinates ->
-                        val positionInParent = coordinates.positionInParent()
-                        val size = coordinates.size
-
+                        val cardPos = coordinates.positionInParent()
+                        val cardHeight = coordinates.size.height.toFloat()
                         menuOffset = Offset(
-                            positionInParent.x + size.width - 100,
-                            positionInParent.y + size.height + with(density) { 8.dp.toPx() }
+                            cardPos.x + coordinates.size.width.toFloat(),
+                            (-(cardHeight / 3))
                         )
-                    }
-
+                        println(cardHeight)
+                    },
             ) {
                 Column(
                     modifier = Modifier
@@ -385,10 +370,6 @@ private fun ResponsiveNoteItem(
                 }
 
                 if (showMenu) {
-                    val dpOffset = with(density) {
-                        DpOffset(menuOffset.x.toDp(), menuOffset.y.toDp())
-                    }
-
                     DropdownMenu(
                         modifier = Modifier.border(
                             1.dp,
@@ -397,7 +378,7 @@ private fun ResponsiveNoteItem(
                         ),
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        offset = dpOffset,
+                        offset = DpOffset(menuOffset.x.dp, menuOffset.y.dp),
                         shape = RoundedCornerShape(10.dp),
                         containerColor = MaterialTheme.colorScheme.background,
                         tonalElevation = 4.dp
@@ -427,9 +408,7 @@ private fun ResponsiveNoteItem(
                 }
             }
         }
-
         if (data.predictedStatus != null) {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -444,11 +423,7 @@ private fun ResponsiveNoteItem(
                 )
             }
         }
-
-
     }
-
-
 }
 
 @Composable
