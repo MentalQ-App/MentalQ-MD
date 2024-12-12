@@ -48,12 +48,12 @@ MentalQ is a mobile application designed to detect a user's mental state by anal
 - Profile
 
 ## Screenshots
-![1](https://github.com/user-attachments/assets/ecbb3a6a-b163-43b9-8db9-7567cfd18159)
+![1](https://github.com/user-attachments/assets/b0b88902-a1b9-44c0-97bb-fafd133f863d)
 ![2](https://github.com/user-attachments/assets/c8bf1fd7-f1ca-4e4b-b40b-b46efac6eff3)
 ![3](https://github.com/user-attachments/assets/4c34591f-1303-4a76-9c46-0f8266a7db97)
 ![4](https://github.com/user-attachments/assets/4319a783-cc98-42c0-9377-8f4b22ec47de)
-![5](https://github.com/user-attachments/assets/5b0a4941-7e8f-4e11-a9e6-e9da96d5964d)
-![6](https://github.com/user-attachments/assets/a4e2d4f0-31cf-4b76-a88e-e60d6d5fb4ab)
+![5](https://github.com/user-attachments/assets/3c16e1cc-79ac-4302-944f-5c17e322186e)
+![6](https://github.com/user-attachments/assets/d9f3409f-66af-43e2-bb85-5ceebb49c351)
 ![7](https://github.com/user-attachments/assets/f0f4499c-2984-4503-9d5e-32b2260eebdb)
 ![8](https://github.com/user-attachments/assets/30a9edf0-e3a4-425e-a5a7-b057cbafafdb)
 ![9](https://github.com/user-attachments/assets/ada49e2d-60dc-46b1-8e43-fc42b5999884)
