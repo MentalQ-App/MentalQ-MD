@@ -1,6 +1,5 @@
 package com.c242_ps246.mentalq.ui.splash
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -87,7 +86,6 @@ fun SplashScreen(
     LaunchedEffect(role) {
         if (role != null) {
             isLoading = false
-            Log.d("SplashScreen", "Navigating to AuthScreen with role: $role")
             navigateToAuthScreen(token, role)
         }
     }

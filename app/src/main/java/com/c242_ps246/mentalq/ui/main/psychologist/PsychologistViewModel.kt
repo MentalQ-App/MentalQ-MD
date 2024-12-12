@@ -1,12 +1,8 @@
 package com.c242_ps246.mentalq.ui.main.psychologist
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.remote.response.PsychologistItem
-import com.c242_ps246.mentalq.data.remote.response.UserData
 import com.c242_ps246.mentalq.data.repository.AuthRepository
 import com.c242_ps246.mentalq.data.repository.PsychologistRepository
 import com.c242_ps246.mentalq.data.repository.Result
@@ -65,13 +61,11 @@ class PsychologistViewModel @Inject constructor(
                     }
 
                     is Result.Success -> {
-                        Log.e("PsyViewModel", "loadPsychologists: $result")
                         _psychologists.value = result.data
                         _uiState.value = _uiState.value.copy(isLoading = false, success = true)
                     }
 
                     is Result.Error -> {
-                        Log.e("PsyViewModel", "loadPsychologists: $result")
                         _uiState.value =
                             _uiState.value.copy(isLoading = false, error = result.error)
                     }

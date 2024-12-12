@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -393,7 +394,8 @@ fun EditProfileDialog(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
                             errorBorderColor = MaterialTheme.colorScheme.error
                         ),
-                        maxLines = 1
+                        maxLines = 1,
+                        singleLine = true
                     )
                     nameError?.let { error ->
                         nameError?.let {
@@ -401,7 +403,8 @@ fun EditProfileDialog(
                                 text = stringResource(it),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp),
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -417,7 +420,8 @@ fun EditProfileDialog(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
                             errorBorderColor = MaterialTheme.colorScheme.error
                         ),
-                        maxLines = 1
+                        maxLines = 1,
+                        singleLine = true
                     )
                     emailError?.let { error ->
                         emailError?.let {
@@ -425,7 +429,8 @@ fun EditProfileDialog(
                                 text = stringResource(it),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                                modifier = Modifier.padding(start = 16.dp, top = 4.dp),
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -449,13 +454,16 @@ fun EditProfileDialog(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
                             errorBorderColor = MaterialTheme.colorScheme.error
                         ),
+                        maxLines = 1,
+                        singleLine = true
                     )
                     birthdayError?.let { error ->
                         Text(
                             text = stringResource(error),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp),
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

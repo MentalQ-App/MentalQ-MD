@@ -4,7 +4,6 @@ package com.c242_ps246.mentalq.ui.auth
 
 import android.app.Activity
 import android.app.DatePickerDialog
-import android.util.Log
 import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -121,7 +120,6 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     val context = LocalContext.current
     val clientId = remember {
         val id = context.getString(R.string.default_web_client_id)
-        Log.e("GoogleSignIn", "Configured Client ID: $id")
         id
     }
 

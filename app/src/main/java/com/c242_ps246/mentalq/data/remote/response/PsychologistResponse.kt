@@ -1,7 +1,6 @@
 package com.c242_ps246.mentalq.data.remote.response
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 data class PsychologistResponse(

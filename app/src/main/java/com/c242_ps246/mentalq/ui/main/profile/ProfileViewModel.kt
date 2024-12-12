@@ -1,7 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.profile
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -69,9 +68,6 @@ class ProfileViewModel @Inject constructor(
 
     fun getUserData() {
         authRepository.getUser().observeForever { result ->
-
-            Log.e("ProfileViewModel", "getUserData: $result")
-
             when (result) {
                 Result.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
@@ -95,7 +91,6 @@ class ProfileViewModel @Inject constructor(
         birthday: RequestBody,
         profileImage: MultipartBody.Part?
     ) {
-        Log.d("ProfileViewModel", "updateProfile: $name, $email, $birthday, $profileImage")
         viewModelScope.launch {
             userRepository.updateProfile(name, email, birthday, profileImage)
                 .observeForever { result ->

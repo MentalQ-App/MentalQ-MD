@@ -2,7 +2,6 @@ package com.c242_ps246.mentalq.data.remote.retrofit
 
 import com.c242_ps246.mentalq.data.remote.response.GeminiRequest
 import com.c242_ps246.mentalq.data.remote.response.GeminiResponse
-import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Query

@@ -1,7 +1,6 @@
 package com.c242_ps246.mentalq.ui.main.psychologist.midtrans
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -28,9 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.c242_ps246.mentalq.R
-import com.c242_ps246.mentalq.ui.component.EmptyState
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 
@@ -43,9 +40,6 @@ fun MidtransScreen(
     onFailed: () -> Unit,
     onBackClick: () -> Unit
 ) {
-
-    Log.e("MidtransScreen", "MidtransScreen: $orderId, $itemId, $userId")
-
     val viewModel: MidtransViewModel = hiltViewModel()
 
     LaunchedEffect(Unit) {
@@ -56,7 +50,6 @@ fun MidtransScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val transactionStatus by viewModel.transactionStatus.collectAsState()
-    val transactionMessage by viewModel.transactionMessage.collectAsState()
     val psychologistData by viewModel.psychologistData.collectAsState()
     val userData by viewModel.userData.collectAsState()
 
@@ -73,7 +66,6 @@ fun MidtransScreen(
         if (uiState.isLoading) {
             CircularProgressIndicator()
         } else {
-//            Log.e("MidtransScreen", "MidtransScreen: $transactionStatus, $transactionMessage")
             if (transactionStatus == "settlement") {
 
                 val isDataNotNull = psychologistData != null && userData != null
@@ -81,8 +73,6 @@ fun MidtransScreen(
                 if (isDataNotNull) {
                     if (!isAlreadyCreated.value) {
                         isAlreadyCreated.value = true
-                        Log.e("MidtransScreen", "MidtransScreen: AKU KEPANGGIL")
-
 
                         makeNewChatRoom(
                             userId = userId,
@@ -97,10 +87,7 @@ fun MidtransScreen(
                         )
                     }
                 }
-
-
             } else {
-                Log.e("MidtransScreen", "MidtransScreen: $psychologistData")
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -141,8 +128,6 @@ private fun makeNewChatRoom(
     val chatRef = firebase.reference.child("chatroom").push()
     val chatId = chatRef.key
 
-//    val members = listOf(userId, psychologistId)
-
     val members = mapOf(
         "user" to mapOf(
             "id" to userId,
@@ -179,15 +164,6 @@ private fun makeNewChatRoom(
                     }
                 }
             }
-//
-//            members.forEach { userId ->
-//                val userChatsRef = firebase.reference.child("userChats").child(userId)
-//                userChatsRef.push().setValue(chatId).addOnCompleteListener {
-//                    if (it.isSuccessful) {
-//                        onSuccess(chatId!!)
-//                    }
-//                }
-//            }
         }
     }
 }
@@ -212,8 +188,6 @@ fun MidtransWebView(
     val uiState by viewModel.uiState.collectAsState()
     val orderId by viewModel.orderId.collectAsState()
     val redirectUrl by viewModel.redirectUrl.collectAsState()
-
-    Log.e("MidtransWebView", "MidtransWebView: $userId, $price, $itemId, $orderId")
 
     if (!uiState.isLoading) {
         BackHandler { onBackClick(orderId) }
