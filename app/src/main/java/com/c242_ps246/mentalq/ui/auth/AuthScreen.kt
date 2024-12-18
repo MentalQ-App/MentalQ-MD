@@ -65,10 +65,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -97,6 +99,22 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
     val token by viewModel.token.collectAsStateWithLifecycle()
     val role by viewModel.role.collectAsStateWithLifecycle()
 
+    var isLogin by rememberSaveable { mutableStateOf(true) }
+    var loginButtonLoadingState by rememberSaveable { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var isRegister by rememberSaveable { mutableStateOf(false) }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var birthday by rememberSaveable { mutableStateOf("") }
+    var acceptedTerms by rememberSaveable { mutableStateOf(false) }
+
+    var loginFailed = stringResource(R.string.login_failed)
+    var loginSuccess = stringResource(R.string.login_success)
+    var updatePasswordSuccess = stringResource(R.string.update_password_success)
+    var registerSuccess = stringResource(R.string.register_success)
+
     LaunchedEffect(token) {
         if (!token.isNullOrEmpty()) {
             viewModel.getUserRole()
@@ -112,10 +130,10 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
         }
     }
 
-    var showToast by remember { mutableStateOf(false) }
-    var toastMessage by remember { mutableStateOf("") }
-    var toastType by remember { mutableStateOf(ToastType.INFO) }
-    var showForgotPassword by remember { mutableStateOf(false) }
+    var showToast by rememberSaveable { mutableStateOf(false) }
+    var toastMessage by rememberSaveable { mutableStateOf("") }
+    var toastType by rememberSaveable { mutableStateOf(ToastType.INFO) }
+    var showForgotPassword by rememberSaveable { mutableStateOf(false) }
 
     val context = LocalContext.current
     val clientId = remember {
@@ -161,21 +179,6 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
         }
     }
 
-    var isLogin by remember { mutableStateOf(true) }
-    var loginButtonLoadingState by remember { mutableStateOf(false) }
-    var isRegister by remember { mutableStateOf(false) }
-    var showPassword by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var birthday by remember { mutableStateOf("") }
-    var acceptedTerms by remember { mutableStateOf(false) }
-
-    var loginFailed = stringResource(R.string.login_failed)
-    var loginSuccess = stringResource(R.string.login_success)
-    var updatePasswordSuccess = stringResource(R.string.update_password_success)
-    var registerSuccess = stringResource(R.string.register_success)
-
     LaunchedEffect(uiState) {
         when {
             uiState.error != null -> {
@@ -192,7 +195,6 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                     if (isLogin) loginSuccess else if (isRegister) registerSuccess else updatePasswordSuccess
                 toastType = ToastType.SUCCESS
                 loginButtonLoadingState = false
-                viewModel.clearSuccess()
                 if (isLogin) {
                     viewModel.getUserRole()
                     val authenticatedRole = role
@@ -204,11 +206,11 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
         }
     }
 
-    var emailError by remember { mutableStateOf<Int?>(null) }
-    var passwordError by remember { mutableStateOf<Int?>(null) }
-    var nameError by remember { mutableStateOf<Int?>(null) }
-    var birthdayError by remember { mutableStateOf<Int?>(null) }
-    var termsError by remember { mutableStateOf<Int?>(null) }
+    var emailError by rememberSaveable { mutableStateOf<Int?>(null) }
+    var passwordError by rememberSaveable { mutableStateOf<Int?>(null) }
+    var nameError by rememberSaveable { mutableStateOf<Int?>(null) }
+    var birthdayError by rememberSaveable { mutableStateOf<Int?>(null) }
+    var termsError by rememberSaveable { mutableStateOf<Int?>(null) }
 
     fun validateTerms(acceptedTerms: Boolean): Boolean {
         return if (!acceptedTerms) {
@@ -536,6 +538,7 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                     Button(
                         onClick = {
                             loginButtonLoadingState = true
+                            keyboardController?.hide()
                             if (validateForm()) {
                                 if (isLogin) {
                                     viewModel.login(email, password)
@@ -631,12 +634,11 @@ fun AuthScreen(onSuccess: (String) -> Unit) {
                         CustomToast(
                             message = toastMessage,
                             type = toastType,
-                            duration = 2000L,
                             onDismiss = { showToast = false }
                         )
                     }
 
-                    var showTermsDialog by remember { mutableStateOf(false) }
+                    var showTermsDialog by rememberSaveable { mutableStateOf(false) }
                     val baseUrl = BuildConfig.BASE_URL
                     val termsUrl = "$baseUrl/terms-of-service"
                     Row(
@@ -819,19 +821,19 @@ fun ForgotPasswordFlow(
     onBack: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    var currentStep by remember { mutableStateOf(ForgotPasswordStep.EMAIL) }
-    var email by remember { mutableStateOf("") }
-    var otp by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var showNewPassword by remember { mutableStateOf(false) }
-    var showConfirmPassword by remember { mutableStateOf(false) }
+    var currentStep by rememberSaveable { mutableStateOf(ForgotPasswordStep.EMAIL) }
+    var email by rememberSaveable { mutableStateOf("") }
+    var otp by rememberSaveable { mutableStateOf("") }
+    var newPassword by rememberSaveable { mutableStateOf("") }
+    var confirmPassword by rememberSaveable { mutableStateOf("") }
+    var showNewPassword by rememberSaveable { mutableStateOf(false) }
+    var showConfirmPassword by rememberSaveable { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var showToast by remember { mutableStateOf(false) }
-    var toastMessage by remember { mutableStateOf("") }
-    var toastType by remember { mutableStateOf(ToastType.INFO) }
+    var showToast by rememberSaveable { mutableStateOf(false) }
+    var toastMessage by rememberSaveable { mutableStateOf("") }
+    var toastType by rememberSaveable { mutableStateOf(ToastType.INFO) }
 
     var errorOccurred = stringResource(R.string.error_occurred)
     var passwordResetSuccess = stringResource(R.string.update_password_success)
@@ -955,7 +957,6 @@ fun ForgotPasswordFlow(
                 CustomToast(
                     message = toastMessage,
                     type = toastType,
-                    duration = 2000L,
                     onDismiss = { showToast = false }
                 )
             }
@@ -1094,7 +1095,7 @@ private fun NewPasswordStep(
     onSubmit: () -> Unit,
     isLoading: Boolean
 ) {
-    var passwordError by remember { mutableStateOf<Int?>(null) }
+    var passwordError by rememberSaveable { mutableStateOf<Int?>(null) }
     var newPasswordStepTitle = stringResource(R.string.new_password_step_title)
     var newPasswordStepSubtitle = stringResource(R.string.new_password_step_subtitle)
 

@@ -465,7 +465,7 @@ fun LatestDiaryCard(note: ListNoteItem, onItemClick: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface

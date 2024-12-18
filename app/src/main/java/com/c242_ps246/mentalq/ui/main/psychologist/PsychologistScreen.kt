@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.size.Scale
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.PsychologistItem
 import com.c242_ps246.mentalq.ui.component.EmptyState
@@ -116,7 +117,7 @@ private fun PsychologistCard(
             .clickable(onClick = {
                 onNavigateToMidtransWebView(userId, psychologist.price, psychologist.userId)
             }),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
@@ -144,14 +145,13 @@ private fun PsychologistCard(
                             .data(imageModel)
                             .placeholder(R.drawable.default_profile)
                             .crossfade(true)
-                            .size(64)
+                            .scale(Scale.FILL)
+                            .size(48)
                             .build(),
-                        contentDescription = "Profile",
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(
-                                CircleShape
-                            )
+                        contentDescription = "Profile Picture",
+                        modifier = modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
                     )
 
                     Spacer(modifier = Modifier.size(16.dp))
