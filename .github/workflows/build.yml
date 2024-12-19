@@ -34,14 +34,27 @@ jobs:
           echo "${{ secrets.GS_CREDENTIALS }}" | base64 -d > ./app/google-services.json
         shell: bash
 
+      - name: Install jq (if necessary)
+        run: sudo apt-get install jq
+
       - name: Validate google-services.json
         run: |
           cat ./app/google-services.json
           jq '.' ./app/google-services.json
         shell: bash
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Build with Gradle
-        run: ./gradlew build --stacktrace --info
+        run: ./gradlew assembleDebug --stacktrace --info
 
       - name: Upload to Google Drive
         uses: adityak74/google-drive-upload-git-action@main
@@ -50,3 +63,10 @@ jobs:
           filename: "app-debug.apk"
           folderId: ${{ secrets.FOLDER_ID }}
           overwrite: "true"
+
+      - name: Upload APK to GitHub Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
