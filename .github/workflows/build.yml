@@ -56,15 +56,18 @@ jobs:
           overwrite: "true"
 
       - name: Create and Push Tag
+        id: create_tag
         run: |
           VERSION="v$(date +'%Y.%m.%d')"
           git tag $VERSION
           git push origin $VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload APK to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.create_and_push_tag.outputs.VERSION }} 
+          tag_name: ${{ steps.create_tag.outputs.VERSION }}
           files: ./app/build/outputs/apk/debug/app-debug.apk
         env:
-          GITHUB_TOKEN: ${{ secrets.GTHB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
