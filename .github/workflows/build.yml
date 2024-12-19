@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
     branches: [ "main" ]
@@ -10,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,19 +53,20 @@ jobs:
           folderId: ${{ secrets.FOLDER_ID }}
           overwrite: "true"
 
-      - name: Create and Push Tag
+      - name: Create Tag
         id: create_tag
         run: |
           VERSION="v$(date +'%Y.%m.%d')"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           git tag $VERSION
           git push origin $VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload APK to GitHub Releases
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.create_tag.outputs.VERSION }}
           files: ./app/build/outputs/apk/debug/app-debug.apk
+          tag_name: ${{ steps.create_tag.outputs.VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
