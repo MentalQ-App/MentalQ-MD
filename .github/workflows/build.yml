@@ -56,13 +56,19 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assembleDebug --stacktrace --info
 
+      - name: Set up Google Drive credentials
+        run: |
+          echo "${{ secrets.CREDENTIALS }}" | base64 -d > ./app/google-drive-service-account.json
+        shell: bash
+
       - name: Upload to Google Drive
         uses: adityak74/google-drive-upload-git-action@main
         with:
-          credentials: ${{ secrets.CREDENTIALS }}
+          credentials: ./app/google-drive-service-account.json
           filename: "./app/build/outputs/apk/debug/app-debug.apk"
           folderId: ${{ secrets.FOLDER_ID }}
           overwrite: "true"
+
 
       - name: Upload APK to GitHub Releases
         uses: softprops/action-gh-release@v1
