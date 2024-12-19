@@ -34,15 +34,6 @@ jobs:
           echo "${{ secrets.GS_CREDENTIALS }}" | base64 -d > ./app/google-services.json
         shell: bash
 
-      - name: Install jq (if necessary)
-        run: sudo apt-get install jq
-
-      - name: Validate google-services.json
-        run: |
-          cat ./app/google-services.json
-          jq '.' ./app/google-services.json
-        shell: bash
-
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:
