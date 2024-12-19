@@ -64,7 +64,7 @@ MentalQ is a mobile application designed to detect a user's mental state by anal
 [Video Demo Link](https://youtu.be/zyE5q8csYjM)
 
 ## Download Our Apps
-[Download Link](https://drive.google.com/drive/folders/17OMxdNMiDujlPFGmDOYREAE1iCrxMXh8?usp=drive_link)
+You can download our application by download the app-debug.apk file inside the Releases.
 
 If the application can't be installed with an error message "App not installed" , make sure that your device does not block installing application from unknown source, also make sure you downloaded it completely.
 
