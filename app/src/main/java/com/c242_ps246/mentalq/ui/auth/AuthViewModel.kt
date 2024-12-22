@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.repository.AuthRepository
@@ -11,9 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
-import kotlin.coroutines.resumeWithException
 
 data class AuthScreenUIState(
     val isLoading: Boolean = false,
@@ -68,101 +67,93 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    @Suppress("DEPRECATION")
     fun loginWithGoogle(account: GoogleSignInAccount) {
         viewModelScope.launch {
-            try {
-                _uiState.value = _uiState.value.copy(isLoading = true)
+            val idToken = account.idToken
 
-                val idToken = account.idToken
-                if (idToken == null) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "Google sign in failed: No ID token",
-                        success = false
-                    )
-                    return@launch
-                }
+            if (idToken != null) {
+                try {
+                    val credential = GoogleAuthProvider.getCredential(idToken, null)
 
-                val credential = GoogleAuthProvider.getCredential(idToken, null)
-
-                val authResult = suspendCancellableCoroutine { continuation ->
                     firebaseAuth.signInWithCredential(credential)
-                        .addOnSuccessListener { result ->
-                            continuation.resume(result, null)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val user = firebaseAuth.currentUser
+                                if (user != null) {
+
+                                    user.getIdToken(true)
+                                        .addOnCompleteListener { tokenTask ->
+                                            if (tokenTask.isSuccessful) {
+                                                val firebaseIdToken = tokenTask.result?.token
+                                                Log.d(
+                                                    "GoogleLogin",
+                                                    "Firebase ID Token: $firebaseIdToken"
+                                                )
+
+                                                if (firebaseIdToken != null) {
+                                                    authRepository.googleLogin(firebaseIdToken)
+                                                        .observeForever { result ->
+                                                            when (result) {
+                                                                Result.Loading -> {
+                                                                    _uiState.value =
+                                                                        _uiState.value.copy(
+                                                                            isLoading = true
+                                                                        )
+                                                                }
+
+                                                                is Result.Success -> {
+                                                                    _uiState.value =
+                                                                        _uiState.value.copy(
+                                                                            isLoading = false,
+                                                                            error = null,
+                                                                            success = true
+                                                                        )
+                                                                }
+
+                                                                is Result.Error -> {
+                                                                    _uiState.value =
+                                                                        _uiState.value.copy(
+                                                                            isLoading = false,
+                                                                            error = result.error,
+                                                                            success = false
+                                                                        )
+                                                                }
+                                                            }
+                                                        }
+                                                } else {
+                                                    Log.e(
+                                                        "GoogleLogin",
+                                                        "Firebase ID Token is null"
+                                                    )
+                                                }
+                                            } else {
+                                                Log.e(
+                                                    "GoogleLogin",
+                                                    "Failed to get Firebase ID Token: ${tokenTask.exception?.message}"
+                                                )
+                                            }
+                                        }
+                                } else {
+                                    Log.e(
+                                        "GoogleLogin",
+                                        "Firebase user is null after successful authentication"
+                                    )
+                                }
+                            } else {
+                                Log.e(
+                                    "GoogleLogin",
+                                    "Firebase authentication failed: ${task.exception?.message}"
+                                )
+                            }
                         }
-                        .addOnFailureListener { exception ->
-                            continuation.resumeWithException(exception)
-                        }
+                } catch (e: Exception) {
+                    Log.e("GoogleLogin", "Error during Google login: ${e.message}")
                 }
-
-                if (authResult == null) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "Google sign in failed: No auth result",
-                        success = false
-                    )
-                    return@launch
-                }
-
-                val user = firebaseAuth.currentUser
-                if (user == null) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "Firebase auth failed: No user",
-                        success = false
-                    )
-                    return@launch
-                }
-
-                val firebaseIdToken = suspendCancellableCoroutine { continuation ->
-                    user.getIdToken(true)
-                        .addOnSuccessListener { result ->
-                            continuation.resume(result.token, null)
-                        }
-                        .addOnFailureListener { exception ->
-                            continuation.resumeWithException(exception)
-                        }
-                }
-
-                if (firebaseIdToken == null) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "Failed to get Firebase token",
-                        success = false
-                    )
-                    return@launch
-                }
-
-                authRepository.googleLogin(firebaseIdToken).observeForever { result ->
-                    when (result) {
-                        Result.Loading -> {
-                            // Already handling loading state
-                        }
-
-                        is Result.Success -> {
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                error = null,
-                                success = true
-                            )
-                        }
-
-                        is Result.Error -> {
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                error = result.error,
-                                success = false
-                            )
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-
+            } else {
+                Log.e("GoogleLogin", "Google ID Token is null")
             }
         }
     }
-
 
     fun register(name: String, email: String, password: String, birthday: String) {
         authRepository.register(name, email, password, birthday).observeForever { result ->

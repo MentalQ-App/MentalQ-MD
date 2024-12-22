@@ -1,11 +1,10 @@
 package com.c242_ps246.mentalq.data.remote.response
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
-import android.os.Parcelable
-
 
 data class NoteResponse(
     @field:SerializedName("listNote")
@@ -29,17 +28,6 @@ data class DeleteNoteResponse(
 data class DetailNoteResponse(
     @field:SerializedName("note")
     val note: ListNoteItem? = null,
-
-    @field:SerializedName("error")
-    val error: Boolean? = null,
-
-    @field:SerializedName("message")
-    val message: String? = null
-)
-
-data class NormalizeNoteResponse(
-    @field:SerializedName("content")
-    val content: String,
 
     @field:SerializedName("error")
     val error: Boolean? = null,

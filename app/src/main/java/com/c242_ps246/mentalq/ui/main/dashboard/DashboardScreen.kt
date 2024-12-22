@@ -83,6 +83,14 @@ fun DashboardScreen(
         viewModel.getPredictedStatusMode()
     }
 
+    LaunchedEffect(streakInfo) {
+        viewModel.calculateStreak()
+    }
+
+    LaunchedEffect(userData) {
+        viewModel.getUserData()
+    }
+
     LaunchedEffect(analysisSize) {
         viewModel.getPredictedStatusMode()
     }

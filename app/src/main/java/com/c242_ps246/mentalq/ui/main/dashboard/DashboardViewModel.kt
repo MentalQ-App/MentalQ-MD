@@ -46,9 +46,6 @@ class DashboardViewModel @Inject constructor(
 
     init {
         loadLatestNotes()
-        getUserData()
-        calculateStreak()
-        getPredictedStatusMode()
     }
 
     fun loadLatestNotes() {
