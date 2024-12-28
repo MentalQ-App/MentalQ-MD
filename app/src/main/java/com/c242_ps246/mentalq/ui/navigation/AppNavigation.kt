@@ -30,7 +30,23 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = if (roleFromSplash == null) Routes.AUTH else Routes.MAIN_SCREEN,
+        startDestination = if (roleFromSplash == null) {
+            Routes.AUTH
+        } else {
+            when (roleFromSplash) {
+                "user" -> {
+                    Routes.MAIN_SCREEN
+                }
+
+                "psychologist" -> {
+                    Routes.PSYCHOLOGIST_MAIN_SCREEN
+                }
+
+                else -> {
+                    Routes.AUTH
+                }
+            }
+        },
         modifier = modifier
     ) {
         composable(
