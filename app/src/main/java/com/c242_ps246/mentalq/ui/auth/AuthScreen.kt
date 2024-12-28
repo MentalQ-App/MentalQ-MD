@@ -77,7 +77,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,14 +85,29 @@ import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.ui.component.CustomToast
 import com.c242_ps246.mentalq.ui.component.TermsWebView
 import com.c242_ps246.mentalq.ui.component.ToastType
-import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import java.util.Calendar
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AuthScreen(onSuccess: (String) -> Unit) {
+fun AuthScreen(
+    tokenFromSplash: String? = null,
+    roleFromSplash: String? = null,
+    onSuccess: (String) -> Unit
+) {
+    var splashToken by rememberSaveable { mutableStateOf(tokenFromSplash) }
+    var splashRole by rememberSaveable { mutableStateOf(roleFromSplash) }
+
+    LaunchedEffect(splashToken, splashRole) {
+        if (!splashToken.isNullOrEmpty() && !splashRole.isNullOrEmpty()) {
+            onSuccess(splashRole!!)
+
+            splashToken = null
+            splashRole = null
+        }
+    }
+
     val viewModel: AuthViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val token by viewModel.token.collectAsStateWithLifecycle()
@@ -1244,13 +1258,5 @@ private fun NewPasswordStep(
                 Text(stringResource(R.string.reset_password))
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AuthScreenPreview() {
-    MentalQTheme {
-        AuthScreen {}
     }
 }

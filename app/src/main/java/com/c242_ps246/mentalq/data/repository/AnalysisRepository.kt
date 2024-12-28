@@ -24,26 +24,24 @@ class AnalysisRepository(
                 val response = analysisApiService.getAnalysis()
                 val remoteAnalysis = response.listAnalysis
 
-                if (remoteAnalysis != null) {
-                    val slicedRemoteData = remoteAnalysis.takeLast(28)
-                    val predictedStatusList = slicedRemoteData.map { it.predictedStatus }
-                    val (size, modePredictedStatus) = calculateMode(predictedStatusList)
-                    val analysisList = slicedRemoteData.map { analysis ->
-                        ListAnalysisItem(
-                            analysis.id,
-                            analysis.noteId,
-                            analysis.predictedStatus,
-                            analysis.confidenceScore,
-                            analysis.updatedAt,
-                            analysis.createdAt
-                        )
-                    }
-                    if (localData != analysisList) {
-                        analysisDao.clearAllAnalysis()
-                        analysisDao.insertAllAnalysis(analysisList)
-                    }
-                    emit(Result.Success(Triple(analysisList, size, modePredictedStatus)))
+                val slicedRemoteData = remoteAnalysis.takeLast(28)
+                val predictedStatusList = slicedRemoteData.map { it.predictedStatus }
+                val (size, modePredictedStatus) = calculateMode(predictedStatusList)
+                val analysisList = slicedRemoteData.map { analysis ->
+                    ListAnalysisItem(
+                        analysis.id,
+                        analysis.noteId,
+                        analysis.predictedStatus,
+                        analysis.confidenceScore,
+                        analysis.updatedAt,
+                        analysis.createdAt
+                    )
                 }
+                if (localData != analysisList) {
+                    analysisDao.clearAllAnalysis()
+                    analysisDao.insertAllAnalysis(analysisList)
+                }
+                emit(Result.Success(Triple(analysisList, size, modePredictedStatus)))
             } catch (e: Exception) {
                 if (localData.isEmpty()) {
                     emit(Result.Error("Failed to fetch remote data: ${e.message}"))
