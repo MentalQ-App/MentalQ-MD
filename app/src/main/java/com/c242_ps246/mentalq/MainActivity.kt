@@ -54,8 +54,7 @@ class MainActivity : ComponentActivity() {
                     userToken,
                     userRole,
                     shouldShowOnboarding,
-                    onboardingViewModel,
-                    preferencesManager
+                    onboardingViewModel
                 )
             }
         }
@@ -67,8 +66,7 @@ fun AppContent(
     userToken: String?,
     userRole: String?,
     shouldShowOnboarding: Boolean,
-    viewModel: OnboardingViewModel,
-    preferencesManager: MentalQAppPreferences
+    viewModel: OnboardingViewModel
 ) {
 
     NetworkAwareContent {
@@ -86,8 +84,7 @@ fun AppContent(
                     AppNavigation(
                         tokenFromSplash = userToken,
                         roleFromSplash = userRole,
-                        modifier = Modifier.padding(innerPadding),
-                        preferencesManager = preferencesManager
+                        modifier = Modifier.padding(innerPadding)
                     )
                 }
             }

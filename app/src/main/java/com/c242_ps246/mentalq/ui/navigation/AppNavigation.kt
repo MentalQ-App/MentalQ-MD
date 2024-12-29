@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.c242_ps246.mentalq.data.manager.MentalQAppPreferences
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideInFromBottom
 import com.c242_ps246.mentalq.ui.animation.PageAnimation.slideOutToBottom
 import com.c242_ps246.mentalq.ui.auth.AuthScreen
@@ -20,7 +19,6 @@ import com.c242_ps246.mentalq.ui.main.PsychologistMainScreen
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,
-    preferencesManager: MentalQAppPreferences,
     tokenFromSplash: String? = null,
     roleFromSplash: String? = null
 ) {
@@ -28,12 +26,15 @@ fun AppNavigation(
     var hasLoggedOut by rememberSaveable { mutableStateOf(false) }
     rememberCoroutineScope()
 
+    var splashToken by rememberSaveable { mutableStateOf(tokenFromSplash) }
+    var splashRole by rememberSaveable { mutableStateOf(roleFromSplash) }
+
     NavHost(
         navController = navController,
-        startDestination = if (roleFromSplash == null) {
+        startDestination = if (splashRole == null) {
             Routes.AUTH
         } else {
-            when (roleFromSplash) {
+            when (splashRole) {
                 "user" -> {
                     Routes.MAIN_SCREEN
                 }
@@ -75,22 +76,26 @@ fun AppNavigation(
             MainScreen(
                 onLogout = {
                     hasLoggedOut = true
+                    splashToken = null
+                    splashRole = null
                     navController.navigate(Routes.AUTH) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                userRole = roleFromSplash ?: "user"
+                userRole = splashRole ?: "user"
             )
         }
         composable(Routes.PSYCHOLOGIST_MAIN_SCREEN) {
             PsychologistMainScreen(
                 onLogout = {
                     hasLoggedOut = true
+                    splashToken = null
+                    splashRole = null
                     navController.navigate(Routes.AUTH) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                userRole = roleFromSplash ?: "psychologist"
+                userRole = splashRole ?: "psychologist"
             )
         }
     }
