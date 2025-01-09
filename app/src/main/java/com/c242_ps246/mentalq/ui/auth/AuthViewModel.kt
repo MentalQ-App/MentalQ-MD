@@ -1,5 +1,6 @@
 package com.c242_ps246.mentalq.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.c242_ps246.mentalq.data.repository.AuthRepository
@@ -84,6 +85,11 @@ class AuthViewModel @Inject constructor(
                                         .addOnCompleteListener { tokenTask ->
                                             if (tokenTask.isSuccessful) {
                                                 val firebaseIdToken = tokenTask.result?.token
+                                                Log.d(
+                                                    "GoogleLogin",
+                                                    "Firebase ID Token: $firebaseIdToken"
+                                                )
+
                                                 if (firebaseIdToken != null) {
                                                     authRepository.googleLogin(firebaseIdToken)
                                                         .observeForever { result ->
@@ -114,19 +120,40 @@ class AuthViewModel @Inject constructor(
                                                                 }
                                                             }
                                                         }
+                                                } else {
+                                                    Log.e(
+                                                        "GoogleLogin",
+                                                        "Firebase ID Token is null"
+                                                    )
                                                 }
+                                            } else {
+                                                Log.e(
+                                                    "GoogleLogin",
+                                                    "Failed to get Firebase ID Token: ${tokenTask.exception?.message}"
+                                                )
                                             }
                                         }
+                                } else {
+                                    Log.e(
+                                        "GoogleLogin",
+                                        "Firebase user is null after successful authentication"
+                                    )
                                 }
+                            } else {
+                                Log.e(
+                                    "GoogleLogin",
+                                    "Firebase authentication failed: ${task.exception?.message}"
+                                )
                             }
                         }
                 } catch (e: Exception) {
-
+                    Log.e("GoogleLogin", "Error during Google login: ${e.message}")
                 }
+            } else {
+                Log.e("GoogleLogin", "Google ID Token is null")
             }
         }
     }
-
 
     fun register(name: String, email: String, password: String, birthday: String) {
         authRepository.register(name, email, password, birthday).observeForever { result ->

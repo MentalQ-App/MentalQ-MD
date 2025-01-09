@@ -13,12 +13,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.size.Scale
 import com.c242_ps246.mentalq.R
 import com.c242_ps246.mentalq.data.remote.response.ChatRoomItem
 import com.c242_ps246.mentalq.ui.component.EmptyState
@@ -112,14 +115,22 @@ private fun ChatPreviewItem(
                 chatRoom.userProfile
             }
 
+            val imageModel = if (profileImg == "null" || profileImg == null) {
+                R.drawable.default_profile
+            } else {
+                profileImg
+            }
+
             AsyncImage(
-                model = if (profileImg == "null" || profileImg == null) {
-                    R.drawable.default_profile
-                } else {
-                    profileImg
-                },
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageModel)
+                    .placeholder(R.drawable.default_profile)
+                    .crossfade(true)
+                    .scale(Scale.FILL)
+                    .size(48)
+                    .build(),
                 contentDescription = "Profile Picture",
-                modifier = Modifier
+                modifier = modifier
                     .size(48.dp)
                     .clip(CircleShape)
             )

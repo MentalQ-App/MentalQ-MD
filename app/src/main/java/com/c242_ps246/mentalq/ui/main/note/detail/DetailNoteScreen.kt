@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -61,14 +62,16 @@ fun DetailNoteScreen(
 ) {
     val viewModel: NoteDetailViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val title: String? by viewModel.title.collectAsStateWithLifecycle()
-    val content: String? by viewModel.content.collectAsStateWithLifecycle()
-    val date: String? by viewModel.date.collectAsStateWithLifecycle()
-    val selectedEmotion: String? by viewModel.emotion.collectAsStateWithLifecycle()
+    val title: String by viewModel.title.collectAsStateWithLifecycle()
+    val content: String by viewModel.content.collectAsStateWithLifecycle()
+    val date: String by viewModel.date.collectAsStateWithLifecycle()
+    val selectedEmotion: String by viewModel.emotion.collectAsStateWithLifecycle()
     var isSaveTriggered by remember { mutableStateOf(false) }
     val voiceToTextParser = remember { VoiceToTextParser(application) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     fun handleBack() {
+        keyboardController?.hide()
         if (!isSaveTriggered) {
             isSaveTriggered = true
             viewModel.saveNoteImmediately()
@@ -147,8 +150,10 @@ fun DetailNoteScreen(
                     .padding(16.dp)
             ) {
                 BasicTextField(
-                    value = title!!,
-                    onValueChange = { viewModel.updateTitle(it) },
+                    value = title,
+                    onValueChange = {
+                        viewModel.updateTitle(it)
+                    },
                     textStyle = TextStyle(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -157,7 +162,7 @@ fun DetailNoteScreen(
                     modifier = Modifier.fillMaxWidth(),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                     decorationBox = { innerTextField ->
-                        if (title.isNullOrEmpty()) {
+                        if (title.isEmpty()) {
                             Text(
                                 text = stringResource(id = R.string.title_placeholder),
                                 style = TextStyle(
@@ -172,7 +177,7 @@ fun DetailNoteScreen(
                 )
 
                 Text(
-                    text = formatDate(date!!),
+                    text = formatDate(date),
                     color = MaterialTheme.colorScheme.tertiary,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -184,8 +189,10 @@ fun DetailNoteScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     BasicTextField(
-                        value = content!!,
-                        onValueChange = { viewModel.updateContent(it) },
+                        value = content,
+                        onValueChange = {
+                            viewModel.updateContent(it)
+                        },
                         textStyle = TextStyle(
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onBackground
@@ -195,7 +202,7 @@ fun DetailNoteScreen(
                             .padding(vertical = 16.dp),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                         decorationBox = { innerTextField ->
-                            if (content.isNullOrEmpty()) {
+                            if (content.isEmpty()) {
                                 Text(
                                     text = stringResource(id = R.string.content_placeholder),
                                     style = TextStyle(
@@ -438,7 +445,6 @@ fun VoiceInputButton(
         CustomToast(
             message = toastMessage,
             type = toastType,
-            duration = 2000L,
             onDismiss = { showToast = false },
             placement = Alignment.BottomCenter
         )

@@ -24,7 +24,6 @@ import com.c242_ps246.mentalq.ui.theme.MentalQTheme
 import com.c242_ps246.mentalq.ui.utils.NetworkAwareContent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlin.getValue
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,23 +37,37 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             var showSplashScreen by remember { mutableStateOf(true) }
+            val shouldShowOnboarding by onboardingViewModel.shouldShowOnboarding.collectAsState()
+            var userToken by remember { mutableStateOf<String?>(null) }
+            var userRole by remember { mutableStateOf<String?>(null) }
 
             if (showSplashScreen) {
                 MentalQTheme {
                     SplashScreen { token, role ->
                         showSplashScreen = false
+                        userToken = token
+                        userRole = role
                     }
                 }
             } else {
-                AppContent(onboardingViewModel, preferencesManager)
+                AppContent(
+                    userToken,
+                    userRole,
+                    shouldShowOnboarding,
+                    onboardingViewModel
+                )
             }
         }
     }
 }
 
 @Composable
-fun AppContent(viewModel: OnboardingViewModel, preferencesManager: MentalQAppPreferences) {
-    val shouldShowOnboarding by viewModel.shouldShowOnboarding.collectAsState()
+fun AppContent(
+    userToken: String?,
+    userRole: String?,
+    shouldShowOnboarding: Boolean,
+    viewModel: OnboardingViewModel
+) {
 
     NetworkAwareContent {
         if (shouldShowOnboarding) {
@@ -69,8 +82,9 @@ fun AppContent(viewModel: OnboardingViewModel, preferencesManager: MentalQAppPre
             MentalQTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavigation(
-                        modifier = Modifier.padding(innerPadding),
-                        preferencesManager = preferencesManager
+                        tokenFromSplash = userToken,
+                        roleFromSplash = userRole,
+                        modifier = Modifier.padding(innerPadding)
                     )
                 }
             }

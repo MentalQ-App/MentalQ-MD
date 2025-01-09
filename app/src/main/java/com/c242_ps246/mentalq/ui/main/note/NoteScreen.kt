@@ -304,7 +304,7 @@ private fun ResponsiveNoteItem(
             .fillMaxWidth()
             .padding(4.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = color
         ),
@@ -314,7 +314,7 @@ private fun ResponsiveNoteItem(
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
@@ -323,7 +323,7 @@ private fun ResponsiveNoteItem(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(shape = RoundedCornerShape(16.dp))
+                    .clip(shape = RoundedCornerShape(12.dp))
                     .combinedClickable(
                         onClick = { onItemClick(data.id) },
                         onLongClick = {
@@ -467,7 +467,6 @@ private fun ResponsiveToast(
     CustomToast(
         message = message,
         type = type,
-        duration = 2000L,
         onDismiss = onDismiss,
     )
 }

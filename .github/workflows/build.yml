@@ -1,64 +1,127 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
       - name: Set up JDK 17
         uses: actions/setup-java@v4.5.0
         with:
           distribution: 'adopt'
           java-version: '17'
-
+          
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
-      - name: Create local properties
+        
+      - name: Create local.properties
         run: |
-          touch local.properties
-          echo GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} > local.properties
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > local.properties
           cat local.properties
-
-      - name: Create google-services.json
+          
+      - name: Set up google-services.json
         run: |
           echo "${{ secrets.GS_CREDENTIALS }}" | base64 -d > ./app/google-services.json
-
-
-      - name: Build with gradle
-        run: ./gradlew build
-
-      - name: Upload to GoogleDrive
+        shell: bash
+        
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+            
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug --stacktrace --info
+        
+      - name: Upload to Google Drive
         uses: adityak74/google-drive-upload-git-action@main
         with:
           credentials: ${{ secrets.CREDENTIALS }}
-          filename: "app-debug.apk"
+          filename: "./app/build/outputs/apk/debug/app-debug.apk"
           folderId: ${{ secrets.FOLDER_ID }}
           overwrite: "true"
           
+      - name: Set Version
+        id: version
+        run: |
+          VERSION="v$(date +'%Y.%m.%d')"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check and Create Tag
+        id: check_tag
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
           
-    
+          git fetch origin tag $VERSION || true
+          
+          if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null || \
+             git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null; then
+            echo "Tag $VERSION already exists"
+            echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            git tag $VERSION
+            git push origin $VERSION
+            echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+
+      - name: Get Release ID
+        id: get_release
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          
+          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$VERSION")
+          
+          RELEASE_ID=$(echo $RESPONSE | jq -r '.id')
+          
+          if [ "$RELEASE_ID" != "null" ]; then
+            echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
+            echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update Existing Release
+        if: steps.get_release.outputs.RELEASE_EXISTS == 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          RELEASE_ID="${{ steps.get_release.outputs.RELEASE_ID }}"
+          
+          ASSETS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets")
+          
+          echo $ASSETS | jq -r '.[] | select(.name=="app-debug.apk") | .id' | while read ASSET_ID; do
+            curl -X DELETE \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
+          done
+          
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/vnd.android.package-archive" \
+            --data-binary @"./app/build/outputs/apk/debug/app-debug.apk" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=app-debug.apk"
+
+      - name: Create New Release
+        if: steps.get_release.outputs.RELEASE_EXISTS != 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./app/build/outputs/apk/debug/app-debug.apk
+          tag_name: ${{ steps.version.outputs.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
