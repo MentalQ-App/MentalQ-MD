@@ -174,4 +174,5 @@
     <string name="prediction_disclaimer_or">or</string>
     <string name="prediction_disclaimer_bold_2">reflect mental health</string>
     <string name="prediction_disclaimer_consult">. Consult a professional for advice</string>
+    <string name="not_available">(Not Available)</string>
 </resources>

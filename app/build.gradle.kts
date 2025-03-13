@@ -34,15 +34,25 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
+                "\"https://mentalq-backend.vercel.app/api/\""
             )
+//            buildConfigField(
+//                "String",
+//                "BASE_URL",
+//                "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
+//            )
         }
         debug {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
+                "\"https://mentalq-backend.vercel.app/api/\""
             )
+//            buildConfigField(
+//                "String",
+//                "BASE_URL",
+//                "\"https://mentalq-backend-130948402050.asia-southeast2.run.app/api/\""
+//            )
 
             val localPropertiesFile = project.rootProject.file("local.properties")
             val properties = Properties()

@@ -623,7 +623,8 @@ fun AuthScreen(
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
                             ),
-                            enabled = !uiState.isLoading
+                            enabled = false
+//                            enabled = !uiState.isLoading
                         ) {
                             if (uiState.isLoading && !loginButtonLoadingState) {
                                 CircularProgressIndicator(
@@ -638,7 +639,9 @@ fun AuthScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = stringResource(R.string.sign_in_with_google),
+                                    text = stringResource(R.string.sign_in_with_google) + " " + stringResource(
+                                        R.string.not_available
+                                    ),
                                     color = MaterialTheme.colorScheme.onSecondary
                                 )
                             }
