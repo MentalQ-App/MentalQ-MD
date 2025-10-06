@@ -97,53 +97,40 @@ class NoteRepository(
             emit(Result.Error("Network error: ${e.message}"))
         }
     }
-
+    
     suspend fun updateNote(note: ListNoteItem): Result<ListNoteItem> = withContext(Dispatchers.IO) {
-
         try {
-
-            val geminiPrompt =
-                "You are an expert Translator. You are tasked to translate documents  to id.Please provide an accurate translation of this document and return translation text only: ${note.content}"
+            val geminiPrompt = """
+            You are an expert Translator. Translate the following text to Indonesian. 
+            Return only the translated text without explanations, quotes, or formatting.
+            Text: ${note.content}
+        """.trimIndent()
 
             val geminiSafetySettings = listOf(
-                GeminiSafetySettings(
-                    category = "HARM_CATEGORY_HATE_SPEECH",
-                    threshold = "BLOCK_NONE"
-                ),
-                GeminiSafetySettings(
-                    category = "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    threshold = "BLOCK_NONE"
-                ),
-                GeminiSafetySettings(
-                    category = "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    threshold = "BLOCK_NONE"
-                ),
-                GeminiSafetySettings(
-                    category = "HARM_CATEGORY_HARASSMENT",
-                    threshold = "BLOCK_NONE"
-                )
+                GeminiSafetySettings("HARM_CATEGORY_HATE_SPEECH", "BLOCK_NONE"),
+                GeminiSafetySettings("HARM_CATEGORY_DANGEROUS_CONTENT", "BLOCK_NONE"),
+                GeminiSafetySettings("HARM_CATEGORY_SEXUALLY_EXPLICIT", "BLOCK_NONE"),
+                GeminiSafetySettings("HARM_CATEGORY_HARASSMENT", "BLOCK_NONE")
             )
-
 
             val normalizedText = try {
                 if (!note.content.isNullOrEmpty()) {
                     val responseGemini = geminiApiService.normalizeText(
                         apiKey = GEMINI_API_KEY,
                         GeminiRequest(
-                            contents = GeminiRequestContent(
-                                parts = GeminiPart(
-                                    text = geminiPrompt
+                            contents = listOf(
+                                GeminiRequestContent(
+                                    role = "user",
+                                    parts = listOf(GeminiPart(text = geminiPrompt))
                                 )
                             ),
                             safetySettings = geminiSafetySettings
                         )
                     )
-
-                    responseGemini.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
+                    responseGemini.candidates?.firstOrNull()
+                        ?.content?.parts?.firstOrNull()?.text
                         ?: note.content
-                } else {
-                    note.content
-                }
+                } else note.content
             } catch (e: Exception) {
                 return@withContext Result.Error("Failed to normalize text: ${e.message}")
             }
@@ -151,16 +138,16 @@ class NoteRepository(
             val updatedNote = note.copy(contentNormalized = normalizedText)
 
             val response = noteApiService.updateNote(
-                id = updatedNote.id,
-                title = updatedNote.title ?: "",
-                content = updatedNote.content ?: "",
-                emotion = updatedNote.emotion ?: "",
-                contentNormalized = updatedNote.contentNormalized ?: "",
+                id = note.id.toString(),
+                title = note.title ?: "",
+                content = note.content ?: "",
+                emotion = note.emotion ?: "",
+                contentNormalized = normalizedText ?: note.content ?: ""
             )
 
             if (response.error == false) {
-                noteDao.updateNote(note)
-                Result.Success(note)
+                noteDao.updateNote(updatedNote)
+                Result.Success(updatedNote)
             } else {
                 Result.Error("Failed to update note: ${response.message}")
             }
