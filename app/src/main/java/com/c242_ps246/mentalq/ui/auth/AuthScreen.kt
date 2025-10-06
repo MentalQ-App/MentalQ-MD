@@ -303,7 +303,7 @@ fun AuthScreen(
         val isPasswordValid = validatePassword(password, isRegister)
         val isNameValid = if (!isLogin) validateName(name) else true
         val isBirthdayValid = if (!isLogin) validateBirthday(birthday) else true
-        val isTermsValid = validateTerms(acceptedTerms)
+        val isTermsValid = if (!isLogin) validateTerms(acceptedTerms) else true
         return isEmailValid && isPasswordValid && isNameValid && isBirthdayValid && isTermsValid
     }
 
@@ -559,6 +559,8 @@ fun AuthScreen(
                                 } else {
                                     viewModel.register(name, email, password, birthday)
                                 }
+                            } else {
+                                loginButtonLoadingState = false
                             }
                         },
                         modifier = Modifier
@@ -590,11 +592,11 @@ fun AuthScreen(
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = {
-                                loginButtonLoadingState = false
-                                if (validateTerms(acceptedTerms)) {
+                        Column {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = {
+                                    loginButtonLoadingState = false
                                     try {
                                         val gso =
                                             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -606,8 +608,6 @@ fun AuthScreen(
                                         val googleSignInClient =
                                             GoogleSignIn.getClient(context, gso)
 
-                                        googleSignInClient.signOut()
-
                                         val signInIntent = googleSignInClient.signInIntent
                                         googleSignInLauncher.launch(signInIntent)
                                     } catch (e: Exception) {
@@ -615,35 +615,32 @@ fun AuthScreen(
                                         toastMessage =
                                             "Error preparing Google Sign-In: ${e.message}"
                                     }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                ),
+                                enabled = !uiState.isLoading
+                            ) {
+                                if (uiState.isLoading && !loginButtonLoadingState) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                } else {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.google_icon),
+                                        contentDescription = stringResource(R.string.sign_in_with_google),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.sign_in_with_google),
+                                        color = MaterialTheme.colorScheme.onSecondary
+                                    )
                                 }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            ),
-                            enabled = false
-//                            enabled = !uiState.isLoading
-                        ) {
-                            if (uiState.isLoading && !loginButtonLoadingState) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.google_icon),
-                                    contentDescription = stringResource(R.string.sign_in_with_google),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = stringResource(R.string.sign_in_with_google) + " " + stringResource(
-                                        R.string.not_available
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSecondary
-                                )
                             }
                         }
                     }
@@ -1202,7 +1199,7 @@ private fun NewPasswordStep(
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = onConfirmPasswordChange,
-                label = { Text(stringResource(R.string.confirm_email)) },
+                label = { Text(stringResource(R.string.confirm_password)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Lock,

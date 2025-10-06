@@ -175,4 +175,6 @@
     <string name="prediction_disclaimer_bold_2">mencerminkan kondisi kesehatan mental</string>
     <string name="prediction_disclaimer_consult">. Konsultasikan dengan profesional untuk saran.</string>
     <string name="not_available">(Tidak Tersedia)</string>
+    <string name="default_web_client_id">1056734232546-9btt30pq6ieiv05gs95o9aoo06ei2nri.apps.googleusercontent.com</string>
+    <string name="confirm_password">Ulangi Password Baru Anda!</string>
 </resources>
